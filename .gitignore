@@ -30,6 +30,11 @@
 *.exe
 *.out
 *.app
+main
 
 #VSCode
 *.vscode
+
+#Macos
+*.dSYM
+
