@@ -1,19 +1,16 @@
 #include "Player.h"
 #include <iostream>
 
-void Player::Initialize()
+void Player::Initialize(const sf::Vector2f &pos)
 {
     speed = 0.05f;
     velocity = sf::Vector2f(0.f, 0.f);
-    isMovingRight = false;
     currentAnim = 0;
     animationTimer = 0.f;
     animationInterval = 0.1f;
-}
+    position = pos;
 
-void Player::Load(const sf::Vector2f &pos)
-{
-    if (texture.loadFromFile("Assets/Player/Textures/Cat-Sheet.png"))
+    if (texture.loadFromFile("SFMLGame/Assets/Player/Textures/Cat-Sheet.png"))
     {
         std::cout << "Player image loaded" << std::endl;
         sprite.setTexture(texture);
@@ -34,15 +31,8 @@ void Player::Load(const sf::Vector2f &pos)
     }
 }
 
-void Player::Update()
+void Player::Update(float dt)
 {
-}
-
-void Player::Move(float &dt)
-{
-    int YIndex = 4;
-    int XIndex = 0;
-
     // calculate current sprite sheet image
     animationTimer += dt;
     if (animationTimer >= animationInterval)
@@ -55,40 +45,50 @@ void Player::Move(float &dt)
         animationTimer = 0.f;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+}
+
+void Player::Move(bool moveRight, bool moveLeft)
+{
+    if (moveRight)
     {
-        isMovingRight = true;
-        // if the player moves to the right, set scale to (1,1) in order to rotate it
+        position.x += 0.01f;
+    }
+    else if (moveLeft)
+    {
+        // move the player
+        if (position.x - (32 / 2) > 0)
+        {
+            position.x -= 0.01f;
+        }
+    }
+}
+
+void Player::UpdateView(bool moveRight, bool moveLeft)
+{
+    int YIndex = 4;
+
+   if(moveRight)
+   {
         sprite.setScale(1 * 3, 1 * 3);
-        // calculate which animation image to take depending on the position on the x axis
         sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
-        // move the player
-        sprite.move(0.01f, 0);
-    }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    {
-        isMovingRight = false;
-        // if the player moves to the left, set scale to (-1,1) in order to rotate it
+        sprite.setPosition(position);
+   }
+   if(moveLeft)
+   {
         sprite.setScale(-1 * 3, 1 * 3);
-        // move the player
-        if (sprite.getPosition().x - (sprite.getGlobalBounds().width / 3) > 0)
-        {
-            // calculate which sprite sheet image to take depending on the position on the x axis
-            sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
-            sprite.move(-0.01f, 0);
-        }
-        else
-        {
-            sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
-        }
-    }
-    else
-    {
-        isMovingRight = false;
-    }
+        sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
+        sprite.setPosition(position);
+   }
+
+
 }
 
 void Player::Draw(sf::RenderTarget &rt) const
 {
     rt.draw(sprite);
+}
+
+sf::Vector2f Player::GetPosition() const
+{
+    return position;
 }

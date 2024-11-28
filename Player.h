@@ -4,19 +4,22 @@
 class Player
 {
 private:
+    // view
     sf::Texture texture;
     sf::Sprite sprite;
+    int currentAnim;
+    // model
     float speed;
     sf::Vector2f velocity;
-    int currentAnim;
     float animationTimer;
     float animationInterval;
+    sf::Vector2f position;
 
 public:
-    void Initialize();
-    void Load(const sf::Vector2f& pos);
-    void Move(float& dt);
+    void Initialize(const sf::Vector2f &pos);
+    void Move(bool moveRight, bool moveLeft);
     void Draw(sf::RenderTarget& rt) const;
-    void Update();
-    bool isMovingRight;
+    sf::Vector2f GetPosition() const;
+    void UpdateView(bool moveRight, bool moveLeft);
+    void Update(float dt);
 };
