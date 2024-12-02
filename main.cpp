@@ -5,20 +5,21 @@
 #include "Perlin.h"
 #include "Level.h"
 
-int main()
-{
 
+int main()
+{   
     // ----------------- INITIALIZE -----------------
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML game", sf::Style::Default, settings);
     sf::Uint8 *pixels = new sf::Uint8[800 * 600 * 4];
     std::srand(static_cast<unsigned>(std::time(nullptr)));
-    Level level;
-    std::vector<sf::Sprite> map = level.Initialize();
+    Player player;
+    Level level(player);
+    const std::vector<sf::Sprite>& mapGround = level.InitializeGround();
+    const std::vector<sf::Sprite>& mapUp = level.InitializeUp();
     sf::Clock timer;
     float deltaTime = 0.0f;
-    Player player;
     Background background(player);
     background.Initialize(window);
     player.Initialize(sf::Vector2f(50.f, 502.f));
@@ -47,14 +48,22 @@ int main()
         player.Move(moveRight, moveLeft);
         player.Update(deltaTime);
         player.UpdateView(moveRight, moveLeft);
+
+        level.Update();
+
         
-        // ----------------- UPDATE -----------------
+        // ----------------- UPDATE----------------
+
 
         // ----------------- DRAW -----------------
         window.clear();
         background.Draw(window);
         player.Draw(window);
-        for (sf::Sprite &block: map)
+        for (const sf::Sprite &block: mapGround)
+        {
+            window.draw(block);
+        }
+        for (const sf::Sprite &block: mapUp)
         {
             window.draw(block);
         }

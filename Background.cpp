@@ -31,8 +31,9 @@ void Background::Move(float dt)
 
     if (deltaX > 0.f)
     {
-        positionSprite1.x -= 80.f * dt;
-        positionSprite2.x -= 80.f * dt;
+        positionSprite1.x -= 200.f * dt;
+        positionSprite2.x -= 200.f * dt;
+
     }
 
 }
@@ -42,13 +43,14 @@ void Background::UpdateView()
     sprite1.setPosition(positionSprite1);
     sprite2.setPosition(positionSprite2);
 
-     if (sprite1.getPosition().x + sprite1.getGlobalBounds().width <= 0)
+
+    if (sprite1.getPosition().x + sprite1.getGlobalBounds().width <= 0)
     {
-        sprite1.setPosition(sprite2.getPosition().x + sprite2.getGlobalBounds().width, 0);
+        positionSprite1.x = windowSize.x;
     }
-    if (sprite2.getPosition().x + sprite2.getGlobalBounds().width <= 0)
+    else if (sprite2.getPosition().x + sprite2.getGlobalBounds().width <= 0)
     {
-        sprite2.setPosition(sprite1.getPosition().x + sprite1.getGlobalBounds().width, 0);
+        positionSprite2.x = windowSize.x;
     }
 }
 
