@@ -9,13 +9,19 @@ void Level::GenerateGround(sf::Sprite &ground, sf::Sprite &obstacle )
     for (int x = positionOfLastTileGround.x; x <= positionOfLastTileGround.x + 800; x+=gap)
     {
         int y = 550;
-        ground.setPosition(x, y);
-        tilesGround.push_back(ground);
-        bool makeGap = (static_cast<double>(std::rand()) / RAND_MAX > 0.85) ? true : false;
-        if (makeGap)
-            gap +=  rand() % 96;
+
+        // decide whether the obstacle will be added
+        bool insertObstacle = (static_cast<double>(std::rand()) / RAND_MAX > 0.85) ? true : false;
+        if(insertObstacle)
+        {
+            obstacle.setPosition(x,y + 17.f);
+            tilesGround.push_back(obstacle);
+        }
         else
-            gap = 32;
+        {
+            ground.setPosition(x, y);
+            tilesGround.push_back(ground);
+        }
     }
     positionOfLastTileGround = tilesGround.back().getPosition();
     
@@ -78,7 +84,7 @@ void Level::UpdateGround(float deltaX)
 
     if(positionOfLastTileGround.x <= 800.f)
     {
-        GenerateGround(groundSprite);
+        GenerateGround(groundSprite, obstacleSprite);
     }
 }
 
@@ -100,8 +106,8 @@ std::vector<sf::Sprite>& Level::InitializeGround()
         groundSprite.setTextureRect(sf::IntRect(xIndex * 32, yIndex * 32, 32, 64));
 
         obstacleSprite.setTexture(obstacleTexture);
-        int x = 8;
-        int y = 1;
+        int x = 25;
+        int y = 3;
         obstacleSprite.setTextureRect(sf::IntRect(x * 32, y * 32, 32, 32));
 
         positionOfLastTileGround = sf::Vector2f(0.f,0.f);
