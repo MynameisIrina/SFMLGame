@@ -41,11 +41,14 @@ int main()
 
         bool moveRight = sf::Keyboard::isKeyPressed(sf::Keyboard::D);
         bool moveLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+        bool jumped = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+
 
         background.Move(deltaTime);
         background.UpdateView();
 
-        player.Move(moveRight, moveLeft);
+        player.Move(moveRight, moveLeft, deltaTime);
+        player.Jump(jumped, deltaTime);
         player.Update(deltaTime);
         player.UpdateView(moveRight, moveLeft);
 

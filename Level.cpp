@@ -27,6 +27,7 @@ void Level::GenerateGround(sf::Sprite &ground, sf::Sprite &obstacle )
     
 }
 
+// generate tiles above the ground
 void Level::GenerateSecondLevel(sf::Sprite &ground)
 {
     for (int x = positionOfLastTileUp.x; x < positionOfLastTileUp.x + 800; x += 64)
