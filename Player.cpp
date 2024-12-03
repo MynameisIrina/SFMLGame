@@ -28,6 +28,8 @@ void Player::Initialize(const sf::Vector2f &pos)
         gravity = 600.f;
         velocity = sf::Vector2f(0.01f, 0.05f);
         onGround = true;
+        jumped = false;
+        stopped = true;
     }
     else
     {
@@ -42,12 +44,26 @@ void Player::Update(float dt)
     if (animationTimer >= animationInterval)
     {
         currentAnim++;
-        if (currentAnim >= 8)
+
+        // if the player stopped moving, reset its animation
+        if ((currentAnim >= 8 || stopped ) && onGround)
         {
             currentAnim = 0;
+            ResetAnimation(4);
+        }
+        // if the player is jumping, play only one animation unit
+        else if(currentAnim >= 0 && !onGround)
+        {
+            currentAnim = 0;
+            ResetAnimation(41);
         }
         animationTimer = 0.f;
     }
+}
+
+void Player::ResetAnimation(int animYIndex)
+{
+    sprite.setTextureRect(sf::IntRect(0, animYIndex * 32, 32, 32));
 }
 
 void Player::Move(bool moveRight, bool moveLeft, float dt)
@@ -74,21 +90,27 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
 
     if (moveRight)
     {
+        stopped = false;
         sprite.setScale(1 * 3, 1 * 3);
         sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
-        //sprite.setPosition(position);
     }
-    if (moveLeft)
+    else if (moveLeft)
     {
+        stopped = false;
         sprite.setScale(-1 * 3, 1 * 3);
         sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
-        //sprite.setPosition(position);
     }
+    else
+    {
+        stopped = true;
+    }
+
     sprite.setPosition(position);
 }
 
-void Player::Jump(bool jumped, float dt)
+void Player::Jump(bool jump, float dt)
 {
+    jumped = jump;
     if (jumped && onGround)
     {
         onGround = false;
@@ -97,6 +119,9 @@ void Player::Jump(bool jumped, float dt)
 
     if (!onGround)
     {
+        int YIndex = 41;
+        sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
+
         velocity.y += gravity * dt;
         position.y += velocity.y * dt;
         // stop the player when it reaches ground
@@ -104,6 +129,8 @@ void Player::Jump(bool jumped, float dt)
         {
             onGround = true;
             velocity.y = 0.0f;
+            YIndex = 4;
+            sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
         }
     }
 }

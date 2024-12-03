@@ -16,6 +16,8 @@ private:
     sf::Vector2f position;
     float gravity;
     bool onGround;
+    bool jumped;
+    bool stopped;
 
 public:
     void Initialize(const sf::Vector2f &pos);
@@ -25,4 +27,5 @@ public:
     void UpdateView(bool moveRight, bool moveLeft);
     void Update(float dt);
     void Jump(bool jumped, float dt);
+    void ResetAnimation(int animYIndex);
 };
