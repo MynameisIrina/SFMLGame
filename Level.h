@@ -24,6 +24,7 @@ private:
     sf::Sprite groundSprite;
     sf::Texture obstacleTexture;
     sf::Sprite obstacleSprite;
+
     //model
     std::vector<sf::Sprite> tilesGround;
     std::vector<sf::Sprite> tilesUp;

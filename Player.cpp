@@ -1,14 +1,20 @@
 #include "Player.h"
+#include "Animation.h"
 #include <iostream>
 
 void Player::Initialize(const sf::Vector2f &pos)
 {
     speed = 0.05f;
     velocity = sf::Vector2f(0.f, 0.f);
-    currentAnim = 0;
     animationTimer = 0.f;
     animationInterval = 0.1f;
     position = pos;
+    gravity = 600.f;
+    velocity = sf::Vector2f(100.f, 10.f);
+    onGround = true;
+    jumped = false;
+    stopped = true;
+
 
     if (texture.loadFromFile("SFMLGame/Assets/Player/Textures/Cat-Sheet.png"))
     {
@@ -16,20 +22,12 @@ void Player::Initialize(const sf::Vector2f &pos)
         sprite.setTexture(texture);
 
         // pick an image from the sprite
-        int XIndex = 0;
-        int YIndex = 4;
-        sprite.setTextureRect(sf::IntRect(XIndex * 32, YIndex * 32, 32, 32));
+        sprite.setTextureRect(sf::IntRect(AnimationPlayer::MOVING_X * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 
         // change the origin of the sprite
         sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
-        sprite.setScale(3, 3);
+        sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
         sprite.setPosition(pos);
-
-        gravity = 600.f;
-        velocity = sf::Vector2f(0.01f, 0.05f);
-        onGround = true;
-        jumped = false;
-        stopped = true;
     }
     else
     {
@@ -46,16 +44,16 @@ void Player::Update(float dt)
         currentAnim++;
 
         // if the player stopped moving, reset its animation
-        if ((currentAnim >= 8 || stopped ) && onGround)
+        if ((currentAnim >= 8 || stopped) && onGround)
         {
             currentAnim = 0;
-            ResetAnimation(4);
+            ResetAnimation(AnimationPlayer::STOP_MOVING);
         }
         // if the player is jumping, play only one animation unit
-        else if(currentAnim >= 0 && !onGround)
+        else if (currentAnim >= 0 && !onGround)
         {
             currentAnim = 0;
-            ResetAnimation(41);
+            ResetAnimation(AnimationPlayer::STOPP_JUMPING);
         }
         animationTimer = 0.f;
     }
@@ -63,48 +61,46 @@ void Player::Update(float dt)
 
 void Player::ResetAnimation(int animYIndex)
 {
-    sprite.setTextureRect(sf::IntRect(0, animYIndex * 32, 32, 32));
+    sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 }
 
-void Player::Move(bool moveRight, bool moveLeft, float dt)
+
+void Player::Move(bool moveRight, bool moveLeft, float dt, float leftBound)
 {
+    float offset = 27.f;
 
     if (moveRight)
     {
+        stopped = false;
         position.x += velocity.x * dt;
-        position.y += velocity.y * dt;
     }
     else if (moveLeft)
     {
-        if (position.x - (32 / 2) > 0)
+        stopped = false;
+        if (position.x > leftBound + offset)
         {
             position.x -= velocity.x * dt;
-            position.y -= velocity.y * dt;
         }
-    }
-}
-
-void Player::UpdateView(bool moveRight, bool moveLeft)
-{
-    int YIndex = 4;
-
-    if (moveRight)
-    {
-        stopped = false;
-        sprite.setScale(1 * 3, 1 * 3);
-        sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
-    }
-    else if (moveLeft)
-    {
-        stopped = false;
-        sprite.setScale(-1 * 3, 1 * 3);
-        sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
     }
     else
     {
         stopped = true;
     }
+}
 
+void Player::UpdateView(bool moveRight, bool moveLeft)
+{
+    if (moveRight)
+    {
+        sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+    }
+    else if (moveLeft)
+    {
+        sprite.setScale(-1 * AnimationPlayer::SCALE, AnimationPlayer::SCALE);
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+    }
+    
     sprite.setPosition(position);
 }
 
@@ -114,13 +110,12 @@ void Player::Jump(bool jump, float dt)
     if (jumped && onGround)
     {
         onGround = false;
-        velocity.y = -200.f;
+        velocity.y = -250.f;
     }
 
     if (!onGround)
     {
-        int YIndex = 41;
-        sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::JUMPING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 
         velocity.y += gravity * dt;
         position.y += velocity.y * dt;
@@ -129,11 +124,12 @@ void Player::Jump(bool jump, float dt)
         {
             onGround = true;
             velocity.y = 0.0f;
-            YIndex = 4;
-            sprite.setTextureRect(sf::IntRect(currentAnim * 32, YIndex * 32, 32, 32));
+            sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
         }
     }
 }
+
+
 
 void Player::Draw(sf::RenderTarget &rt) const
 {

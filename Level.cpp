@@ -1,11 +1,15 @@
 #include "Level.h"
 #include <iostream>
 
-Level::Level(const Player &pl) : player(pl), previousPlayerX(pl.GetPosition().x) {}
+Level::Level(const Player &pl) 
+    : player(pl), 
+      previousPlayerX(pl.GetPosition().x)
+      {}
 
-void Level::GenerateGround(sf::Sprite &ground, sf::Sprite &obstacle )
+
+void Level::GenerateGround(sf::Sprite &ground, sf::Sprite &obstacle)
 {
-     int gap = 32;
+    int gap = 32;
     for (int x = positionOfLastTileGround.x; x <= positionOfLastTileGround.x + 800; x+=gap)
     {
         int y = 550;

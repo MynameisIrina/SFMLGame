@@ -3,27 +3,31 @@
 #include "Player.h"
 #include "Background.h"
 #include "Perlin.h"
+#include "Level_TileBased.h"
 #include "Level.h"
-
+#include "Camera.h"
 
 int main()
-{   
+{
     // ----------------- INITIALIZE -----------------
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML game", sf::Style::Default, settings);
     sf::Uint8 *pixels = new sf::Uint8[800 * 600 * 4];
     std::srand(static_cast<unsigned>(std::time(nullptr)));
-    Player player;
-    Level level(player);
-    const std::vector<sf::Sprite>& mapGround = level.InitializeGround();
-    const std::vector<sf::Sprite>& mapUp = level.InitializeUp();
     sf::Clock timer;
     float deltaTime = 0.0f;
+
+
+    Player player;
     Background background(player);
+    Camera camera(window, player);
     background.Initialize(window);
     player.Initialize(sf::Vector2f(50.f, 502.f));
+    camera.Initialize();
 
+    Level_TileBased level_tile(player, camera);
+    level_tile.Initialize();
 
     // ----------------- INITIALIZE -----------------
 
@@ -43,33 +47,25 @@ int main()
         bool moveLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
         bool jumped = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
 
-
         background.Move(deltaTime);
         background.UpdateView();
 
-        player.Move(moveRight, moveLeft, deltaTime);
+        float leftBound = camera.CalculateLeftBound();
+        player.Move(moveRight, moveLeft, deltaTime, leftBound);
         player.Jump(jumped, deltaTime);
         player.Update(deltaTime);
         player.UpdateView(moveRight, moveLeft);
+        level_tile.UpdateLevel();
 
-        level.Update();
+        camera.Update(moveLeft);
 
-        
         // ----------------- UPDATE----------------
-
 
         // ----------------- DRAW -----------------
         window.clear();
         background.Draw(window);
         player.Draw(window);
-        for (const sf::Sprite &block: mapGround)
-        {
-            window.draw(block);
-        }
-        for (const sf::Sprite &block: mapUp)
-        {
-            window.draw(block);
-        }
+        level_tile.Draw(window);
         window.display();
         // ----------------- DRAW -----------------
     }
