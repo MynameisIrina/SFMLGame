@@ -2,13 +2,13 @@
 #include <iostream>
 #include <list>
 
-Background::Background(const Player &pl) : player(pl) {}
+Background::Background(const std::shared_ptr<Player>  pl) : player(pl) {}
 
-void Background::Initialize(const sf::RenderWindow &window)
+void Background::Initialize(const std::shared_ptr<sf::RenderWindow>  window)
 {
     texture.loadFromFile("SFMLGame/Assets/Background/Background.png");
     textureSize = texture.getSize();
-    windowSize = window.getSize();
+    windowSize = window->getSize();
     float ScaleX = (float)windowSize.x / textureSize.x;
     float ScaleY = (float)windowSize.y / textureSize.y;
     sprite1.setTexture(texture);
@@ -25,7 +25,7 @@ void Background::Initialize(const sf::RenderWindow &window)
 
 void Background::Move(float dt)
 {
-    sf::Vector2f playerPosition = player.GetPosition();
+    sf::Vector2f playerPosition = player->GetPosition();
     int deltaX = static_cast<int>(playerPosition.x) % windowSize.x;
 
     if(deltaX == 0)
@@ -48,8 +48,8 @@ void Background::UpdateView()
     sprite2.setPosition(positionSprite2);
 }
 
-void Background::Draw(sf::RenderTarget &rt) const
+void Background::Draw(std::shared_ptr<sf::RenderTarget> rt) const
 {
-    rt.draw(sprite1);
-    rt.draw(sprite2);
+    rt->draw(sprite1);
+    rt->draw(sprite2);
 }

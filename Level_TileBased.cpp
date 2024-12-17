@@ -1,9 +1,9 @@
 #include <iostream>
 #include "Level_TileBased.h"
 
-Level_TileBased::Level_TileBased(const Player &pl, Camera &cam)
+Level_TileBased::Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam)
     : player(pl),
-      previousPlayerX(pl.GetPosition().x),
+      previousPlayerX(pl->GetPosition().x),
       camera(cam)
 {}
 
@@ -25,11 +25,11 @@ void Level_TileBased::Initialize()
     ShowGrid();
 }
 
-void Level_TileBased::Draw(sf::RenderWindow &window) const
+void Level_TileBased::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {
     for (const sf::Sprite &tile : tiles)
     {
-        window.draw(tile);
+        window->draw(tile);
     }
 }
 
@@ -77,21 +77,21 @@ void Level_TileBased::GenerateLevel(int startX)
         PlacePattern(patternIndex, x, currY);
     }
 
-    float currentBound = (startX == 0) ? currentBound = camera.CalculateLeftBound() : currentBound = camera.CalculateRightBound();
+    float currentBound = (startX == 0) ? currentBound = camera->CalculateLeftBound() : currentBound = camera->CalculateRightBound();
     CheckGround(startX, currentBound);
 }
 
 void Level_TileBased::UpdateLevel()
 {
     // This helps us track when the player has moved a full tile.
-    int deltaXInGameUnits = (int)(player.GetPosition().x) % TILE_SIZE;
+    int deltaXInGameUnits = (int)(player->GetPosition().x) % TILE_SIZE;
 
     // This ensures that we only trigger the tile updates when the camera is moving
-    if (player.GetPosition().x >= camera.GetView().getCenter().x && deltaXInGameUnits == 0)
+    if (player->GetPosition().x >= camera->GetView().getCenter().x && deltaXInGameUnits == 0)
     {
         if (!tiles.empty())
         {
-            float leftBound = camera.CalculateLeftBound();
+            float leftBound = camera->CalculateLeftBound();
 
             // This helps to avoid rendering and memory usage for tiles that are no longer needed.
             tiles.erase(

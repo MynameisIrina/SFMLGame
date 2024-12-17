@@ -131,9 +131,9 @@ void Player::Jump(bool jump, float dt)
 
 
 
-void Player::Draw(sf::RenderTarget &rt) const
+void Player::Draw(std::shared_ptr<sf::RenderTarget> rt) const
 {
-    rt.draw(sprite);
+    rt->draw(sprite);
 }
 
 sf::Vector2f Player::GetPosition() const

@@ -4,7 +4,6 @@
 #include "Background.h"
 #include "Perlin.h"
 #include "Level_TileBased.h"
-#include "Level.h"
 #include "Camera.h"
 
 int main()
@@ -12,33 +11,33 @@ int main()
     // ----------------- INITIALIZE -----------------
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML game", sf::Style::Default, settings);
-    sf::Uint8 *pixels = new sf::Uint8[800 * 600 * 4];
+    std::shared_ptr<sf::RenderWindow> window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "SFML game", sf::Style::Default, settings);
+    std::unique_ptr<sf::Uint8[]> pixels = std::make_unique<sf::Uint8[]>(800 * 600 * 4);
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     sf::Clock timer;
     float deltaTime = 0.0f;
 
+    std::shared_ptr<Player> player = std::make_shared<Player>();
+    std::shared_ptr<Camera> camera = std::make_shared<Camera>(window, player);
 
-    Player player;
     Background background(player);
-    Camera camera(window, player);
     background.Initialize(window);
-    player.Initialize(sf::Vector2f(50.f, 502.f));
-    camera.Initialize();
+    player->Initialize(sf::Vector2f(50.f, 502.f));
+    camera->Initialize();
 
     Level_TileBased level_tile(player, camera);
     level_tile.Initialize();
 
     // ----------------- INITIALIZE -----------------
 
-    while (window.isOpen())
+    while (window->isOpen())
     {
         //  ----------------- UPDATE -----------------
         sf::Event event;
-        while (window.pollEvent(event))
+        while (window->pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
-                window.close();
+                window->close();
         }
 
         deltaTime = timer.restart().asSeconds();
@@ -50,23 +49,23 @@ int main()
         background.Move(deltaTime);
         background.UpdateView();
 
-        float leftBound = camera.CalculateLeftBound();
-        player.Move(moveRight, moveLeft, deltaTime, leftBound);
-        player.Jump(jumped, deltaTime);
-        player.Update(deltaTime);
-        player.UpdateView(moveRight, moveLeft);
+        float leftBound = camera->CalculateLeftBound();
+        player->Move(moveRight, moveLeft, deltaTime, leftBound);
+        player->Jump(jumped, deltaTime);
+        player->Update(deltaTime);
+        player->UpdateView(moveRight, moveLeft);
         level_tile.UpdateLevel();
 
-        camera.Update(moveLeft);
+        camera->Update(moveLeft);
 
         // ----------------- UPDATE----------------
 
         // ----------------- DRAW -----------------
-        window.clear();
+        window->clear();
         background.Draw(window);
-        player.Draw(window);
+        player->Draw(window);
         level_tile.Draw(window);
-        window.display();
+        window->display();
         // ----------------- DRAW -----------------
     }
 

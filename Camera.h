@@ -7,13 +7,13 @@ class Camera
 
 private:
     sf::View view;
-    const Player &player;
-    sf::RenderWindow &window;
+    const std::shared_ptr<Player> player;
+    std::shared_ptr<sf::RenderWindow> window;
     float viewThreshold;
     bool isCameraFollowing;
 
 public:
-    Camera(sf::RenderWindow &window, const Player &player);
+    Camera(std::shared_ptr<sf::RenderWindow> window, const std::shared_ptr<Player> player);
     void Initialize();
     void Update(bool moveLeft);
     sf::View GetView() const;

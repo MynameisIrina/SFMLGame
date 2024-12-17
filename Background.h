@@ -5,16 +5,16 @@
 class Background
 {
 public:
-    Background(const Player& pl);
-    void Initialize(const sf::RenderWindow& window);
+    Background(const std::shared_ptr<Player>  pl);
+    void Initialize(const std::shared_ptr<sf::RenderWindow>  window);
     void Update(float dt);
-    void Draw(sf::RenderTarget& rt) const;
+    void Draw(std::shared_ptr<sf::RenderTarget> rt) const;
     void Move(float dt);
     void UpdateView();
 
 private:
     // model
-    const Player& player;
+    const std::shared_ptr<Player>  player;
     float previousPlayerX;
     sf::Vector2f positionSprite1, positionSprite2, positionCurrentSprite;
     const float speed = 80.f;

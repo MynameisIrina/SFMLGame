@@ -25,8 +25,8 @@ class Level_TileBased
     };
 
 public:
-    Level_TileBased(const Player &pl, Camera &cam);
-    void Draw(sf::RenderWindow &window) const;
+    Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam);
+    void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
     void GenerateLevel(int startX);
     void PlacePattern(int patternIndex, int currentX, int currentY);
     void ShowGrid() const;
@@ -55,8 +55,8 @@ private:
     sf::Texture groundTexture;
     sf::Sprite groundSprite;
 
-    const Player& player;
-    const Camera& camera;
+    const std::shared_ptr<Player> player;
+    const std::shared_ptr<Camera> camera;
     float previousPlayerX;
 
     int startX = 2;

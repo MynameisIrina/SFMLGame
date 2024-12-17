@@ -1,17 +1,17 @@
 #include "Camera.h"
 
-Camera::Camera(sf::RenderWindow &windowRef, const Player &playerRef) : window(windowRef), player(playerRef) {}
+Camera::Camera(std::shared_ptr<sf::RenderWindow> windowRef, const std::shared_ptr<Player> playerRef) : window(windowRef), player(playerRef) {}
 
 void Camera::Initialize()
 {
-    view.setSize(window.getSize().x, window.getSize().y);
-    view.setCenter(window.getSize().x / 2, window.getSize().y / 2);
+    view.setSize(window->getSize().x, window->getSize().y);
+    view.setCenter(window->getSize().x / 2, window->getSize().y / 2);
     bool isCameraFollowing = false;
 }
 
 void Camera::Update(bool moveLeft)
 {
-    sf::Vector2f playerPosition = player.GetPosition();
+    sf::Vector2f playerPosition = player->GetPosition();
 
     float viewThreshold = view.getCenter().x;
 
@@ -30,7 +30,7 @@ void Camera::Update(bool moveLeft)
         view.setCenter(playerPosition.x, view.getSize().y / 2);
     }
 
-    window.setView(view);
+    window->setView(view);
 }
 
 sf::View Camera::GetView() const

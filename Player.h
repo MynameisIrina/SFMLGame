@@ -22,7 +22,7 @@ private:
 public:
     void Initialize(const sf::Vector2f &pos);
     void Move(bool moveRight, bool moveLeft, float dt, float leftBound);
-    void Draw(sf::RenderTarget& rt) const;
+    void Draw(std::shared_ptr<sf::RenderTarget> rt) const;
     sf::Vector2f GetPosition() const;
     void UpdateView(bool moveRight, bool moveLeft);
     void Update(float dt);
