@@ -1,25 +1,21 @@
 #include <iostream>
 #include "Level_TileBased.h"
 
-Level_TileBased::Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam)
+Level_TileBased::Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam, std::shared_ptr<TextureLoader> txLoaderRef)
     : player(pl),
       previousPlayerX(pl->GetPosition().x),
-      camera(cam)
-{}
+      camera(cam),
+      txLoader(txLoaderRef)
+{
+}
 
 void Level_TileBased::Initialize()
 {
     grid.resize(GRID_HEIGHT, std::vector<int>(TOTAL_GRID_WIDTH, 0));
-    patterns = {pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9 ,pattern10, pattern11, pattern12};
+    patterns = {pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12};
 
-    // ground without grass
-    groundTexture.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Ground.png");
-    groundSprite.setTexture(groundTexture);
-    groundSprite.setTextureRect(sf::IntRect(TileCoordinates::groundX * TILE_SIZE, TileCoordinates::groundY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
-    // ground with grass
-    groundWithGrassTexture.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Ground.png");
-    groundWithGrassSprite.setTexture(groundWithGrassTexture);
-    groundWithGrassSprite.setTextureRect(sf::IntRect(TileCoordinates::grassX * TILE_SIZE, TileCoordinates::grassY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+    grassSprite = txLoader->SetSprite(TextureLoader::TextureType::Tile_Grass);
+    dirtSprite = txLoader->SetSprite(TextureLoader::TextureType::Tile_Dirt);
 
     GenerateLevel(0);
     ShowGrid();
@@ -30,6 +26,11 @@ void Level_TileBased::Draw(const std::shared_ptr<sf::RenderWindow> window) const
     for (const sf::Sprite &tile : tiles)
     {
         window->draw(tile);
+    }
+
+    for (const sf::RectangleShape &boundingRec : boundingRecs)
+    {
+        window->draw(boundingRec);
     }
 }
 
@@ -52,13 +53,13 @@ void Level_TileBased::GenerateLevel(int startX)
     int patternWidth = 0;
     int patternHeight = 0;
 
-    //generate platforms on invisible level area (or visible + invisible for initial method call)
+    // generate platforms on invisible level area (or visible + invisible for initial method call)
     for (int x = startX; x < GRID_WIDTH + BUFFER_COLUMNS; x += patternWidth)
     {
 
-        // Check if current pattern does not go out of bounds when placing it
         int newX = x + patternWidth;
-        if(newX >= GRID_WIDTH + BUFFER_COLUMNS)
+        bool inBounds = newX < GRID_WIDTH + BUFFER_COLUMNS;
+        if (!inBounds)
         {
             break;
         }
@@ -84,10 +85,11 @@ void Level_TileBased::GenerateLevel(int startX)
 void Level_TileBased::UpdateLevel()
 {
     // This helps us track when the player has moved a full tile.
-    int deltaXInGameUnits = (int)(player->GetPosition().x) % TILE_SIZE;
+    int playerPosInGameUnits = (int)(player->GetPosition().x) % TILE_SIZE;
 
-    // This ensures that we only trigger the tile updates when the camera is moving
-    if (player->GetPosition().x >= camera->GetView().getCenter().x && deltaXInGameUnits == 0)
+    bool playerAtThreshold = player->GetPosition().x >= camera->GetView().getCenter().x;
+
+    if (playerAtThreshold && playerPosInGameUnits == 0)
     {
         if (!tiles.empty())
         {
@@ -153,6 +155,14 @@ void Level_TileBased::ShiftGridLeft()
     }
 }
 
+std::vector<sf::RectangleShape> Level_TileBased::GetTiles()
+{
+    if(boundingRecs.size() > 0)
+    {
+        return boundingRecs;
+    }
+}
+
 void Level_TileBased::CheckGround(int curX, float v)
 {
     for (int y = 0; y < GRID_HEIGHT; ++y)
@@ -166,21 +176,31 @@ void Level_TileBased::CheckGround(int curX, float v)
                 float globalTileX = v + (x - curX) * TILE_SIZE;
 
                 // differentiate between top of the ground and underground to render different sprites
-                if ((y - 1 >= 0 && grid[y - 1][x] == 0) || y == 0)
+                bool nothingAbove = grid[y - 1][x] == 0;
+                if (y - 1 >= 0 && nothingAbove || y == 0)
                 {
                     grid[y][x] = 2;
-                    sf::Sprite grassTile(groundWithGrassTexture);
-                    grassTile.setTextureRect(sf::IntRect(TileCoordinates::grassX * TILE_SIZE, TileCoordinates::grassY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+                    sf::Sprite grassTile(txLoader->GetTexture(TextureLoader::Tile_Grass));
+                    grassTile.setTextureRect(sf::IntRect(TextureLoader::grassX * TILE_SIZE, TextureLoader::grassY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
                     grassTile.setPosition(globalTileX, y * TILE_SIZE);
                     tiles.push_back(grassTile);
+
+                    sf::RectangleShape boundingRec;
+                    boundingRec.setSize(sf::Vector2f(32, 32));
+                    boundingRec.setFillColor(sf::Color::Transparent);
+                    boundingRec.setOutlineColor(sf::Color::Blue);
+                    boundingRec.setOutlineThickness(1);
+                    boundingRec.setPosition(grassTile.getPosition());
+
+                    boundingRecs.push_back(boundingRec);
                 }
-                else if (y - 1 >= 0 && grid[y - 1][x] != 0)
+                else if (y - 1 >= 0 && !nothingAbove)
                 {
                     grid[y][x] = 1;
-                    sf::Sprite groundTile(groundTexture);
-                    groundTile.setTextureRect(sf::IntRect(TileCoordinates::groundX * TILE_SIZE, TileCoordinates::groundY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
-                    groundTile.setPosition(globalTileX, y * TILE_SIZE);
-                    tiles.push_back(groundTile);
+                    sf::Sprite dirtTile(txLoader->GetTexture(TextureLoader::Tile_Dirt));
+                    dirtTile.setTextureRect(sf::IntRect(TextureLoader::groundX * TILE_SIZE, TextureLoader::groundY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+                    dirtTile.setPosition(globalTileX, y * TILE_SIZE);
+                    tiles.push_back(dirtTile);
                 }
             }
         }

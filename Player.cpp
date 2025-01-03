@@ -1,30 +1,21 @@
 #include "Player.h"
-#include "Animation.h"
 #include <iostream>
 
 void Player::Initialize(const sf::Vector2f &pos)
 {
-    speed = 0.05f;
-    velocity = sf::Vector2f(0.f, 0.f);
-    animationTimer = 0.f;
-    animationInterval = 0.1f;
     position = pos;
-    gravity = 600.f;
-    velocity = sf::Vector2f(100.f, 10.f);
-    onGround = true;
-    jumped = false;
-    stopped = true;
-
+    boundingRec.setSize(sf::Vector2f(64, 40));
+    boundingRec.setFillColor(sf::Color::Transparent);
+    boundingRec.setOutlineColor(sf::Color::Red);
+    boundingRec.setOutlineThickness(1);
 
     if (texture.loadFromFile("SFMLGame/Assets/Player/Textures/Cat-Sheet.png"))
     {
         std::cout << "Player image loaded" << std::endl;
         sprite.setTexture(texture);
 
-        // pick an image from the sprite
         sprite.setTextureRect(sf::IntRect(AnimationPlayer::MOVING_X * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 
-        // change the origin of the sprite
         sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
         sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
         sprite.setPosition(pos);
@@ -35,7 +26,43 @@ void Player::Initialize(const sf::Vector2f &pos)
     }
 }
 
-void Player::Update(float dt)
+void Player::Update(float dt, std::vector<sf::RectangleShape> tiles)
+{
+    CalculateCurrAnimation(dt);
+    CheckCollision(tiles);
+
+}
+
+void Player::ResetAnimation(int animYIndex)
+{
+    sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+}
+
+void Player::CheckCollision(std::vector<sf::RectangleShape> tiles)
+{
+    onGround = false;
+
+    for (const auto& tile : tiles)
+    {
+        if (Math::CheckRectCollision(boundingRec.getGlobalBounds(), tile.getGlobalBounds()))
+        {
+            sf::FloatRect playerBounds = boundingRec.getGlobalBounds();
+            sf::FloatRect tileBounds = tile.getGlobalBounds();
+
+            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
+            float overlapTop = playerBounds.top - (tileBounds.top + tileBounds.height);
+
+            if (overlapBottom <= 0 && velocity.y > 0) // Collision below
+            {
+                onGround = true;
+                velocity.y = 0;
+            }
+        }
+    }
+
+}
+
+void Player::CalculateCurrAnimation(float dt)
 {
     // calculate current sprite sheet image
     animationTimer += dt;
@@ -59,15 +86,12 @@ void Player::Update(float dt)
     }
 }
 
-void Player::ResetAnimation(int animYIndex)
-{
-    sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
-}
-
-
 void Player::Move(bool moveRight, bool moveLeft, float dt, float leftBound)
 {
     float offset = 27.f;
+
+    // Apply gravity
+    if (!onGround) velocity.y += collisionGravityFactor * dt;
 
     if (moveRight)
     {
@@ -100,8 +124,9 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
         sprite.setScale(-1 * AnimationPlayer::SCALE, AnimationPlayer::SCALE);
         sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
     }
-    
+
     sprite.setPosition(position);
+    boundingRec.setPosition(sprite.getPosition().x - 32, sprite.getPosition().y + 10);
 }
 
 void Player::Jump(bool jump, float dt)
@@ -119,21 +144,13 @@ void Player::Jump(bool jump, float dt)
 
         velocity.y += gravity * dt;
         position.y += velocity.y * dt;
-        // stop the player when it reaches ground
-        if (position.y >= 502.f)
-        {
-            onGround = true;
-            velocity.y = 0.0f;
-            sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
-        }
     }
 }
-
-
 
 void Player::Draw(std::shared_ptr<sf::RenderTarget> rt) const
 {
     rt->draw(sprite);
+    rt->draw(boundingRec);
 }
 
 sf::Vector2f Player::GetPosition() const

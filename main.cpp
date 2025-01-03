@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "TextureLoader.h"
 #include "Player.h"
 #include "Background.h"
 #include "Perlin.h"
@@ -17,15 +18,19 @@ int main()
     sf::Clock timer;
     float deltaTime = 0.0f;
 
+    std::shared_ptr<TextureLoader> txLoader = std::make_shared<TextureLoader>();
+    txLoader->Initialize();
+
     std::shared_ptr<Player> player = std::make_shared<Player>();
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(window, player);
 
     Background background(player);
     background.Initialize(window);
-    player->Initialize(sf::Vector2f(50.f, 502.f));
+    player->Initialize(sf::Vector2f(10.f, 10.f));
+    //player->Initialize(sf::Vector2f(50.f, 502.f));
     camera->Initialize();
 
-    Level_TileBased level_tile(player, camera);
+    Level_TileBased level_tile(player, camera, txLoader);
     level_tile.Initialize();
 
     // ----------------- INITIALIZE -----------------
@@ -52,7 +57,8 @@ int main()
         float leftBound = camera->CalculateLeftBound();
         player->Move(moveRight, moveLeft, deltaTime, leftBound);
         player->Jump(jumped, deltaTime);
-        player->Update(deltaTime);
+        std::vector<sf::RectangleShape> tiles = level_tile.GetTiles();
+        player->Update(deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
         level_tile.UpdateLevel();
 

@@ -3,19 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include "Player.h"
 #include "Camera.h"
+#include "TextureLoader.h"
 
 class Level_TileBased
 {
 
-    enum TileCoordinates
-    {
-        groundX = 0,
-        groundY = 10,
-        grassX = 2,
-        grassY = 8,
-        tileSize = 32
-    };
-
+public:
     enum LevelBounds
     {
         minX = 0,
@@ -24,8 +17,7 @@ class Level_TileBased
         maxY = 15
     };
 
-public:
-    Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam);
+    Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam, std::shared_ptr<TextureLoader> txLoaderRef);
     void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
     void GenerateLevel(int startX);
     void PlacePattern(int patternIndex, int currentX, int currentY);
@@ -36,24 +28,28 @@ public:
     void ShiftGridLeft();
     bool IsAreaFree(int currentX, int currentY, int patternWidth, int patternHeight);
     int FindRightmostTileX();
+    std::vector<sf::RectangleShape> GetTiles();
 
 private:
     const int GRID_WIDTH = 25;
     const int GRID_HEIGHT = 15;
     const int TILE_SIZE = 32;
-    const int BUFFER_COLUMNS = 10; 
+    const int BUFFER_COLUMNS = 10;
     const int TOTAL_GRID_WIDTH = GRID_WIDTH + BUFFER_COLUMNS;
 
+    std::vector<sf::RectangleShape> boundingRecs;
 
     std::vector<std::vector<int>> grid;
-    std::vector<std::vector<std::vector<int>>> patterns;
+    using Pattern = std::vector<std::vector<int>>;
+    std::vector<Pattern> patterns;
     std::vector<sf::Sprite> tiles;
+
+    std::shared_ptr<TextureLoader> txLoader;
+    sf::Sprite grassSprite;
+    sf::Sprite dirtSprite;
 
     sf::Texture groundWithGrassTexture;
     sf::Sprite groundWithGrassSprite;
-
-    sf::Texture groundTexture;
-    sf::Sprite groundSprite;
 
     const std::shared_ptr<Player> player;
     const std::shared_ptr<Camera> camera;
@@ -61,81 +57,66 @@ private:
 
     int startX = 2;
     bool hasShifted = false;
-    int shiftCounter;
+    int shiftCounter = 0;
 
-std::vector<std::vector<int>> pattern1 = {
-    {0, 0},
-    {1, 1},
-    {0, 1}
-};
+    Pattern pattern1 = {
+        {0, 0},
+        {1, 1},
+        {0, 1}};
 
-std::vector<std::vector<int>> pattern2 = {
-    {0, 0},
-    {1, 0},
-    {1, 1}
-};
+    Pattern pattern2 = {
+        {0, 0},
+        {1, 0},
+        {1, 1}};
 
-std::vector<std::vector<int>> pattern3 = {
-    {0, 1},
-    {1, 1},
-    {0, 1}
-};
+    Pattern pattern3 = {
+        {0, 1},
+        {1, 1},
+        {0, 1}};
 
-std::vector<std::vector<int>> pattern4 = {
-    {0, 0},
-    {1, 1},
-    {1, 1}
-};
+    Pattern pattern4 = {
+        {0, 0},
+        {1, 1},
+        {1, 1}};
 
-std::vector<std::vector<int>> pattern5 = {
-    {0, 1},
-    {1, 1},
-    {0, 0}
-};
+    Pattern pattern5 = {
+        {0, 1},
+        {1, 1},
+        {0, 0}};
 
-std::vector<std::vector<int>> pattern6 = {
-    {0, 0, 1},
-    {0, 1, 1},
-    {1, 1, 0}
-};
+    Pattern pattern6 = {
+        {0, 0, 1},
+        {0, 1, 1},
+        {1, 1, 0}};
 
-std::vector<std::vector<int>> pattern7 = {
-    {1, 1},
-    {0, 1},
-    {0, 1}
-};
+    Pattern pattern7 = {
+        {1, 1},
+        {0, 1},
+        {0, 1}};
 
-std::vector<std::vector<int>> pattern8 = {
-    {0, 1},
-    {1, 0},
-    {0, 1}
-};
+    Pattern pattern8 = {
+        {0, 1},
+        {1, 0},
+        {0, 1}};
 
-std::vector<std::vector<int>> pattern9 = {
-    {1, 1, 1, 1},
-    {1, 1, 1, 1},
-    {1, 1, 1, 1}
-};
+    Pattern pattern9 = {
+        {1, 1, 1, 1},
+        {1, 1, 1, 1},
+        {1, 1, 1, 1}};
 
-std::vector<std::vector<int>> pattern10 = {
-    {1, 1},
-    {1, 1},
-    {1, 1},
-    {1, 1}
-};
+    Pattern pattern10 = {
+        {1, 1},
+        {1, 1},
+        {1, 1},
+        {1, 1}};
 
-std::vector<std::vector<int>> pattern11 = {
-    {1, 1, 1},
-    {1, 1, 1},
-    {1, 1, 1}
-};
+    Pattern pattern11 = {
+        {1, 1, 1},
+        {1, 1, 1},
+        {1, 1, 1}};
 
-std::vector<std::vector<int>> pattern12 = {
-    {1, 0, 0},
-    {1, 1, 1},
-    {0, 0, 1}
-};
-
-
-
+    Pattern pattern12 = {
+        {1, 0, 0},
+        {1, 1, 1},
+        {0, 0, 1}};
 };
