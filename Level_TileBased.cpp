@@ -201,6 +201,15 @@ void Level_TileBased::CheckGround(int curX, float v)
                     dirtTile.setTextureRect(sf::IntRect(TextureLoader::groundX * TILE_SIZE, TextureLoader::groundY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
                     dirtTile.setPosition(globalTileX, y * TILE_SIZE);
                     tiles.push_back(dirtTile);
+
+                    sf::RectangleShape boundingRec;
+                    boundingRec.setSize(sf::Vector2f(32, 32));
+                    boundingRec.setFillColor(sf::Color::Transparent);
+                    boundingRec.setOutlineColor(sf::Color::Blue);
+                    boundingRec.setOutlineThickness(1);
+                    boundingRec.setPosition(dirtTile.getPosition());
+
+                    boundingRecs.push_back(boundingRec);
                 }
             }
         }

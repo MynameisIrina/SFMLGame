@@ -19,7 +19,9 @@ private:
     sf::Vector2f position;
     float gravity = 600.f;
     float collisionGravityFactor = 0.1f;
-    bool onGround = true;
+    bool landedAfterJump = true;
+    bool collisionGround = false;
+    bool collisionSide = false;
     bool jumped = false;
     bool stopped = true;
     Math math;
@@ -30,9 +32,9 @@ public:
     void Draw(std::shared_ptr<sf::RenderTarget> rt) const;
     sf::Vector2f GetPosition() const;
     void UpdateView(bool moveRight, bool moveLeft);
-    void Update(float dt, std::vector<sf::RectangleShape> tiles);
+    void Update(float dt, const std::vector<sf::RectangleShape> tiles);
     void Jump(bool jumped, float dt);
     void ResetAnimation(int animYIndex);
-    void CheckCollision(std::vector<sf::RectangleShape> tiles);
+    void CheckCollision(const std::vector<sf::RectangleShape> tiles);
     void CalculateCurrAnimation(float dt);
 };

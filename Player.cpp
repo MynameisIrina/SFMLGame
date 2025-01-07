@@ -4,7 +4,7 @@
 void Player::Initialize(const sf::Vector2f &pos)
 {
     position = pos;
-    boundingRec.setSize(sf::Vector2f(64, 40));
+    boundingRec.setSize(sf::Vector2f(30, 40));
     boundingRec.setFillColor(sf::Color::Transparent);
     boundingRec.setOutlineColor(sf::Color::Red);
     boundingRec.setOutlineThickness(1);
@@ -26,11 +26,10 @@ void Player::Initialize(const sf::Vector2f &pos)
     }
 }
 
-void Player::Update(float dt, std::vector<sf::RectangleShape> tiles)
+void Player::Update(float dt, const std::vector<sf::RectangleShape> tiles)
 {
     CalculateCurrAnimation(dt);
     CheckCollision(tiles);
-
 }
 
 void Player::ResetAnimation(int animYIndex)
@@ -38,28 +37,40 @@ void Player::ResetAnimation(int animYIndex)
     sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 }
 
-void Player::CheckCollision(std::vector<sf::RectangleShape> tiles)
+void Player::CheckCollision(const std::vector<sf::RectangleShape> tiles)
 {
-    onGround = false;
+    collisionGround = false;
+    collisionSide = false;
 
-    for (const auto& tile : tiles)
+    for (const auto &tile : tiles)
     {
+        sf::FloatRect playerBounds = boundingRec.getGlobalBounds();
+        sf::FloatRect tileBounds = tile.getGlobalBounds();
+
         if (Math::CheckRectCollision(boundingRec.getGlobalBounds(), tile.getGlobalBounds()))
         {
-            sf::FloatRect playerBounds = boundingRec.getGlobalBounds();
-            sf::FloatRect tileBounds = tile.getGlobalBounds();
-
-            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
             float overlapTop = playerBounds.top - (tileBounds.top + tileBounds.height);
+            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
 
-            if (overlapBottom <= 0 && velocity.y > 0) // Collision below
+            if (overlapBottom <= 0.f && overlapBottom >= -1.f)
             {
-                onGround = true;
-                velocity.y = 0;
+                collisionGround = true;
+                continue;
+            }
+
+            float overlapRight = tileBounds.left - (playerBounds.left + playerBounds.width);
+            float overlapLeft = playerBounds.left - (tileBounds.left + tileBounds.width);
+
+            if (abs(overlapRight) < abs(overlapLeft) && overlapRight <= 0.f && sprite.getScale().x > 0)
+            {
+                collisionSide = true;
+            }
+            else if (abs(overlapRight) > abs(overlapLeft) && overlapLeft <= 0.f && sprite.getScale().x < 0)
+            {
+                collisionSide = true;
             }
         }
     }
-
 }
 
 void Player::CalculateCurrAnimation(float dt)
@@ -71,13 +82,13 @@ void Player::CalculateCurrAnimation(float dt)
         currentAnim++;
 
         // if the player stopped moving, reset its animation
-        if ((currentAnim >= 8 || stopped) && onGround)
+        if ((currentAnim >= 8 || stopped) && landedAfterJump)
         {
             currentAnim = 0;
             ResetAnimation(AnimationPlayer::STOP_MOVING);
         }
         // if the player is jumping, play only one animation unit
-        else if (currentAnim >= 0 && !onGround)
+        else if (currentAnim >= 0 && !landedAfterJump)
         {
             currentAnim = 0;
             ResetAnimation(AnimationPlayer::STOPP_JUMPING);
@@ -90,8 +101,27 @@ void Player::Move(bool moveRight, bool moveLeft, float dt, float leftBound)
 {
     float offset = 27.f;
 
-    // Apply gravity
-    if (!onGround) velocity.y += collisionGravityFactor * dt;
+    if (collisionGround)
+    {
+        velocity.y = 0;
+    }
+
+    if (collisionSide)
+    {
+        velocity.x = 0;
+    }
+
+    if (collisionGround && !collisionSide)
+    {
+        velocity.x = 100.f;
+    }
+
+
+    if (!collisionGround && landedAfterJump)
+    {
+        velocity.y += gravity * dt;
+        position.y += velocity.y * dt;
+    }
 
     if (moveRight)
     {
@@ -126,24 +156,29 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     }
 
     sprite.setPosition(position);
-    boundingRec.setPosition(sprite.getPosition().x - 32, sprite.getPosition().y + 10);
+    boundingRec.setPosition(sprite.getPosition().x - 16, sprite.getPosition().y + 10);
 }
 
 void Player::Jump(bool jump, float dt)
 {
     jumped = jump;
-    if (jumped && onGround)
+
+    if (jumped && landedAfterJump)
     {
-        onGround = false;
+        landedAfterJump = false;
         velocity.y = -250.f;
     }
 
-    if (!onGround)
+    if (!landedAfterJump)
     {
         sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::JUMPING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
-
         velocity.y += gravity * dt;
         position.y += velocity.y * dt;
+
+        if (collisionGround)
+        {
+            landedAfterJump = true;
+        }
     }
 }
 
