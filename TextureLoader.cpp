@@ -17,6 +17,15 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load grass texture");
     }
     textures[Tile_Grass] = grassTex;
+
+    sf::Texture playerTex;
+    if (!playerTex.loadFromFile("SFMLGame/Assets/Player/Textures/Cat-Sheet.png"))
+    {
+        throw std::runtime_error("Failed to load player texture");
+    }
+    textures[Player] = playerTex;
+
+
 }
 
 sf::Texture& TextureLoader::GetTexture(TextureType type)
@@ -37,6 +46,8 @@ sf::Sprite TextureLoader::SetSprite(TextureType type)
     case Tile_Grass:
         sprite.setTextureRect(sf::IntRect(SpriteCoordinates::grassX * TILE_SIZE, SpriteCoordinates::grassY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
         break;
+    case Player:
+        sprite.setTextureRect(sf::IntRect(SpriteCoordinates::playerX * TILE_SIZE, SpriteCoordinates::playerY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
     }
 
     return sprite;

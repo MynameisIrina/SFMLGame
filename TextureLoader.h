@@ -8,7 +8,8 @@ public:
     enum TextureType
     {
         Tile_Grass,
-        Tile_Dirt
+        Tile_Dirt,
+        Player
     };
 
     enum SpriteCoordinates
@@ -17,7 +18,9 @@ public:
         groundY = 10,
         grassX = 2,
         grassY = 8,
-        tileSize = 32
+        tileSize = 32,
+        playerX = 0,
+        playerY = 4
     };
 
     void Initialize();

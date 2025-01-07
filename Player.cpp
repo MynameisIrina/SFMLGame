@@ -1,29 +1,23 @@
 #include "Player.h"
 #include <iostream>
 
+Player::Player(std::shared_ptr<TextureLoader> txLoaderRef): txLoader(txLoaderRef)
+{}
+
 void Player::Initialize(const sf::Vector2f &pos)
 {
     position = pos;
+    
     boundingRec.setSize(sf::Vector2f(30, 40));
     boundingRec.setFillColor(sf::Color::Transparent);
     boundingRec.setOutlineColor(sf::Color::Red);
     boundingRec.setOutlineThickness(1);
 
-    if (texture.loadFromFile("SFMLGame/Assets/Player/Textures/Cat-Sheet.png"))
-    {
-        std::cout << "Player image loaded" << std::endl;
-        sprite.setTexture(texture);
-
-        sprite.setTextureRect(sf::IntRect(AnimationPlayer::MOVING_X * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
-
-        sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
-        sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
-        sprite.setPosition(pos);
-    }
-    else
-    {
-        std::cout << "Player image failed to load" << std::endl;
-    }
+    sprite = txLoader->SetSprite(TextureLoader::TextureType::Player);
+    
+    sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
+    sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
+    sprite.setPosition(pos);
 }
 
 void Player::Update(float dt, const std::vector<sf::RectangleShape> tiles)
@@ -115,7 +109,6 @@ void Player::Move(bool moveRight, bool moveLeft, float dt, float leftBound)
     {
         velocity.x = 100.f;
     }
-
 
     if (!collisionGround && landedAfterJump)
     {

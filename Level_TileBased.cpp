@@ -157,7 +157,7 @@ void Level_TileBased::ShiftGridLeft()
 
 std::vector<sf::RectangleShape> Level_TileBased::GetTiles()
 {
-    if(boundingRecs.size() > 0)
+    if (boundingRecs.size() > 0)
     {
         return boundingRecs;
     }
@@ -185,14 +185,7 @@ void Level_TileBased::CheckGround(int curX, float v)
                     grassTile.setPosition(globalTileX, y * TILE_SIZE);
                     tiles.push_back(grassTile);
 
-                    sf::RectangleShape boundingRec;
-                    boundingRec.setSize(sf::Vector2f(32, 32));
-                    boundingRec.setFillColor(sf::Color::Transparent);
-                    boundingRec.setOutlineColor(sf::Color::Blue);
-                    boundingRec.setOutlineThickness(1);
-                    boundingRec.setPosition(grassTile.getPosition());
-
-                    boundingRecs.push_back(boundingRec);
+                    CreateBoundRec(grassTile.getPosition());
                 }
                 else if (y - 1 >= 0 && !nothingAbove)
                 {
@@ -202,16 +195,20 @@ void Level_TileBased::CheckGround(int curX, float v)
                     dirtTile.setPosition(globalTileX, y * TILE_SIZE);
                     tiles.push_back(dirtTile);
 
-                    sf::RectangleShape boundingRec;
-                    boundingRec.setSize(sf::Vector2f(32, 32));
-                    boundingRec.setFillColor(sf::Color::Transparent);
-                    boundingRec.setOutlineColor(sf::Color::Blue);
-                    boundingRec.setOutlineThickness(1);
-                    boundingRec.setPosition(dirtTile.getPosition());
-
-                    boundingRecs.push_back(boundingRec);
+                    CreateBoundRec(dirtTile.getPosition());
                 }
             }
         }
     }
+}
+
+void Level_TileBased::CreateBoundRec(const sf::Vector2f position)
+{
+    sf::RectangleShape boundingRec;
+    boundingRec.setSize(sf::Vector2f(32, 32));
+    boundingRec.setFillColor(sf::Color::Transparent);
+    boundingRec.setOutlineColor(sf::Color::Blue);
+    boundingRec.setOutlineThickness(1);
+    boundingRec.setPosition(position);
+    boundingRecs.push_back(boundingRec);
 }

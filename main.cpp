@@ -21,7 +21,7 @@ int main()
     std::shared_ptr<TextureLoader> txLoader = std::make_shared<TextureLoader>();
     txLoader->Initialize();
 
-    std::shared_ptr<Player> player = std::make_shared<Player>();
+    std::shared_ptr<Player> player = std::make_shared<Player>(txLoader);
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(window, player);
 
     Background background(player);

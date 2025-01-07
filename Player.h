@@ -2,13 +2,15 @@
 #include <SFML/Graphics.hpp>
 #include "Animation.h"
 #include "Math.h"
+#include "TextureLoader.h"
 
 class Player
 {
 private:
     // view
-    sf::Texture texture;
+    std::shared_ptr<TextureLoader> txLoader;
     sf::Sprite sprite;
+
     int currentAnim = 0;
     sf::RectangleShape boundingRec;
     // model
@@ -27,6 +29,7 @@ private:
     Math math;
 
 public:
+    Player(std::shared_ptr<TextureLoader> txLoaderRef);
     void Initialize(const sf::Vector2f &pos);
     void Move(bool moveRight, bool moveLeft, float dt, float leftBound);
     void Draw(std::shared_ptr<sf::RenderTarget> rt) const;

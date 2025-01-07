@@ -28,6 +28,7 @@ public:
     void ShiftGridLeft();
     bool IsAreaFree(int currentX, int currentY, int patternWidth, int patternHeight);
     int FindRightmostTileX();
+    void CreateBoundRec(const sf::Vector2f position);
     std::vector<sf::RectangleShape> GetTiles();
 
 private:
