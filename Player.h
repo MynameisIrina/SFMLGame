@@ -35,9 +35,9 @@ public:
     void Draw(std::shared_ptr<sf::RenderTarget> rt) const;
     sf::Vector2f GetPosition() const;
     void UpdateView(bool moveRight, bool moveLeft);
-    void Update(float dt, const std::vector<sf::RectangleShape> tiles);
+    void Update(float dt, const std::vector<sf::RectangleShape> &tiles);
     void Jump(bool jumped, float dt);
     void ResetAnimation(int animYIndex);
-    void CheckCollision(const std::vector<sf::RectangleShape> tiles);
+    void CheckCollision(const std::vector<sf::RectangleShape> &tiles);
     void CalculateCurrAnimation(float dt);
 };

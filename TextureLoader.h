@@ -30,4 +30,5 @@ public:
 private:
     const int TILE_SIZE = 32;
     std::map <TextureType, sf::Texture> textures;
+    std::map<TextureType, sf::IntRect> textureCoordinates;
 };

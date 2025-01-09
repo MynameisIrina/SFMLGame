@@ -20,7 +20,7 @@ void Player::Initialize(const sf::Vector2f &pos)
     sprite.setPosition(pos);
 }
 
-void Player::Update(float dt, const std::vector<sf::RectangleShape> tiles)
+void Player::Update(float dt, const std::vector<sf::RectangleShape> &tiles)
 {
     CalculateCurrAnimation(dt);
     CheckCollision(tiles);
@@ -31,7 +31,7 @@ void Player::ResetAnimation(int animYIndex)
     sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 }
 
-void Player::CheckCollision(const std::vector<sf::RectangleShape> tiles)
+void Player::CheckCollision(const std::vector<sf::RectangleShape> &tiles)
 {
     collisionGround = false;
     collisionSide = false;
