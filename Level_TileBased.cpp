@@ -12,12 +12,13 @@ Level_TileBased::Level_TileBased(const std::shared_ptr<Player> pl, const std::sh
 void Level_TileBased::Initialize()
 {
     grid.resize(GRID_HEIGHT, std::vector<int>(TOTAL_GRID_WIDTH, 0));
-    patterns = {pattern1, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12};
+    patterns = {defaultPattern, pattern2, pattern3, pattern4, pattern5, pattern6, pattern7, pattern8, pattern9, pattern10, pattern11, pattern12};
 
     grassSprite = txLoader->SetSprite(TextureLoader::TextureType::Tile_Grass);
     dirtSprite = txLoader->SetSprite(TextureLoader::TextureType::Tile_Dirt);
 
-    GenerateLevel(0);
+    GenerateDefaultTiles();
+    GenerateLevel(startLevelGenerationX);
     ShowGrid();
 }
 
@@ -47,6 +48,29 @@ void Level_TileBased::ShowGrid() const
     std::cout << "" << std::endl;
 }
 
+void Level_TileBased::GenerateDefaultTiles()
+{
+    int currY = 2;
+    int patternWidth = defaultPattern[0].size();
+    int patternHeight = defaultPattern.size();
+
+    // generate platforms on invisible level area (or visible + invisible for initial method call)
+    for (int x = 0; x < patternWidth; x += patternWidth)
+    {
+        int newX = x + patternWidth;
+        bool inBounds = newX < GRID_WIDTH + BUFFER_COLUMNS;
+        if (!inBounds)
+        {
+            break;
+        }
+
+        PlacePattern(0, x, currY);
+    }
+
+    float currentBound = camera->CalculateLeftBound();
+    CheckGround(0, currentBound);
+}
+
 void Level_TileBased::GenerateLevel(int startX)
 {
     int currY = 0;
@@ -56,7 +80,6 @@ void Level_TileBased::GenerateLevel(int startX)
     // generate platforms on invisible level area (or visible + invisible for initial method call)
     for (int x = startX; x < GRID_WIDTH + BUFFER_COLUMNS; x += patternWidth)
     {
-
         int newX = x + patternWidth;
         bool inBounds = newX < GRID_WIDTH + BUFFER_COLUMNS;
         if (!inBounds)
@@ -78,7 +101,7 @@ void Level_TileBased::GenerateLevel(int startX)
         PlacePattern(patternIndex, x, currY);
     }
 
-    float currentBound = (startX == 0) ? currentBound = camera->CalculateLeftBound() : currentBound = camera->CalculateRightBound();
+    float currentBound = (startX == startLevelGenerationX) ? currentBound = camera->CalculateLeftBound() + (startX * TILE_SIZE) : currentBound = camera->CalculateRightBound();
     CheckGround(startX, currentBound);
 }
 
@@ -161,6 +184,7 @@ std::vector<sf::RectangleShape> Level_TileBased::GetTiles()
     {
         return boundingRecs;
     }
+    return {};
 }
 
 void Level_TileBased::CheckGround(int curX, float v)

@@ -30,6 +30,7 @@ public:
     int FindRightmostTileX();
     void CreateBoundRec(const sf::Vector2f position);
     std::vector<sf::RectangleShape> GetTiles();
+    void GenerateDefaultTiles();
 
 private:
     const int GRID_WIDTH = 25;
@@ -56,10 +57,15 @@ private:
     const std::shared_ptr<Camera> camera;
     float previousPlayerX;
 
-    int startX = 2;
     bool hasShifted = false;
     int shiftCounter = 0;
+    int startLevelGenerationX = 3;
 
+    Pattern defaultPattern = {
+        {0, 0, 0},
+        {1, 1, 1},
+        {1, 1, 1}};
+    
     Pattern pattern1 = {
         {0, 0},
         {1, 1},
@@ -120,4 +126,5 @@ private:
         {1, 0, 0},
         {1, 1, 1},
         {0, 0, 1}};
+
 };
