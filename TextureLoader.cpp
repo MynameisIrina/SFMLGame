@@ -27,6 +27,13 @@ void TextureLoader::Initialize()
     }
     textures[Player] = playerTex;
     textureCoordinates[Player] = sf::IntRect(SpriteCoordinates::playerX * TILE_SIZE, SpriteCoordinates::playerY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+    sf::Texture backgroundTex;
+    if (!backgroundTex.loadFromFile("SFMLGame/Assets/Background/Background.png"))
+    {
+        throw std::runtime_error("Failed to load player texture");
+    }
+    textures[Background] = backgroundTex;
 }
 
 sf::Texture& TextureLoader::GetTexture(TextureType type)
@@ -38,7 +45,9 @@ sf::Sprite TextureLoader::SetSprite(TextureType type)
 {
     sf::Sprite sprite;
     sprite.setTexture(textures[type]);
-    sprite.setTextureRect(textureCoordinates[type]);
-
+    if(type != Background)
+    {
+        sprite.setTextureRect(textureCoordinates[type]);
+    }
     return sprite;
 }

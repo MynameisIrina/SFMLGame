@@ -15,7 +15,7 @@ private:
 public:
     Camera(std::shared_ptr<sf::RenderWindow> window, const std::shared_ptr<Player> player);
     void Initialize();
-    void Update(bool moveLeft);
+    void Update(bool moveLeft, bool respawn);
     sf::View GetView() const;
     float CalculateLeftBound() const;
     float CalculateRightBound() const;

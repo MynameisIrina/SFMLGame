@@ -9,25 +9,32 @@ void Camera::Initialize()
     bool isCameraFollowing = false;
 }
 
-void Camera::Update(bool moveLeft)
+void Camera::Update(bool moveLeft, bool respawn)
 {
     sf::Vector2f playerPosition = player->GetPosition();
-
     float viewThreshold = view.getCenter().x;
 
-    if (playerPosition.x >= viewThreshold)
+    if (respawn)
     {
-        isCameraFollowing = true;
-    }
-
-    if (moveLeft)
-    {
+        view.setCenter(window->getSize().x / 2, window->getSize().y / 2);
         isCameraFollowing = false;
     }
-
-    if (isCameraFollowing)
+    else
     {
-        view.setCenter(playerPosition.x, view.getSize().y / 2);
+        if (playerPosition.x >= viewThreshold)
+        {
+            isCameraFollowing = true;
+        }
+
+        if (moveLeft)
+        {
+            isCameraFollowing = false;
+        }
+
+        if (isCameraFollowing)
+        {
+            view.setCenter(playerPosition.x, view.getSize().y / 2);
+        }
     }
 
     window->setView(view);

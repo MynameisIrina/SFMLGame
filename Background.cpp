@@ -2,54 +2,46 @@
 #include <iostream>
 #include <list>
 
-Background::Background(const std::shared_ptr<Player>  pl) : player(pl) {}
+Background::Background(const std::shared_ptr<Player> pl, std::shared_ptr<TextureLoader> txLoaderRef) : player(pl), txLoader(txLoaderRef) {}
 
-void Background::Initialize(const std::shared_ptr<sf::RenderWindow>  window)
+void Background::Initialize(const std::shared_ptr<sf::RenderWindow> window)
 {
-    texture.loadFromFile("SFMLGame/Assets/Background/Background.png");
-    textureSize = texture.getSize();
+    textureSize = txLoader->GetTexture(TextureLoader::Background).getSize();
     windowSize = window->getSize();
-    float ScaleX = (float)windowSize.x / textureSize.x;
-    float ScaleY = (float)windowSize.y / textureSize.y;
-    sprite1.setTexture(texture);
-    sprite1.setScale(ScaleX, ScaleY);
-    sprite1.setPosition(-400, 0);
-    sprite2.setTexture(texture);
-    sprite2.setScale(ScaleX, ScaleY);
-    sprite2.setPosition(windowSize.x - 400, 0);
+    scaleX = (float)windowSize.x / textureSize.x;
+    scaleY = (float)windowSize.y / textureSize.y;
 
-    positionSprite1 = sprite1.getPosition();
-    positionSprite2 = sprite2.getPosition();
-    currentSprite = sprite1;
+    sprite1 = txLoader->SetSprite(TextureLoader::TextureType::Background);
+    sprite1.setScale(scaleX, scaleY);
+    sprite1.setPosition(0, 0);
+    spriteList.push_back(sprite1);
+
+    sprite2 = txLoader->SetSprite(TextureLoader::TextureType::Background);
+    sprite2.setScale(scaleX, scaleY);
+    sprite2.setPosition(windowSize.x, 0);
+    spriteList.push_back(sprite2);
 }
 
-void Background::Move(float dt)
+void Background::GenerateNewSprite()
 {
     sf::Vector2f playerPosition = player->GetPosition();
-    int deltaX = static_cast<int>(playerPosition.x) % windowSize.x;
+    
 
-    if(deltaX == 0)
+    if (playerPosition.x > spriteList.back().getPosition().x)
     {
-        if(playerPosition.x > sprite1.getPosition().x + windowSize.x){
-
-            positionSprite1.x = positionSprite1.x + offsetPlacement;
-        }
-        else if(playerPosition.x > sprite2.getPosition().x + windowSize.x)
-        {
-            positionSprite2.x = positionSprite2.x + offsetPlacement;
-        }
-       
+        sf::Sprite newSprite;
+        newSprite.setTexture(txLoader->GetTexture(TextureLoader::Background));
+        newSprite.setScale(scaleX, scaleY);
+        newSprite.setPosition(spriteList.back().getPosition().x + windowSize.x, 0);
+        spriteList.push_back(newSprite);
     }
-}
 
-void Background::UpdateView()
-{
-    sprite1.setPosition(positionSprite1);
-    sprite2.setPosition(positionSprite2);
 }
 
 void Background::Draw(std::shared_ptr<sf::RenderTarget> rt) const
 {
-    rt->draw(sprite1);
-    rt->draw(sprite2);
+    for (const auto& sprite : spriteList)
+    {
+        rt->draw(sprite);
+    }
 }

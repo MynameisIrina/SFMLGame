@@ -114,16 +114,16 @@ void Level_TileBased::UpdateLevel()
 
     if (playerAtThreshold && playerPosInGameUnits == 0)
     {
-        if (!tiles.empty())
-        {
-            float leftBound = camera->CalculateLeftBound();
+        // if (!tiles.empty())
+        // {
+        //     float leftBound = camera->CalculateLeftBound();
 
-            // This helps to avoid rendering and memory usage for tiles that are no longer needed.
-            tiles.erase(
-                std::remove_if(tiles.begin(), tiles.end(), [this, leftBound](sf::Sprite &tile)
-                               { return tile.getPosition().x + TILE_SIZE < leftBound; }),
-                tiles.end());
-        }
+        //     // This helps to avoid rendering and memory usage for tiles that are no longer needed.
+        //     tiles.erase(
+        //         std::remove_if(tiles.begin(), tiles.end(), [this, leftBound](sf::Sprite &tile)
+        //                        { return tile.getPosition().x + TILE_SIZE < leftBound; }),
+        //         tiles.end());
+        // }
 
         // Simulate the world moving, which allows to place new tiles at the right of the grid
         ShiftGridLeft();
@@ -174,7 +174,7 @@ void Level_TileBased::ShiftGridLeft()
 
         shiftCounter++;
         hasShifted = true;
-        ShowGrid();
+        //ShowGrid();
     }
 }
 

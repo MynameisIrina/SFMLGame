@@ -9,7 +9,8 @@ public:
     {
         Tile_Grass,
         Tile_Dirt,
-        Player
+        Player,
+        Background
     };
 
     enum SpriteCoordinates

@@ -24,10 +24,10 @@ int main()
     std::shared_ptr<Player> player = std::make_shared<Player>(txLoader);
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(window, player);
 
-    Background background(player);
+    Background background(player, txLoader);
     background.Initialize(window);
-    player->Initialize(sf::Vector2f(10.f, 10.f));
-    //player->Initialize(sf::Vector2f(50.f, 502.f));
+    player->Initialize(sf::Vector2f(35.f, 20.f));
+    
     camera->Initialize();
 
     Level_TileBased level_tile(player, camera, txLoader);
@@ -50,19 +50,20 @@ int main()
         bool moveRight = sf::Keyboard::isKeyPressed(sf::Keyboard::D);
         bool moveLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
         bool jumped = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+        bool respawn = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
 
-        background.Move(deltaTime);
-        background.UpdateView();
+        background.GenerateNewSprite();
 
         float leftBound = camera->CalculateLeftBound();
         player->Move(moveRight, moveLeft, deltaTime, leftBound);
         player->Jump(jumped, deltaTime);
+        if(respawn) player->Respawn();
         std::vector<sf::RectangleShape> tiles = level_tile.GetTiles();
         player->Update(deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
         level_tile.UpdateLevel();
 
-        camera->Update(moveLeft);
+        camera->Update(moveLeft, respawn);
 
         // ----------------- UPDATE----------------
 

@@ -91,6 +91,13 @@ void Player::CalculateCurrAnimation(float dt)
     }
 }
 
+void Player::Respawn()
+{
+    position = respawnPos;
+    // stop the player if it was falling down
+    velocity.y = 0;
+}
+
 void Player::Move(bool moveRight, bool moveLeft, float dt, float leftBound)
 {
     float offset = 27.f;
@@ -114,6 +121,7 @@ void Player::Move(bool moveRight, bool moveLeft, float dt, float leftBound)
     {
         velocity.y += gravity * dt;
         position.y += velocity.y * dt;
+        landedAfterJump = false;
     }
 
     if (moveRight)

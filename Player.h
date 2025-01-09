@@ -26,6 +26,8 @@ private:
     bool collisionSide = false;
     bool jumped = false;
     bool stopped = true;
+    bool respawn = false;
+    sf::Vector2f respawnPos = sf::Vector2f(35.f, 20.f);
     Math math;
 
 public:
@@ -40,4 +42,5 @@ public:
     void ResetAnimation(int animYIndex);
     void CheckCollision(const std::vector<sf::RectangleShape> &tiles);
     void CalculateCurrAnimation(float dt);
+    void Respawn();
 };
