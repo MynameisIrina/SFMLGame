@@ -43,6 +43,14 @@ void TextureLoader::Initialize()
     }
     textures[Obstacle] = obstacleTex;
     textureCoordinates[Obstacle] = sf::IntRect(SpriteCoordinates::obstacleX * TILE_SIZE, SpriteCoordinates::obstacleY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+    sf::Texture healthBarTex;
+    if (!healthBarTex.loadFromFile("Assets/Background/PixelArtPlatformer/Texture/hearts.png"))
+    {
+        throw std::runtime_error("Failed to load lifebar texture");
+    }
+    textures[HealthBar] = healthBarTex;
+    textureCoordinates[HealthBar] = sf::IntRect(SpriteCoordinates::HealthBarX * 16, SpriteCoordinates::HealthBarY * 16, 16, 16);
 }
 
 sf::Texture& TextureLoader::GetTexture(TextureType type)

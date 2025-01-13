@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Player.h"
+class Player;
 
 class Camera
 {
@@ -13,9 +13,9 @@ private:
     bool isCameraFollowing;
 
 public:
-    Camera(std::shared_ptr<sf::RenderWindow> window, const std::shared_ptr<Player> player);
+    Camera(std::shared_ptr<sf::RenderWindow> window);
     void Initialize();
-    void Update(bool moveLeft, bool respawn);
+    void Update(const std::shared_ptr<Player> player, bool moveLeft, bool respawn);
     sf::View GetView() const;
     float CalculateLeftBound() const;
     float CalculateRightBound() const;

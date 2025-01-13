@@ -1,6 +1,7 @@
 #include "Camera.h"
+#include "Player.h"
 
-Camera::Camera(std::shared_ptr<sf::RenderWindow> windowRef, const std::shared_ptr<Player> playerRef) : window(windowRef), player(playerRef) {}
+Camera::Camera(std::shared_ptr<sf::RenderWindow> windowRef) : window(windowRef){}
 
 void Camera::Initialize()
 {
@@ -9,7 +10,7 @@ void Camera::Initialize()
     bool isCameraFollowing = false;
 }
 
-void Camera::Update(bool moveLeft, bool respawn)
+void Camera::Update(const std::shared_ptr<Player> player, bool moveLeft, bool respawn)
 {
     sf::Vector2f playerPosition = player->GetPosition();
     float viewThreshold = view.getCenter().x;

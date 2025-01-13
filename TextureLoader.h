@@ -11,7 +11,8 @@ public:
         Tile_Dirt,
         Player,
         Background,
-        Obstacle
+        Obstacle,
+        HealthBar
     };
 
     enum SpriteCoordinates
@@ -24,7 +25,9 @@ public:
         playerX = 0,
         playerY = 4,
         obstacleX = 27,
-        obstacleY = 3
+        obstacleY = 3,
+        HealthBarX = 0,
+        HealthBarY = 0
     };
 
     void Initialize();

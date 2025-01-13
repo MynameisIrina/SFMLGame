@@ -3,6 +3,8 @@
 #include "Animation.h"
 #include "Math.h"
 #include "TextureLoader.h"
+#include "HealthBar.h"
+
 
 class Player
 {
@@ -10,9 +12,10 @@ private:
     // view
     std::shared_ptr<TextureLoader> txLoader;
     sf::Sprite sprite;
-
+    std::unique_ptr<HealthBar> healthBar;
     int currentAnim = 0;
     sf::RectangleShape boundingRecPlayer;
+    
     // model
     float speed = 0.05f;
     sf::Vector2f velocity = sf::Vector2f(100.f, 10.f);;
@@ -30,6 +33,7 @@ private:
     bool stopped = true;
     bool respawn = false;
     bool atRespawnPos = false;
+    bool canLoseLife = true;
     sf::Vector2f saveLastPos = sf::Vector2f(35.f, 20.f);
     sf::Vector2f respawnPos = sf::Vector2f(35.f, 20.f);
     Math math;
@@ -38,11 +42,11 @@ private:
 public:
     Player(std::shared_ptr<TextureLoader> txLoaderRef);
     void Initialize(const sf::Vector2f &pos);
-    void Move(bool moveRight, bool moveLeft, float dt, float leftBound);
+    //void Move(bool moveRight, bool moveLeft, float dt, float leftBound);
     void Draw(const std::shared_ptr<sf::RenderTarget> rt);
     sf::Vector2f GetPosition() const;
     void UpdateView(bool moveRight, bool moveLeft);
-    void Update(bool moveRight, bool moveLeft, float leftBound, float dt, std::vector<sf::RectangleShape> &boundRecs);
+    void Update(bool moveRight, bool moveLeft, float leftBound, float dt, std::vector<sf::RectangleShape> &boundRecs, std::shared_ptr<HealthBar> healthbar);
     void Jump(bool jumped, float dt);
     void ResetAnimation(int animYIndex);
     void CheckCollisionGround(std::vector<sf::RectangleShape> &boundRecs);

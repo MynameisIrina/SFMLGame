@@ -1,7 +1,8 @@
 #include "Player.h"
 #include <iostream>
+#include "HealthBar.h"
 
-Player::Player(std::shared_ptr<TextureLoader> txLoaderRef) : txLoader(txLoaderRef)
+Player::Player(std::shared_ptr<TextureLoader> txLoaderRef): txLoader(txLoaderRef)
 {
 }
 
@@ -21,15 +22,18 @@ void Player::Initialize(const sf::Vector2f &pos)
     sprite.setPosition(pos);
 }
 
-void Player::Update(bool moveRight, bool moveLeft, float leftBound, float dt, std::vector<sf::RectangleShape> &boundRecs)
+void Player::Update(bool moveRight, bool moveLeft, float leftBound, float dt, std::vector<sf::RectangleShape> &boundRecs, std::shared_ptr<HealthBar> healthbar)
 {
 
     CalculateCurrAnimation(dt);
 
     float offset = 27.f;
 
-    std::cout << "Collision ground: " << collisionGround << std::endl;
-    std::cout << "Is Jumping: " << isJumping << std::endl;
+    if(canLoseLife && position.y > 800)
+    {
+        healthbar->LoseLife();
+        canLoseLife = false;
+    }
 
     if (collisionTop)
     {
@@ -250,6 +254,7 @@ void Player::Respawn()
         // stop the player if it was falling down
         velocity.y = 0;
         atRespawnPos = true;
+        canLoseLife = true;
     }
     else
     {
@@ -262,47 +267,6 @@ sf::Vector2f Player::GetLastSavedPos()
     return saveLastPos;
 }
 
-void Player::Move(bool moveRight, bool moveLeft, float dt, float leftBound)
-{
-    float offset = 27.f;
-
-    if (!collisionGround)
-    {
-        velocity.y += gravity * dt; // Apply gravity only if not grounded
-        position.y += velocity.y * dt;
-    }
-
-    if (collisionGround && !isJumping)
-    {
-        velocity.y = 0;
-        isJumping = false;
-    }
-
-    if (collisionGround && !collisionSide)
-    {
-        velocity.x = 100.f;
-    }
-
-    if (moveRight)
-    {
-        stopped = false;
-        atRespawnPos = false;
-        position.x += velocity.x * dt;
-    }
-    else if (moveLeft)
-    {
-        stopped = false;
-        atRespawnPos = false;
-        if (position.x > leftBound + offset)
-        {
-            position.x -= velocity.x * dt;
-        }
-    }
-    else
-    {
-        stopped = true;
-    }
-}
 
 void Player::UpdateView(bool moveRight, bool moveLeft)
 {
