@@ -4,6 +4,9 @@
 #include "Player.h"
 #include "Camera.h"
 #include "TextureLoader.h"
+#include "Obstacle.h"
+#include <unordered_map>
+
 
 class Level_TileBased
 {
@@ -24,13 +27,17 @@ public:
     void ShowGrid() const;
     void Initialize();
     void CheckGround(int curX, float v);
-    void UpdateLevel();
+    void UpdateLevel(float dt, bool respawn);
     void ShiftGridLeft();
     bool IsAreaFree(int currentX, int currentY, int patternWidth, int patternHeight);
     int FindRightmostTileX();
-    void CreateBoundRec(const sf::Vector2f position);
-    std::vector<sf::RectangleShape> GetTiles();
+    void CreateBoundRecGround(const sf::Vector2f position);
+    sf::RectangleShape CreateBoundRecObstacle(const sf::Vector2f position);
+    std::vector<sf::RectangleShape>& GetBoundRecs();
     void GenerateDefaultTiles();
+    void PlaceObstacles();
+    void UpdateObstacle(float dt);
+    void UpdateBoundingRecObstacle();
 
 private:
     const int GRID_WIDTH = 25;
@@ -39,7 +46,10 @@ private:
     const int BUFFER_COLUMNS = 10;
     const int TOTAL_GRID_WIDTH = GRID_WIDTH + BUFFER_COLUMNS;
 
-    std::vector<sf::RectangleShape> boundingRecs;
+    std::vector<sf::RectangleShape> boundingRecsGround;
+    std::vector<sf::RectangleShape> boundingRecsObstacle;
+    std::vector<sf::RectangleShape> allboundingRecs;
+    std::map<std::shared_ptr<Obstacle>, sf::RectangleShape> obstacles;
 
     std::vector<std::vector<int>> grid;
     using Pattern = std::vector<std::vector<int>>;
@@ -60,12 +70,13 @@ private:
     bool hasShifted = false;
     int shiftCounter = 0;
     int startLevelGenerationX = 3;
+    int prevYFromLevelGen = 2;
 
     Pattern defaultPattern = {
         {0, 0, 0},
         {1, 1, 1},
         {1, 1, 1}};
-    
+
     Pattern pattern1 = {
         {0, 0},
         {1, 1},
@@ -78,8 +89,8 @@ private:
 
     Pattern pattern3 = {
         {0, 1},
-        {1, 1},
-        {0, 1}};
+        {0, 1},
+        {1, 1}};
 
     Pattern pattern4 = {
         {0, 0},
@@ -89,7 +100,7 @@ private:
     Pattern pattern5 = {
         {0, 1},
         {1, 1},
-        {0, 0}};
+        {1, 0}};
 
     Pattern pattern6 = {
         {0, 0, 1},
@@ -97,34 +108,31 @@ private:
         {1, 1, 0}};
 
     Pattern pattern7 = {
-        {1, 1},
+        {0, 0},
         {0, 1},
-        {0, 1}};
-
-    Pattern pattern8 = {
-        {0, 1},
-        {1, 0},
-        {0, 1}};
-
-    Pattern pattern9 = {
-        {1, 1, 1, 1},
-        {1, 1, 1, 1},
-        {1, 1, 1, 1}};
-
-    Pattern pattern10 = {
-        {1, 1},
-        {1, 1},
-        {1, 1},
         {1, 1}};
 
-    Pattern pattern11 = {
-        {1, 1, 1},
-        {1, 1, 1},
+    Pattern pattern8 = {
+        {0, 0, 0},
+        {1, 0, 0},
         {1, 1, 1}};
 
     Pattern pattern12 = {
-        {1, 0, 0},
+        {0, 0, 1},
         {1, 1, 1},
-        {0, 0, 1}};
+        {1, 0, 1}};
+
+    Pattern pattern13 = {
+        {1},
+        {1, 1},
+        {1, 1, 1},
+        {1, 1, 1, 1}};
+
+    Pattern pattern14 = {
+        {0, 0, 0, 1},
+        {0, 0, 1, 1},
+        {0, 1, 1, 1},
+        {1, 1, 1, 1}};
+
 
 };

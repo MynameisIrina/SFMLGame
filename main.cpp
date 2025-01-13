@@ -6,6 +6,7 @@
 #include "Perlin.h"
 #include "Level_TileBased.h"
 #include "Camera.h"
+#include "Obstacle.h"
 
 int main()
 {
@@ -33,6 +34,7 @@ int main()
     Level_TileBased level_tile(player, camera, txLoader);
     level_tile.Initialize();
 
+
     // ----------------- INITIALIZE -----------------
 
     while (window->isOpen())
@@ -52,16 +54,28 @@ int main()
         bool jumped = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
         bool respawn = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
 
-        background.GenerateNewSprite();
 
+        background.GenerateNewSprite();
         float leftBound = camera->CalculateLeftBound();
-        player->Move(moveRight, moveLeft, deltaTime, leftBound);
+        std::vector<sf::RectangleShape>& boundRecs = level_tile.GetBoundRecs();
+        //player->Move(moveRight, moveLeft, deltaTime, leftBound);
         player->Jump(jumped, deltaTime);
-        if(respawn) player->Respawn();
-        std::vector<sf::RectangleShape> tiles = level_tile.GetTiles();
-        player->Update(deltaTime, tiles);
+        player->Update(moveRight, moveLeft, leftBound, deltaTime, boundRecs);
         player->UpdateView(moveRight, moveLeft);
-        level_tile.UpdateLevel();
+        // Flag to ensure respawn happens only once per key press
+        static bool respawnPressed = false;
+
+        if(respawn && !respawnPressed)
+        {
+            player->Respawn();
+            respawnPressed = true;
+        }
+        if(!respawn)
+        {
+            respawnPressed = false;
+        }
+        
+        level_tile.UpdateLevel(deltaTime, respawn);
 
         camera->Update(moveLeft, respawn);
 
