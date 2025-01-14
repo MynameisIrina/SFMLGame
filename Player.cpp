@@ -79,6 +79,9 @@ void Player::Update(bool moveRight, bool moveLeft, float leftBound, float dt, st
 
     CheckCollisionGround(boundRecs);
     CheckCollisionSide(boundRecs);
+
+
+
 }
 
 void Player::CheckCollisionSide(std::vector<sf::RectangleShape> &boundRecs)

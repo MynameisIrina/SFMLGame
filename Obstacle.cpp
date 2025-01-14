@@ -4,7 +4,6 @@ Obstacle::Obstacle(std::shared_ptr<TextureLoader> txLoaderRef): txLoader(txLoade
 { sprite = txLoader->SetSprite(TextureLoader::TextureType::Obstacle); }
 
 
-
 void Obstacle::Initialize(sf::Vector2f startPosition, float speed, float minX, float maxX)
 {
     this->position = startPosition;

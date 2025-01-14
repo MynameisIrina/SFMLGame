@@ -32,8 +32,8 @@ public:
     bool IsAreaFree(int currentX, int currentY, int patternWidth, int patternHeight);
     int FindRightmostTileX();
     void CreateBoundRecGround(const sf::Vector2f position);
-    sf::RectangleShape CreateBoundRecObstacle(const sf::Vector2f position);
-    std::vector<sf::RectangleShape>& GetBoundRecs();
+    void CreateBoundRecObstacle(const std::shared_ptr<Obstacle> obstacle);
+    std::vector<sf::RectangleShape>& GetAllBoundingRecs();
     void GenerateDefaultTiles();
     void PlaceObstacles();
     void UpdateObstacle(float dt);
@@ -48,7 +48,7 @@ private:
 
     std::vector<sf::RectangleShape> boundingRecsGround;
     std::vector<sf::RectangleShape> boundingRecsObstacle;
-    std::vector<sf::RectangleShape> allboundingRecs;
+    std::vector<sf::RectangleShape> allBoundingRecs;
     std::map<std::shared_ptr<Obstacle>, sf::RectangleShape> obstacles;
 
     std::vector<std::vector<int>> grid;

@@ -31,13 +31,18 @@ void Level_TileBased::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 
     for (auto &obstacle : obstacles)
     {
-        sf::Sprite sprite = obstacle.first->GetSprite(); // Access the Obstacle object (key)
-        sf::RectangleShape rect = obstacle.second;       // Access the associated sf::RectangleShape (value)
+        sf::Sprite sprite = obstacle.first->GetSprite();
+        sf::RectangleShape rect = obstacle.second; 
         window->draw(sprite);
         window->draw(rect);
     }
 
-    for (const sf::RectangleShape &boundingRec : allboundingRecs)
+    for (const sf::RectangleShape &boundingRec : boundingRecsGround)
+    {
+        window->draw(boundingRec);
+    }
+
+    for (const sf::RectangleShape &boundingRec : boundingRecsObstacle)
     {
         window->draw(boundingRec);
     }
@@ -74,10 +79,13 @@ void Level_TileBased::PlaceObstacles()
         for (int x = GRID_WIDTH; x < TOTAL_GRID_WIDTH - 1; ++x)
         {
             float globalTileX = currentBound + (x - GRID_WIDTH) * TILE_SIZE;
-            // Check if the current cell is empty and the cell below is ground
-            if (grid[y][x] == 0 && (grid[y + 1][x] == 2) && (grid[y + 1][x + 1] == 2) && (grid[y + 1][x - 1] == 2))
+
+            bool noTileCurrent = grid[y][x] == 0;
+            bool threeConsecutiveTilesUnderneath = ((grid[y + 1][x] == 2) && (grid[y + 1][x + 1] == 2) && (grid[y + 1][x - 1] == 2));
+            bool noTilesAlongPath = (grid[y][x + 1] == 0 &&  grid[y][x - 1] == 0);
+
+            if (noTileCurrent && threeConsecutiveTilesUnderneath &&  noTilesAlongPath)
             {
-                // Randomly decide to place an obstacle
                 if (rand() % 2 == 0)
                 {
                     grid[y][x] = 3;
@@ -85,9 +93,7 @@ void Level_TileBased::PlaceObstacles()
                     std::shared_ptr<Obstacle> obstacle = std::make_shared<Obstacle>(txLoader);
                     obstacle->Initialize({globalTileX, static_cast<float>(y * TILE_SIZE)}, 50.0f, globalTileX - TILE_SIZE, globalTileX + TILE_SIZE);
                     sf::Sprite obstacleSprite = obstacle->GetSprite();
-                    sf::RectangleShape obstBoundRec = CreateBoundRecObstacle(obstacle->GetPosition());
-
-                    obstacles[obstacle] = obstBoundRec;
+                    CreateBoundRecObstacle(obstacle);
                 }
             }
         }
@@ -96,12 +102,12 @@ void Level_TileBased::PlaceObstacles()
 
 void Level_TileBased::UpdateObstacle(float dt)
 {
-    // for(auto &obstacle: obstacles)
-    // {
-    //     //obstacle.first->MoveObstacle(dt);
-    //     //obstacle.first->UpdateTexture();
-    //     //obstacle.second.setPosition(obstacle.first->GetPosition());
-    // }
+    for(auto &obstacle: obstacles)
+    {
+        obstacle.first->MoveObstacle(dt);
+        obstacle.first->UpdateTexture();
+        obstacle.second.setPosition(obstacle.first->GetPosition());
+    }
 }
 
 void Level_TileBased::GenerateLevel(int startX)
@@ -145,7 +151,6 @@ void Level_TileBased::GenerateLevel(int startX)
 
 void Level_TileBased::UpdateLevel(float dt, bool respawn)
 {
-
     // This helps us track when the player has moved a full tile
     int playerPosInGameUnits = (int)(player->GetPosition().x) % TILE_SIZE;
 
@@ -154,17 +159,6 @@ void Level_TileBased::UpdateLevel(float dt, bool respawn)
 
     if (playerAtThreshold && playerPosInGameUnits == 0 && playerHasReturned)
     {
-        // if (!tiles.empty())
-        // {
-        //     float leftBound = camera->CalculateLeftBound();
-
-        //     // This helps to avoid rendering and memory usage for tiles that are no longer needed.
-        //     tiles.erase(
-        //         std::remove_if(tiles.begin(), tiles.end(), [this, leftBound](sf::Sprite &tile)
-        //                        { return tile.getPosition().x + TILE_SIZE < leftBound; }),
-        //         tiles.end());
-        // }
-
         // Simulate the world moving, which allows to place new tiles at the right of the grid
         ShiftGridLeft();
     }
@@ -232,7 +226,6 @@ void Level_TileBased::CheckGround(int curX, float v)
                     grassTile.setTextureRect(sf::IntRect(TextureLoader::grassX * TILE_SIZE, TextureLoader::grassY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
                     grassTile.setPosition(globalTileX, y * TILE_SIZE);
                     tiles.push_back(grassTile);
-
                     CreateBoundRecGround(grassTile.getPosition());
                 }
                 else if (y - 1 >= 0 && !nothingAbove)
@@ -242,7 +235,6 @@ void Level_TileBased::CheckGround(int curX, float v)
                     dirtTile.setTextureRect(sf::IntRect(TextureLoader::groundX * TILE_SIZE, TextureLoader::groundY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
                     dirtTile.setPosition(globalTileX, y * TILE_SIZE);
                     tiles.push_back(dirtTile);
-
                     CreateBoundRecGround(dirtTile.getPosition());
                 }
             }
@@ -278,20 +270,18 @@ void Level_TileBased::CreateBoundRecGround(const sf::Vector2f position)
     boundingRec.setOutlineThickness(1);
     boundingRec.setPosition(position);
     boundingRecsGround.push_back(boundingRec);
-    allboundingRecs.push_back(boundingRec);
+    allBoundingRecs.push_back(boundingRec);
 }
 
-sf::RectangleShape Level_TileBased::CreateBoundRecObstacle(const sf::Vector2f position)
+void Level_TileBased::CreateBoundRecObstacle(const std::shared_ptr<Obstacle> obstacle)
 {
     sf::RectangleShape boundingRec;
     boundingRec.setSize(sf::Vector2f(32, 32));
     boundingRec.setFillColor(sf::Color::Transparent);
     boundingRec.setOutlineColor(sf::Color::Red);
     boundingRec.setOutlineThickness(1);
-    boundingRec.setPosition(position);
-    boundingRecsObstacle.push_back(boundingRec);
-    allboundingRecs.push_back(boundingRec);
-    return boundingRec;
+    boundingRec.setPosition(obstacle->GetPosition());
+    obstacles[obstacle] = boundingRec;
 }
 
 void Level_TileBased::ShowGrid() const
@@ -307,12 +297,27 @@ void Level_TileBased::ShowGrid() const
     std::cout << "" << std::endl;
 }
 
-std::vector<sf::RectangleShape> &Level_TileBased::GetBoundRecs()
+
+std::vector<sf::RectangleShape>& Level_TileBased::GetAllBoundingRecs()
 {
-    if (boundingRecsGround.size() > 0)
+    allBoundingRecs.clear();
+
+    for(auto& ground: boundingRecsGround)
     {
-        return allboundingRecs;
+        allBoundingRecs.push_back(ground);
     }
-    static std::vector<sf::RectangleShape> emptyVector; // Static to avoid dangling reference
+
+    for(auto& obstacle: obstacles)
+    {
+        allBoundingRecs.push_back(obstacle.second);
+    }
+
+
+    if (allBoundingRecs.size() > 0)
+    {
+        return allBoundingRecs;
+    }
+
+    static std::vector<sf::RectangleShape> emptyVector;
     return emptyVector;
 }

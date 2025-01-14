@@ -62,7 +62,7 @@ int main()
 
         background.GenerateNewSprite();
         float leftBound = camera->CalculateLeftBound();
-        std::vector<sf::RectangleShape>& boundRecs = level_tile.GetBoundRecs();
+        std::vector<sf::RectangleShape>& boundRecs = level_tile.GetAllBoundingRecs();
         player->Jump(jumped, deltaTime);
         player->Update(moveRight, moveLeft, leftBound, deltaTime, boundRecs, healthBar);
         player->UpdateView(moveRight, moveLeft);
