@@ -6,9 +6,10 @@ Player::Player(std::shared_ptr<TextureLoader> txLoaderRef): txLoader(txLoaderRef
 {
 }
 
-void Player::Initialize(const sf::Vector2f &pos)
+void Player::Initialize(const sf::Vector2f &pos, std::shared_ptr<HealthBar> healthBarRef)
 {
     position = pos;
+    healthBar = healthBarRef;
 
     boundingRecPlayer.setSize(sf::Vector2f(30, 40));
     boundingRecPlayer.setFillColor(sf::Color::Transparent);
@@ -22,17 +23,17 @@ void Player::Initialize(const sf::Vector2f &pos)
     sprite.setPosition(pos);
 }
 
-void Player::Update(bool moveRight, bool moveLeft, float leftBound, float dt, std::vector<sf::RectangleShape> &boundRecs, std::shared_ptr<HealthBar> healthbar)
+void Player::Update(bool moveRight, bool moveLeft, float leftBound, float dt, std::vector<Tile> &boundRecs, std::shared_ptr<HealthBar> healthBarRef)
 {
-
     CalculateCurrAnimation(dt);
 
     float offset = 27.f;
 
     if(canLoseLife && position.y > 800)
     {
-        healthbar->LoseLife();
+        healthBar->LoseLife();
         canLoseLife = false;
+        //Respawn();
     }
 
     if (collisionTop)
@@ -77,14 +78,13 @@ void Player::Update(bool moveRight, bool moveLeft, float leftBound, float dt, st
         stopped = true;
     }
 
+
     CheckCollisionGround(boundRecs);
     CheckCollisionSide(boundRecs);
 
-
-
 }
 
-void Player::CheckCollisionSide(std::vector<sf::RectangleShape> &boundRecs)
+void Player::CheckCollisionSide(std::vector<Tile> &boundRecs)
 {
     collisionSide = false;
 
@@ -113,14 +113,19 @@ void Player::drawRay(std::shared_ptr<sf::RenderTarget> window, const sf::Vector2
 {
     sf::VertexArray ray(sf::Lines, 2);
     ray[0].position = start;
-    ray[0].color = color; // Starting point color
+    ray[0].color = color;
     ray[1].position = end;
-    ray[1].color = color; // Ending point color
+    ray[1].color = color;
 
     window->draw(ray);
 }
 
-bool Player::castRay(const sf::RectangleShape &player, std::vector<sf::RectangleShape> &platforms, float rayLength, bool isMovingRight)
+bool Player::isRespawn()
+{
+    return respawn;
+}
+
+bool Player::castRay(const sf::RectangleShape &player, std::vector<Tile> &platforms, float rayLength, bool isMovingRight)
 {
     sf::Vector2f rayStart = boundingRecPlayer.getPosition() + sf::Vector2f(boundingRecPlayer.getSize().x / 2, boundingRecPlayer.getSize().y / 2);
 
@@ -143,33 +148,34 @@ bool Player::castRay(const sf::RectangleShape &player, std::vector<sf::Rectangle
 
     for (auto &platform : platforms)
     {
-        bool ray1Collision_Right = ray[0].position.x < platform.getGlobalBounds().left + platform.getGlobalBounds().width &&
-                                   ray[1].position.x > platform.getGlobalBounds().left &&
-                                   ray[0].position.y > platform.getGlobalBounds().top &&
-                                   ray[0].position.y < platform.getGlobalBounds().top + platform.getGlobalBounds().height;
-        bool ray2Collision_Right = ray2[0].position.x < platform.getGlobalBounds().left + platform.getGlobalBounds().width &&
-                                   ray2[1].position.x > platform.getGlobalBounds().left &&
-                                   ray2[0].position.y > platform.getGlobalBounds().top &&
-                                   ray2[0].position.y < platform.getGlobalBounds().top + platform.getGlobalBounds().height;
-        bool ray1Collision_Left = ray[1].position.x < platform.getGlobalBounds().left + platform.getGlobalBounds().width &&
-                                  ray[0].position.x > platform.getGlobalBounds().left &&
-                                  ray[0].position.y > platform.getGlobalBounds().top &&
-                                  ray[0].position.y < platform.getGlobalBounds().top + platform.getGlobalBounds().height;
-        bool ray2Collision_Left = ray2[1].position.x < platform.getGlobalBounds().left + platform.getGlobalBounds().width &&
-                                  ray2[0].position.x > platform.getGlobalBounds().left &&
-                                  ray2[0].position.y > platform.getGlobalBounds().top &&
-                                  ray2[0].position.y < platform.getGlobalBounds().top + platform.getGlobalBounds().height;
+        sf::RectangleShape platformShape = platform.tileData.shape;
+        bool ray1Collision_Right = ray[0].position.x < platformShape.getGlobalBounds().left + platformShape.getGlobalBounds().width &&
+                                   ray[1].position.x > platformShape.getGlobalBounds().left &&
+                                   ray[0].position.y > platformShape.getGlobalBounds().top &&
+                                   ray[0].position.y < platformShape.getGlobalBounds().top + platformShape.getGlobalBounds().height;
+        bool ray2Collision_Right = ray2[0].position.x < platformShape.getGlobalBounds().left + platformShape.getGlobalBounds().width &&
+                                   ray2[1].position.x > platformShape.getGlobalBounds().left &&
+                                   ray2[0].position.y > platformShape.getGlobalBounds().top &&
+                                   ray2[0].position.y < platformShape.getGlobalBounds().top + platformShape.getGlobalBounds().height;
+        bool ray1Collision_Left = ray[1].position.x < platformShape.getGlobalBounds().left + platformShape.getGlobalBounds().width &&
+                                  ray[0].position.x > platformShape.getGlobalBounds().left &&
+                                  ray[0].position.y > platformShape.getGlobalBounds().top &&
+                                  ray[0].position.y < platformShape.getGlobalBounds().top + platformShape.getGlobalBounds().height;
+        bool ray2Collision_Left = ray2[1].position.x < platformShape.getGlobalBounds().left + platformShape.getGlobalBounds().width &&
+                                  ray2[0].position.x > platformShape.getGlobalBounds().left &&
+                                  ray2[0].position.y > platformShape.getGlobalBounds().top &&
+                                  ray2[0].position.y < platformShape.getGlobalBounds().top + platformShape.getGlobalBounds().height;
 
         if (ray1Collision_Right || ray2Collision_Right)
         {
-            platform.setOutlineColor(sf::Color::Red);
-            position.x = platform.getGlobalBounds().left - boundingRecPlayer.getGlobalBounds().width + epsilon;
+            platformShape.setOutlineColor(sf::Color::Red);
+            position.x = platformShape.getGlobalBounds().left - boundingRecPlayer.getGlobalBounds().width + epsilon;
             return true;
         }
         else if (ray1Collision_Left || ray2Collision_Left)
         {
-            platform.setOutlineColor(sf::Color::Cyan);
-            position.x = platform.getGlobalBounds().left + platform.getGlobalBounds().width + boundingRecPlayer.getGlobalBounds().width - epsilon;
+            platformShape.setOutlineColor(sf::Color::Cyan);
+            position.x = platformShape.getGlobalBounds().left + platformShape.getGlobalBounds().width + boundingRecPlayer.getGlobalBounds().width - epsilon;
             return true;
         }
     }
@@ -192,19 +198,28 @@ void Player::ResetAnimation(int animYIndex)
     sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 }
 
-void Player::CheckCollisionGround(std::vector<sf::RectangleShape> &boundRecs)
+void Player::CheckCollisionGround(std::vector<Tile> &boundRecs)
 {
     collisionGround = false;
     collisionTop = false;
 
+
     for (auto &boundRec : boundRecs)
     {
+        Tile::TileData tileData = boundRec.tileData;
         sf::FloatRect playerBounds = boundingRecPlayer.getGlobalBounds();
-        sf::FloatRect tileBounds = boundRec.getGlobalBounds();
+        sf::FloatRect tileBounds = tileData.shape.getGlobalBounds();
 
-        if (Math::CheckRectCollision(boundingRecPlayer.getGlobalBounds(), boundRec.getGlobalBounds()))
+        if (Math::CheckRectCollision(playerBounds, tileBounds))
         {
-            boundRec.setOutlineColor(sf::Color::Green);
+            if(canLoseLife && tileData.type == Tile::Obstacle)
+            {
+                healthBar->LoseLife();
+                canLoseLife = false;
+                loseLifeCooldown.restart();
+            }
+
+            tileData.shape.setOutlineColor(sf::Color::Green);
 
             float overlapTop = playerBounds.top - (tileBounds.top + tileBounds.height);
             float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
@@ -221,6 +236,11 @@ void Player::CheckCollisionGround(std::vector<sf::RectangleShape> &boundRecs)
                 continue;
             }
         }
+    }
+
+    if(!canLoseLife && loseLifeCooldown.getElapsedTime().asSeconds() >= loseLifeDelay)
+    {
+        canLoseLife = true;
     }
 }
 
@@ -252,9 +272,14 @@ void Player::Respawn()
 {
     if (!atRespawnPos)
     {
-        saveLastPos = position;
+        respawn = true;
+        //saveLastPos = position;
+        sf::Vector2f tmp = position;
+        if(tmp.x > maxPosition.x)
+        {
+            maxPosition = position;
+        }
         position = respawnPos;
-        // stop the player if it was falling down
         velocity.y = 0;
         atRespawnPos = true;
         canLoseLife = true;
@@ -265,9 +290,9 @@ void Player::Respawn()
     }
 }
 
-sf::Vector2f Player::GetLastSavedPos()
+sf::Vector2f Player::GetMaxPosition()
 {
-    return saveLastPos;
+    return maxPosition;
 }
 
 

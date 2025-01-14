@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "TextureLoader.h"
 #include "Obstacle.h"
-#include <unordered_map>
+#include "Tile.h"
 
 
 class Level_TileBased
@@ -33,8 +33,8 @@ public:
     int FindRightmostTileX();
     void CreateBoundRecGround(const sf::Vector2f position);
     void CreateBoundRecObstacle(const std::shared_ptr<Obstacle> obstacle);
-    std::vector<sf::RectangleShape>& GetAllBoundingRecs();
-    void GenerateDefaultTiles();
+    std::vector<Tile>& GetAllTiles();
+    int GenerateDefaultTiles();
     void PlaceObstacles();
     void UpdateObstacle(float dt);
     void UpdateBoundingRecObstacle();
@@ -46,10 +46,10 @@ private:
     const int BUFFER_COLUMNS = 10;
     const int TOTAL_GRID_WIDTH = GRID_WIDTH + BUFFER_COLUMNS;
 
-    std::vector<sf::RectangleShape> boundingRecsGround;
-    std::vector<sf::RectangleShape> boundingRecsObstacle;
-    std::vector<sf::RectangleShape> allBoundingRecs;
-    std::map<std::shared_ptr<Obstacle>, sf::RectangleShape> obstacles;
+    std::vector<Tile> tilesGround;
+    std::vector<Tile> tilesObstacle;
+    std::vector<Tile> allTiles;
+    std::map<std::shared_ptr<Obstacle>, Tile> obstacles;
 
     std::vector<std::vector<int>> grid;
     using Pattern = std::vector<std::vector<int>>;
@@ -66,10 +66,12 @@ private:
     const std::shared_ptr<Player> player;
     const std::shared_ptr<Camera> camera;
     float previousPlayerX;
+    float lastX_atTotalGridWidthPos = 0;
+    float lastX_atGridWidthPos = 0;
+    int offsetBetweenTiles;
 
     bool hasShifted = false;
     int shiftCounter = 0;
-    int startLevelGenerationX = 3;
     int prevYFromLevelGen = 2;
 
     Pattern defaultPattern = {

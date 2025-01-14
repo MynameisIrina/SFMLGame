@@ -17,6 +17,5 @@ public:
     void Initialize();
     void Update(const std::shared_ptr<Player> player, bool moveLeft, bool respawn);
     sf::View GetView() const;
-    float CalculateLeftBound() const;
-    float CalculateRightBound() const;
+    int CalculateLeftBound() const;
 };

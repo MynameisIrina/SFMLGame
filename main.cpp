@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Obstacle.h"
 #include "HealthBar.h"
+#include "Tile.h"
 
 int main()
 {
@@ -24,13 +25,14 @@ int main()
     txLoader->Initialize();
 
     std::shared_ptr<Player> player = std::make_shared<Player>(txLoader);
-    player->Initialize(sf::Vector2f(35.f, 20.f));
 
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(window);
-    camera->Initialize();
 
     std::shared_ptr<HealthBar> healthBar = std::make_shared<HealthBar>(txLoader, camera);
+
+    camera->Initialize();
     healthBar->Initialize(6);
+    player->Initialize(sf::Vector2f(35.f, 20.f), healthBar);
 
     Level_TileBased level_tile(player, camera, txLoader);
     level_tile.Initialize();
@@ -62,9 +64,9 @@ int main()
 
         background.GenerateNewSprite();
         float leftBound = camera->CalculateLeftBound();
-        std::vector<sf::RectangleShape>& boundRecs = level_tile.GetAllBoundingRecs();
+        std::vector<Tile>& tiles = level_tile.GetAllTiles();
         player->Jump(jumped, deltaTime);
-        player->Update(moveRight, moveLeft, leftBound, deltaTime, boundRecs, healthBar);
+        player->Update(moveRight, moveLeft, leftBound, deltaTime, tiles, healthBar);
         player->UpdateView(moveRight, moveLeft);
         // Flag to ensure respawn happens only once per key press
         static bool respawnPressed = false;

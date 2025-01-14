@@ -46,12 +46,8 @@ sf::View Camera::GetView() const
     return view;
 }
 
-float Camera::CalculateLeftBound() const
+int Camera::CalculateLeftBound() const
 {
     return view.getCenter().x - view.getSize().x / 2.f;
 }
 
-float Camera::CalculateRightBound() const
-{
-    return view.getCenter().x + view.getSize().x / 2.f;
-}

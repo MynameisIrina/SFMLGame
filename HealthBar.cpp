@@ -16,7 +16,6 @@ void HealthBar::Initialize(int amount)
         hearts.push_back(heart);
     }
 
-    std::cout << "Initialized hearts with " << hearts.size() << " hearts." << std::endl;
 }
 
 void HealthBar::Draw(const std::shared_ptr<sf::RenderTarget> rt) const
@@ -34,6 +33,8 @@ void HealthBar::Update(const std::shared_ptr<Camera> cam)
         sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX + (i * 32), offsetY);
         hearts[i].position = position;
     }
+
+    
 
     
     UpdateView();
