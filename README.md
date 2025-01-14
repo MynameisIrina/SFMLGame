@@ -40,17 +40,19 @@ On Windows, follow the SFML installation steps provided in the official SFML doc
 3. Build the Project
 
   3.1 Compile the Project
+  
   Use Clang++ to compile the project. Navigate to your project directory, then run the following commands in your terminal:
   ```bash
-  clang++ -c main.cpp Player.cpp Background.cpp Camera.cpp Level_TileBased.cpp    TextureLoader.cpp Math.cpp Obstacle.cpp -I<sfml-install-path>/include -std=c++17
+  clang++ -c main.cpp HealthBar.cpp Player.cpp Background.cpp Camera.cpp Level_TileBased.cpp TextureLoader.cpp Math.cpp Obstacle.cpp -I<sfml-install-path>/include -std=c++17
   ```
   
   This will compile the source files into object files (main.o, Player.o, etc.).
 
   3.2 Link the Object Files and Create the Executable
+  
   After compiling the object files, link them together into a single executable file:
   ```bash
-  clang++ main.o Player.o Background.o Camera.o Level_TileBased.o TextureLoader.o Math.o Obstacle.o -o sfml-app -L<sfml-install-path>/lib -lsfml-graphics -lsfml-window -lsfml-system
+  clang++ main.o Player.o Background.o Camera.o Level_TileBased.o TextureLoader.o Math.o Obstacle.o HealthBar.o -o sfml-app -L<sfml-install-path>/lib -lsfml-graphics -lsfml-window -lsfml-system
   ```
   
   This will generate the executable sfml-app
