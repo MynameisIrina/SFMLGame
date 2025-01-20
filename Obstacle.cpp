@@ -1,26 +1,24 @@
 #include "Obstacle.h"
+#include "Tile.h"
+#include "Level_TileBased.h"
 
-Obstacle::Obstacle(std::shared_ptr<TextureLoader> txLoaderRef): txLoader(txLoaderRef)
-{ sprite = txLoader->SetSprite(TextureLoader::TextureType::Obstacle); }
 
-
-void Obstacle::Initialize(sf::Vector2f startPosition, float speed, float minX, float maxX)
+void Obstacle::Initialize(sf::Sprite sprite, sf::Vector2f startPosition, float speed, float minX, float maxX)
 {
+    this->sprite = sprite;
     this->position = startPosition;
     this->speed = speed;
     this->minX = minX;
     this->maxX = maxX;
-    sprite.setPosition(position);
 }
-
 
 void Obstacle::MoveObstacle(float dt)
 {
-    if(movingForward)
+    if (movingForward)
     {
         position.x += speed * dt;
 
-        if(position.x >= maxX)
+        if (position.x >= maxX)
         {
             movingForward = false;
         }
@@ -29,14 +27,12 @@ void Obstacle::MoveObstacle(float dt)
     {
         position.x -= speed * dt;
 
-        if(position.x <= minX)
+        if (position.x <= minX)
         {
             movingForward = true;
         }
     }
-    
 }
-
 
 void Obstacle::UpdateTexture()
 {
@@ -53,3 +49,14 @@ sf::Sprite Obstacle::GetSprite() const
     return sprite;
 }
 
+
+sf::RectangleShape Obstacle::CreateBoundingRec()
+{
+    sf::RectangleShape boundingRec;
+    boundingRec.setSize(sf::Vector2f(32, 32));
+    boundingRec.setFillColor(sf::Color::Transparent);
+    boundingRec.setOutlineColor(sf::Color::Blue);
+    boundingRec.setOutlineThickness(1);
+    boundingRec.setPosition(position);
+    return boundingRec;
+}

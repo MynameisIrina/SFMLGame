@@ -4,9 +4,8 @@
 #include "Player.h"
 #include "Camera.h"
 #include "TextureLoader.h"
-#include "Obstacle.h"
+#include "ObstacleManager.h"
 #include "Tile.h"
-
 
 class Level_TileBased
 {
@@ -20,24 +19,21 @@ public:
         maxY = 15
     };
 
-    Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam, std::shared_ptr<TextureLoader> txLoaderRef);
+
+    Level_TileBased(const std::shared_ptr<Camera> cam, std::shared_ptr<TextureLoader> txLoaderRef);
     void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
     void GenerateLevel(int startX);
     void PlacePattern(int patternIndex, int currentX, int currentY);
     void ShowGrid() const;
     void Initialize();
     void CheckGround(int curX, float v);
-    void UpdateLevel(float dt, bool respawn);
+    void UpdateLevel(const std::shared_ptr<Player> player, float dt, bool respawn);
     void ShiftGridLeft();
-    bool IsAreaFree(int currentX, int currentY, int patternWidth, int patternHeight);
     int FindRightmostTileX();
-    void CreateBoundRecGround(const sf::Vector2f position);
-    void CreateBoundRecObstacle(const std::shared_ptr<Obstacle> obstacle);
     std::vector<Tile>& GetAllTiles();
     int GenerateDefaultTiles();
-    void PlaceObstacles();
-    void UpdateObstacle(float dt);
-    void UpdateBoundingRecObstacle();
+    sf::Sprite CreateTile(TextureLoader::TextureType type, int coordX, int coordY, int x, int y, int globalPositionX);
+    void CreateBoundRec(Tile::Tile_Type type, sf::Vector2f position, const std::shared_ptr<Obstacle> &obstacle = nullptr);
 
 private:
     const int GRID_WIDTH = 25;
@@ -46,10 +42,10 @@ private:
     const int BUFFER_COLUMNS = 10;
     const int TOTAL_GRID_WIDTH = GRID_WIDTH + BUFFER_COLUMNS;
 
+    ObstacleManager obstacleManager;
     std::vector<Tile> tilesGround;
     std::vector<Tile> tilesObstacle;
     std::vector<Tile> allTiles;
-    std::map<std::shared_ptr<Obstacle>, Tile> obstacles;
 
     std::vector<std::vector<int>> grid;
     using Pattern = std::vector<std::vector<int>>;
@@ -57,18 +53,12 @@ private:
     std::vector<sf::Sprite> tiles;
 
     std::shared_ptr<TextureLoader> txLoader;
-    sf::Sprite grassSprite;
-    sf::Sprite dirtSprite;
-
-    sf::Texture groundWithGrassTexture;
-    sf::Sprite groundWithGrassSprite;
 
     const std::shared_ptr<Player> player;
     const std::shared_ptr<Camera> camera;
     float previousPlayerX;
     float lastX_atTotalGridWidthPos = 0;
     float lastX_atGridWidthPos = 0;
-    int offsetBetweenTiles;
 
     bool hasShifted = false;
     int shiftCounter = 0;

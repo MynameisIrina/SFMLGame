@@ -6,13 +6,15 @@
 class Obstacle
 {
 public:
-    Obstacle(std::shared_ptr<TextureLoader> txLoaderRef);
-    void Initialize(sf::Vector2f startPosition, float speed, float minX, float maxX);
+
+    void Initialize(sf::Sprite sprite, sf::Vector2f startPosition, float speed, float minX, float maxX);
     void Draw(std::shared_ptr<sf::RenderTarget> rt) const;
+    void MoveObstacles(float dt);
     void MoveObstacle(float dt);
     void UpdateTexture();
     sf::Vector2f GetPosition() const;
     sf::Sprite GetSprite() const;
+    sf::RectangleShape CreateBoundingRec();
 
 private:
     std::shared_ptr<TextureLoader> txLoader;

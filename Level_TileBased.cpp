@@ -1,65 +1,21 @@
 #include <iostream>
 #include "Level_TileBased.h"
 
-Level_TileBased::Level_TileBased(const std::shared_ptr<Player> pl, const std::shared_ptr<Camera> cam, std::shared_ptr<TextureLoader> txLoaderRef)
-    : player(pl),
-      previousPlayerX(pl->GetPosition().x),
-      camera(cam),
-      txLoader(txLoaderRef)
+Level_TileBased::Level_TileBased(const std::shared_ptr<Camera> cam, std::shared_ptr<TextureLoader> txLoaderRef)
+    : camera(cam),
+      txLoader(txLoaderRef),
+      obstacleManager(txLoaderRef)
 {
 }
 
 void Level_TileBased::Initialize()
 {
-    grid.resize(GRID_HEIGHT, std::vector<int>(TOTAL_GRID_WIDTH, 0));
+    grid.resize(GRID_HEIGHT, std::vector<int>(TOTAL_GRID_WIDTH, static_cast<int>(Tile::Tile_Type::Empty)));
     patterns = {defaultPattern, pattern1, pattern2, pattern3, pattern4, pattern5};
-
-    grassSprite = txLoader->SetSprite(TextureLoader::TextureType::Tile_Grass);
-    dirtSprite = txLoader->SetSprite(TextureLoader::TextureType::Tile_Dirt);
 
     int initialWidthPattern = GenerateDefaultTiles();
     GenerateLevel(initialWidthPattern);
     ShowGrid();
-}
-
-void Level_TileBased::PlaceObstacles()
-{
-
-    for (int y = 0; y < GRID_HEIGHT - 1; ++y)
-    {
-        for (int x = GRID_WIDTH; x < TOTAL_GRID_WIDTH - 1; ++x)
-        {
-            // Check if the current cell is empty and the cell below is ground
-            bool noTileCurrent = grid[y][x] == 0;
-            bool threeConsecutiveTilesUnderneath = ((grid[y + 1][x] == 2) && (grid[y + 1][x + 1] == 2) && (grid[y + 1][x - 1] == 2));
-            bool noTilesAlongPath = (grid[y][x + 1] == 0 && grid[y][x - 1] == 0);
-            if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath)
-            {
-                float globalTileX = lastX_atGridWidthPos + (x - GRID_WIDTH) * TILE_SIZE;
-                // Randomly decide to place an obstacle
-                if (rand() % 2 == 0)
-                {
-                    grid[y][x] = 3;
-
-                    std::shared_ptr<Obstacle> obstacle = std::make_shared<Obstacle>(txLoader);
-                    obstacle->Initialize({globalTileX, static_cast<float>(y * TILE_SIZE)}, 50.0f, globalTileX - TILE_SIZE, globalTileX + TILE_SIZE);
-                    sf::Sprite obstacleSprite = obstacle->GetSprite();
-                    CreateBoundRecObstacle(obstacle);
-                }
-            }
-        }
-    }
-}
-
-void Level_TileBased::UpdateObstacle(float dt)
-{
-    for (auto &obstacle : obstacles)
-    {
-        obstacle.first->MoveObstacle(dt);
-        obstacle.first->UpdateTexture();
-        Tile::TileData &tileData = obstacle.second.tileData;
-        tileData.shape.setPosition(obstacle.first->GetPosition());
-    }
 }
 
 int Level_TileBased::GenerateDefaultTiles()
@@ -130,10 +86,10 @@ void Level_TileBased::GenerateLevel(int startX)
     prevYFromLevelGen = currY;
 
     CheckGround(startX, startingPositionX);
-    PlaceObstacles();
+    obstacleManager.SpawnObstacles(grid, GRID_HEIGHT, GRID_WIDTH, TOTAL_GRID_WIDTH, lastX_atGridWidthPos, TILE_SIZE);
 }
 
-void Level_TileBased::UpdateLevel(float dt, bool respawn)
+void Level_TileBased::UpdateLevel(const std::shared_ptr<Player> player, float dt, bool respawn)
 {
     // This helps us track when the player has moved a full tile
     int playerPosInGameUnits = (int)(player->GetPosition().x) % TILE_SIZE;
@@ -155,13 +111,10 @@ void Level_TileBased::UpdateLevel(float dt, bool respawn)
     if (shiftCounter == BUFFER_COLUMNS && playerHasReturned)
     {
         shiftCounter = 0;
-        GenerateLevel(GRID_WIDTH + offsetBetweenTiles);
+        GenerateLevel(GRID_WIDTH);
     }
 
-    if (obstacles.size() > 0)
-    {
-        UpdateObstacle(dt);
-    }
+    obstacleManager.MoveObstacles(dt);
 }
 
 void Level_TileBased::PlacePattern(int patternIndex, int currentX, int currentY)
@@ -191,7 +144,7 @@ void Level_TileBased::PlacePattern(int patternIndex, int currentX, int currentY)
 
 void Level_TileBased::CheckGround(int curX, float v)
 {
-    int globalTileX;
+    int globalPositionX;
     for (int y = 0; y < GRID_HEIGHT; ++y)
     {
         for (int x = curX; x < TOTAL_GRID_WIDTH; ++x)
@@ -199,45 +152,47 @@ void Level_TileBased::CheckGround(int curX, float v)
             if (grid[y][x] == 1)
             {
                 // Calculate the global X position for the tile to render it in the correct screen location
-                globalTileX = v + (x - curX) * TILE_SIZE;
+                globalPositionX = v + (x - curX) * TILE_SIZE;
 
                 // differentiate between top of the ground and underground to render different sprites
                 bool nothingAbove = grid[y - 1][x] == 0;
                 if (y - 1 >= 0 && nothingAbove || y == 0)
                 {
-                    grid[y][x] = 2;
-                    sf::Sprite grassTile(txLoader->GetTexture(TextureLoader::Tile_Grass));
-                    grassTile.setTextureRect(sf::IntRect(TextureLoader::grassX * TILE_SIZE, TextureLoader::grassY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
-                    grassTile.setPosition(globalTileX, y * TILE_SIZE);
-                    tiles.push_back(grassTile);
-                    CreateBoundRecGround(grassTile.getPosition());
+                    grid[y][x] = static_cast<int>(Tile::Tile_Type::Grass);
+                    sf::Sprite newTile = CreateTile(TextureLoader::TextureType::Tile_Grass, TextureLoader::grassX, TextureLoader::grassY, x, y, globalPositionX);
+                    CreateBoundRec(Tile::Tile_Type::Grass, newTile.getPosition());
                 }
                 else if (y - 1 >= 0 && !nothingAbove)
                 {
-                    grid[y][x] = 1;
-                    sf::Sprite dirtTile(txLoader->GetTexture(TextureLoader::Tile_Dirt));
-                    dirtTile.setTextureRect(sf::IntRect(TextureLoader::groundX * TILE_SIZE, TextureLoader::groundY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
-                    dirtTile.setPosition(globalTileX, y * TILE_SIZE);
-                    tiles.push_back(dirtTile);
-                    CreateBoundRecGround(dirtTile.getPosition());
+                    grid[y][x] = static_cast<int>(Tile::Tile_Type::Dirt);
+                    sf::Sprite newTile = CreateTile(TextureLoader::TextureType::Tile_Dirt, TextureLoader::groundX, TextureLoader::groundY, x, y, globalPositionX);
+                    CreateBoundRec(Tile::Tile_Type::Dirt, newTile.getPosition());
                 }
 
                 // Track the global X-coordinate of the farthest tile generated
                 // This ensures that new tiles can be generated starting from this position (starting at total grid width)
-                if (globalTileX > lastX_atTotalGridWidthPos)
+                if (globalPositionX > lastX_atTotalGridWidthPos)
                 {
-                    lastX_atTotalGridWidthPos = globalTileX;
+                    lastX_atTotalGridWidthPos = globalPositionX;
                 }
 
                 // This ensures that obstacles can be generated starting from this position (starting at grid width)
-                if(x <= GRID_WIDTH && globalTileX > lastX_atGridWidthPos)
+                if (x <= GRID_WIDTH && globalPositionX > lastX_atGridWidthPos)
                 {
-                    lastX_atGridWidthPos = globalTileX;
+                    lastX_atGridWidthPos = globalPositionX;
                 }
             }
         }
     }
+}
 
+sf::Sprite Level_TileBased::CreateTile(TextureLoader::TextureType type, int coordX, int coordY, int x, int y, int globalPositionX)
+{
+    sf::Sprite tile(txLoader->GetTexture(type));
+    tile.setTextureRect(sf::IntRect(coordX * TILE_SIZE, coordY * TILE_SIZE, TILE_SIZE, TILE_SIZE));
+    tile.setPosition(globalPositionX, y * TILE_SIZE);
+    tiles.push_back(tile);
+    return tile;
 }
 
 void Level_TileBased::ShiftGridLeft()
@@ -250,7 +205,8 @@ void Level_TileBased::ShiftGridLeft()
             {
                 grid[y][x] = grid[y][x + 1];
             }
-            grid[y][TOTAL_GRID_WIDTH - 1] = 0;
+            grid[y][TOTAL_GRID_WIDTH - 1] = static_cast<int>(Tile::Tile_Type::Empty);
+            ;
         }
 
         shiftCounter++;
@@ -259,7 +215,7 @@ void Level_TileBased::ShiftGridLeft()
     }
 }
 
-void Level_TileBased::CreateBoundRecGround(const sf::Vector2f position)
+void Level_TileBased::CreateBoundRec(Tile::Tile_Type type, sf::Vector2f position, const std::shared_ptr<Obstacle> &obstacle)
 {
     sf::RectangleShape boundingRec;
     boundingRec.setSize(sf::Vector2f(32, 32));
@@ -267,19 +223,8 @@ void Level_TileBased::CreateBoundRecGround(const sf::Vector2f position)
     boundingRec.setOutlineColor(sf::Color::Blue);
     boundingRec.setOutlineThickness(1);
     boundingRec.setPosition(position);
-    tilesGround.push_back(Tile(Tile::Ground, boundingRec));
-    allTiles.push_back(Tile(Tile::Ground, boundingRec));
-}
-
-void Level_TileBased::CreateBoundRecObstacle(const std::shared_ptr<Obstacle> obstacle)
-{
-    sf::RectangleShape boundingRec;
-    boundingRec.setSize(sf::Vector2f(32, 32));
-    boundingRec.setFillColor(sf::Color::Transparent);
-    boundingRec.setOutlineColor(sf::Color::Red);
-    boundingRec.setOutlineThickness(1);
-    boundingRec.setPosition(obstacle->GetPosition());
-    obstacles.insert(std::make_pair(obstacle, Tile(Tile::Obstacle, boundingRec)));
+    tilesGround.push_back(Tile(Tile::Dirt, boundingRec));
+    allTiles.push_back(Tile(Tile::Dirt, boundingRec));
 }
 
 void Level_TileBased::ShowGrid() const
@@ -304,10 +249,11 @@ std::vector<Tile> &Level_TileBased::GetAllTiles()
         allTiles.push_back(ground);
     }
 
-    for (auto &obstacle : obstacles)
+    for (auto &obstacle : obstacleManager.GetObstacles())
     {
         allTiles.push_back(obstacle.second);
     }
+
 
     if (allTiles.size() > 0)
     {
@@ -325,22 +271,11 @@ void Level_TileBased::Draw(const std::shared_ptr<sf::RenderWindow> window) const
         window->draw(tile);
     }
 
-    for (auto &obstacle : obstacles)
-    {
-        sf::Sprite sprite = obstacle.first->GetSprite();
-        Tile::TileData tileData = obstacle.second.tileData;
-        window->draw(sprite);
-        window->draw(tileData.shape);
-    }
-
     for (const Tile &tile : tilesGround)
     {
 
         window->draw(tile.tileData.shape);
     }
 
-    for (const Tile &tile : tilesObstacle)
-    {
-        window->draw(tile.tileData.shape);
-    }
+    obstacleManager.Draw(window);
 }

@@ -30,14 +30,15 @@ int main()
 
     std::shared_ptr<HealthBar> healthBar = std::make_shared<HealthBar>(txLoader, camera);
 
+    Level_TileBased level_tile(camera, txLoader);
+
+    Background background(txLoader);
+
+
     camera->Initialize();
-    healthBar->Initialize(6);
-    player->Initialize(sf::Vector2f(35.f, 20.f), healthBar);
-
-    Level_TileBased level_tile(player, camera, txLoader);
+    player->Initialize(sf::Vector2f(35.f, 20.f), 6);
+    healthBar->Initialize(player);
     level_tile.Initialize();
-
-    Background background(player, txLoader);
     background.Initialize(window);
     
 
@@ -62,19 +63,14 @@ int main()
         bool jumped = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
         bool respawn = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
 
-        background.GenerateNewSprite();
+        background.GenerateNewSprite(player);
         float leftBound = camera->CalculateLeftBound();
         std::vector<Tile>& tiles = level_tile.GetAllTiles();
         player->Jump(jumped, deltaTime);
-        player->Update(moveRight, moveLeft, leftBound, deltaTime, tiles, healthBar);
+        player->Update(moveRight, moveLeft, leftBound, respawn, deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
         // Flag to ensure respawn happens only once per key press
         static bool respawnPressed = false;
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::P))
-        {
-            healthBar->GainLife();
-        }
 
         if(respawn && !respawnPressed)
         {
@@ -86,10 +82,10 @@ int main()
             respawnPressed = false;
         }
         
-        level_tile.UpdateLevel(deltaTime, respawn);
+        level_tile.UpdateLevel(player, deltaTime, respawn);
 
-        camera->Update(player, moveLeft, respawn);
-        healthBar->Update(camera);
+        camera->Update(player);
+        healthBar->Update(camera, player);
 
         // ----------------- UPDATE----------------
 

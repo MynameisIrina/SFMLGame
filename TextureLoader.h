@@ -32,7 +32,6 @@ public:
 
     void Initialize();
     sf::Texture& GetTexture(TextureType type);
-    //sf::Sprite& GetSprite(TextureType type);
     sf::Sprite SetSprite(TextureType type);
 
 private:

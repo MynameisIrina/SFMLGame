@@ -7,8 +7,10 @@ public:
 
     enum Tile_Type
     {
-        Ground,
-        Obstacle
+        Empty = 0,
+        Dirt = 1,
+        Grass = 2,
+        Obstacle = 3
     };
 
     struct TileData

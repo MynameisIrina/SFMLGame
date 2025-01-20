@@ -10,12 +10,11 @@ private:
     const std::shared_ptr<Player> player;
     std::shared_ptr<sf::RenderWindow> window;
     float viewThreshold;
-    bool isCameraFollowing;
 
 public:
     Camera(std::shared_ptr<sf::RenderWindow> window);
     void Initialize();
-    void Update(const std::shared_ptr<Player> player, bool moveLeft, bool respawn);
+    void Update(const std::shared_ptr<Player> player);
     sf::View GetView() const;
     int CalculateLeftBound() const;
 };

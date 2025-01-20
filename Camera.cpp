@@ -7,32 +7,20 @@ void Camera::Initialize()
 {
     view.setSize(window->getSize().x, window->getSize().y);
     view.setCenter(window->getSize().x / 2, window->getSize().y / 2);
-    bool isCameraFollowing = false;
 }
 
-void Camera::Update(const std::shared_ptr<Player> player, bool moveLeft, bool respawn)
+void Camera::Update(const std::shared_ptr<Player> player)
 {
     sf::Vector2f playerPosition = player->GetPosition();
-    float viewThreshold = view.getCenter().x;
+    const float viewThreshold = view.getCenter().x;
 
-    if (respawn)
+    if (player->IsRespawn())
     {
         view.setCenter(window->getSize().x / 2, window->getSize().y / 2);
-        isCameraFollowing = false;
     }
     else
     {
-        if (playerPosition.x >= viewThreshold)
-        {
-            isCameraFollowing = true;
-        }
-
-        if (moveLeft)
-        {
-            isCameraFollowing = false;
-        }
-
-        if (isCameraFollowing)
+        if (playerPosition.x >= viewThreshold && !player->IsMoveLeft())
         {
             view.setCenter(playerPosition.x, view.getSize().y / 2);
         }

@@ -1,14 +1,20 @@
 #include "HealthBar.h"
 #include <iostream>
+#include "Player.h"
 
-HealthBar::HealthBar(std::shared_ptr<TextureLoader> txLoaderRef, std::shared_ptr<Camera> cam) : txLoader(txLoaderRef), camera(cam)
+std::shared_ptr<TextureLoader> HealthBar::txLoader = nullptr; 
+
+HealthBar::HealthBar(std::shared_ptr<TextureLoader> txLoaderRef, std::shared_ptr<Camera> cam) : camera(cam)
 {
+    txLoader = txLoaderRef;
 }
 
-void HealthBar::Initialize(int amount)
+void HealthBar::Initialize(const std::shared_ptr<Player> player)
 {
     sf::Sprite sprite = txLoader->SetSprite(TextureLoader::TextureType::HealthBar);
-    for (int i = 0; i < amount; i++)
+
+    hearts.reserve(player->GetMaxHealth());
+    for (int i = 0; i < player->GetMaxHealth(); i++)
     {
         sprite.setScale(scale, scale);
         sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX, offsetY);
@@ -26,17 +32,30 @@ void HealthBar::Draw(const std::shared_ptr<sf::RenderTarget> rt) const
     }
 }
 
-void HealthBar::Update(const std::shared_ptr<Camera> cam)
+void HealthBar::Update(const std::shared_ptr<Camera> cam, const std::shared_ptr<Player> player)
 {
+    int currentHealth = player->GetHealth();
+
     for (int i = 0; i < hearts.size(); i++)
     {
+        // update position
         sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX + (i * 32), offsetY);
         hearts[i].position = position;
+
+        if(i < currentHealth)
+        {
+            hearts[i].isActive = true;
+            hearts[i].sprite.setColor(sf::Color(255,255,255, 255));
+        }
+        else
+        {
+            hearts[i].isActive = false;
+            hearts[i].sprite.setColor(sf::Color(255,255,255, 0));
+        }
+
     }
 
-    
 
-    
     UpdateView();
 }
 
@@ -47,32 +66,4 @@ void HealthBar::UpdateView()
         sf::Vector2f position = heart.position;
         heart.sprite.setPosition(position);
     }
-}
-
-void HealthBar::LoseLife()
-{
-    for(int i = hearts.size() - 1; i >= 0; i--)
-    {
-        if(hearts[i].isActive)
-        {
-            hearts[i].isActive = false;
-            hearts[i].sprite.setColor(sf::Color(255,255,255, 0));
-            break;
-        }
-    }
-
-}
-
-void HealthBar::GainLife()
-{
-    for(int i = 0; i < hearts.size(); i++)
-    {
-        if(!hearts[i].isActive)
-        {
-            hearts[i].isActive = true;
-            hearts[i].sprite.setColor(sf::Color(255,255,255, 255));
-            break;
-        }
-    }
-
 }

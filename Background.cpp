@@ -2,7 +2,12 @@
 #include <iostream>
 #include <list>
 
-Background::Background(const std::shared_ptr<Player> pl, std::shared_ptr<TextureLoader> txLoaderRef) : player(pl), txLoader(txLoaderRef) {}
+std::shared_ptr<TextureLoader> Background::txLoader = nullptr; 
+
+Background::Background(std::shared_ptr<TextureLoader> txLoaderRef)
+{
+    txLoader = txLoaderRef;
+}
 
 void Background::Initialize(const std::shared_ptr<sf::RenderWindow> window)
 {
@@ -11,32 +16,30 @@ void Background::Initialize(const std::shared_ptr<sf::RenderWindow> window)
     scaleX = (float)windowSize.x / textureSize.x;
     scaleY = (float)windowSize.y / textureSize.y;
 
-    sprite1 = txLoader->SetSprite(TextureLoader::TextureType::Background);
-    sprite1.setScale(scaleX, scaleY);
-    sprite1.setPosition(0, 0);
-    spriteList.push_back(sprite1);
-
-    sprite2 = txLoader->SetSprite(TextureLoader::TextureType::Background);
-    sprite2.setScale(scaleX, scaleY);
-    sprite2.setPosition(windowSize.x, 0);
-    spriteList.push_back(sprite2);
+    AddNewBackgroundSprite(0);
+    AddNewBackgroundSprite(windowSize.x);
 }
 
-void Background::GenerateNewSprite()
+
+void Background::GenerateNewSprite(const std::shared_ptr<Player> player)
 {
     sf::Vector2f playerPosition = player->GetPosition();
     
-
     if (playerPosition.x > spriteList.back().getPosition().x)
     {
-        sf::Sprite newSprite;
-        newSprite.setTexture(txLoader->GetTexture(TextureLoader::Background));
-        newSprite.setScale(scaleX, scaleY);
-        newSprite.setPosition(spriteList.back().getPosition().x + windowSize.x, 0);
-        spriteList.push_back(newSprite);
+        AddNewBackgroundSprite(spriteList.back().getPosition().x + windowSize.x);
     }
 
 }
+
+void Background::AddNewBackgroundSprite(float positionX)
+{
+    sf::Sprite newSprite = txLoader->SetSprite(TextureLoader::TextureType::Background);;
+    newSprite.setScale(scaleX, scaleY);
+    newSprite.setPosition(positionX, 0);
+    spriteList.push_back(newSprite);
+}
+
 
 void Background::Draw(std::shared_ptr<sf::RenderTarget> rt) const
 {
