@@ -36,7 +36,7 @@ int main()
 
 
     camera->Initialize();
-    player->Initialize(sf::Vector2f(35.f, 20.f), 6);
+    player->Initialize(sf::Vector2f(35.f, 20.f), 6, 2.5f);
     healthBar->Initialize(player);
     level_tile.Initialize();
     background.Initialize(window);

@@ -21,7 +21,6 @@ public:
         groundY = 10,
         grassX = 2,
         grassY = 8,
-        tileSize = 32,
         playerX = 0,
         playerY = 4,
         obstacleX = 27,

@@ -8,23 +8,25 @@ Player::Player(std::shared_ptr<TextureLoader> txLoaderRef)
     txLoader = txLoaderRef;
 }
 
-void Player::Initialize(const sf::Vector2f &pos, int maxHealthRef)
+void Player::Initialize(const sf::Vector2f pos, int maxHealthRef, float scale)
 {
     position = pos;
     maxHealth = maxHealthRef;
+    this->scale = scale;
     health = maxHealth;
     condition = Normal;
 
-    boundingRecPlayer.setSize(sf::Vector2f(30, 40));
-    boundingRecPlayer.setFillColor(sf::Color::Transparent);
-    boundingRecPlayer.setOutlineColor(sf::Color::Red);
-    boundingRecPlayer.setOutlineThickness(1);
 
     sprite = txLoader->SetSprite(TextureLoader::TextureType::Player);
 
+    sprite.setScale(scale, scale);
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
-    sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
     sprite.setPosition(pos);
+
+    boundingRecPlayer.setSize(sf::Vector2f(sprite.getLocalBounds().width, sprite.getLocalBounds().height));
+    boundingRecPlayer.setFillColor(sf::Color::Transparent);
+    boundingRecPlayer.setOutlineColor(sf::Color::Red);
+    boundingRecPlayer.setOutlineThickness(1);
 }
 
 void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &boundRecs)
@@ -229,7 +231,7 @@ void Player::Respawn()
         respawn = true;
         position = respawnPos;
         velocity.y = 0;
-        sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
+        sprite.setScale(scale, scale);
         atRespawnPos = true;
     }
     else
@@ -242,12 +244,12 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
 {
     if (moveRight)
     {
-        sprite.setScale(AnimationPlayer::SCALE, AnimationPlayer::SCALE);
+        sprite.setScale(scale, scale);
         sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
     }
     else if (moveLeft)
     {
-        sprite.setScale(-1 * AnimationPlayer::SCALE, AnimationPlayer::SCALE);
+        sprite.setScale(-scale, scale);
         sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
     }
 

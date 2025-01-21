@@ -36,6 +36,7 @@ private:
     sf::Vector2f respawnPos = sf::Vector2f(35.f, 20.f);
     sf::Vector2f maxPosition = sf::Vector2f(35.f, 20.f);
     sf::Vector2f position;
+    float scale;
     PlayerCondition condition;
     sf::Clock loseLifeCooldown;
 
@@ -71,7 +72,7 @@ public:
     Player(std::shared_ptr<TextureLoader> txLoaderRef);
 
     // Initialization
-    void Initialize(const sf::Vector2f &pos, int maxHealthRef);
+    void Initialize(const sf::Vector2f pos, int maxHealthRef, float scale);
 
     // Update
     void Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &boundRecs);
