@@ -50,13 +50,14 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<int>> &grid
 void ObstacleManager::PlaceObstacle(std::vector<std::vector<int>> &grid, int gridWidth, int lastX_atGridWidthPos, int tileSize, int currX, int currY)
 {
     float globalTileX = lastX_atGridWidthPos + (currX - gridWidth) * tileSize;
-    if (rand() % 2 == 0)
+    if (rand() % OBSTACLE_PROBABILITY == 0)
     {
         grid[currY][currX] = static_cast<int>(Tile::Tile_Type::Obstacle);
         std::shared_ptr<Obstacle> obstacle = std::make_shared<Obstacle>();
-        obstacle->Initialize(sprite, { globalTileX, static_cast<float>(currY * tileSize)}, 50.0f, globalTileX - tileSize, globalTileX + tileSize);
+        float speed = std::clamp(rand() % MAX_SPEED, MIN_SPEED, MAX_SPEED);
+        obstacle->Initialize(sprite, { globalTileX + sprite.getGlobalBounds().width / 2 , static_cast<float>(currY * tileSize + sprite.getGlobalBounds().height / 2)}, speed, globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2);
         sf::RectangleShape boundRec = obstacle->CreateBoundingRec();
-        obstacles.insert(std::make_pair(obstacle, Tile(Tile::Obstacle, boundRec)));
+        obstacles.emplace(std::make_pair(obstacle, Tile(Tile::Obstacle, boundRec)));
     }
 }
 

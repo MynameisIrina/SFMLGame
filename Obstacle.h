@@ -7,7 +7,7 @@ class Obstacle
 {
 public:
 
-    void Initialize(sf::Sprite sprite, sf::Vector2f startPosition, float speed, float minX, float maxX);
+    void Initialize(sf::Sprite& sprite, sf::Vector2f startPosition, float speed, float minX, float maxX);
     void Draw(std::shared_ptr<sf::RenderTarget> rt) const;
     void MoveObstacles(float dt);
     void MoveObstacle(float dt);
@@ -20,7 +20,9 @@ private:
     std::shared_ptr<TextureLoader> txLoader;
     sf::Sprite sprite;
     sf::Vector2f position;
-    float speed = 50.f;
+    float rotation;
+    float speed;
+    float rotationSpeed = 0.1f;
     bool movingForward = true;;
     float maxX;
     float minX;
