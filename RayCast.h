@@ -24,6 +24,6 @@ class RayCast
 
     };
 
-    static std::optional<RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, std::vector<Tile> platforms);
+    static std::optional<RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, std::vector<Tile>& platforms);
 
 };

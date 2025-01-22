@@ -17,12 +17,6 @@ public:
         Dead
     };
 
-    enum MotionState
-    {
-        Moving,
-        Stopped
-    };
-
 private:
     // Private data
     static std::shared_ptr<TextureLoader> txLoader;
@@ -39,32 +33,39 @@ private:
     float scale;
     PlayerCondition condition;
     sf::Clock loseLifeCooldown;
+    sf::Clock respawnTimer;
+    PlayerCondition currentState;
 
-    // Static constants
-    static constexpr float epsilon = 3.0f;
-    static constexpr float horizontalVelocity = 100.0f;
-    static constexpr float speed = 0.05f;
-    static constexpr float gravity = 600.f;
-    static constexpr float animationInterval = 0.1f;
-    static constexpr float loseLifeDelay = 1.0f;
+    // const variables
+    const float epsilon = 3.0f;
+    const float horizontalVelocity = 100.0f;
+    const float speed = 0.05f;
+    const float gravity = 600.f;
+    const float rebirth_animation_duration = 0.8f;
+    const float rebirth_animation_interval = 0.1f;
+    const int max_frames = 8;
+    float animationInterval = 0.1f;
+    const float loseLifeDelay = 1.0f;
 
     // Flags
     bool isJumping = false;
     bool collisionGround = false;
     bool collisionSide = false;
     bool collisionTop = false;
-    bool stopped = true;
+    bool stopped = false;
     bool respawn = false;
-    bool moveRight;
-    bool moveLeft;
+    bool moveRight = false;
+    bool moveLeft = false;
     bool atRespawnPos = false;
     bool collisionObstacle = false;
+    bool isRespawnTimerRestarted = false;
 
     // Animation
     float animationTimer = 0.f;
+    float rebornAnimationTimer = 0.f;
 
     // Health
-    int health = 0; 
+    int health = 0;
     int maxHealth = 0;
 
 public:
@@ -72,7 +73,7 @@ public:
     Player(std::shared_ptr<TextureLoader> txLoaderRef);
 
     // Initialization
-    void Initialize(const sf::Vector2f pos, int maxHealthRef, float scale);
+    void Initialize(sf::Vector2f pos, int maxHealthRef, float scale);
 
     // Update
     void Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &boundRecs);
@@ -94,13 +95,14 @@ public:
 
     // Respawn
     void Respawn();
+    void HandleRespawn(bool respawn);
 
     // Health
-    void IncreaseHealth();  // Increase health
-    void DecreaseHealth();  // Decrease health
-    int GetHealth() const;  // Get current health
-    int GetMaxHealth() const;  // Get max health
-    bool IsPlayerProtected();  // Check if the player is protected
+    void IncreaseHealth();    // Increase health
+    void DecreaseHealth();    // Decrease health
+    int GetHealth() const;    // Get current health
+    int GetMaxHealth() const; // Get max health
+    bool IsPlayerProtected(); // Check if the player is protected
 
     // Other
     void Draw(const std::shared_ptr<sf::RenderTarget> rt);
@@ -113,6 +115,6 @@ public:
     static void DrawRay(std::shared_ptr<sf::RenderTarget> window, const sf::Vector2f &start, const sf::Vector2f &end, sf::Color color = sf::Color::Red);
 
     // Health management methods
-    void LoseLife();   // Lose a life
-    void GainLife();   // Gain a life
+    void LoseLife(); // Lose a life
+    void GainLife(); // Gain a life
 };

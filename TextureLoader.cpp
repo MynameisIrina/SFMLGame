@@ -51,6 +51,14 @@ void TextureLoader::Initialize()
     }
     textures[HealthBar] = healthBarTex;
     textureCoordinates[HealthBar] = sf::IntRect(SpriteCoordinates::HealthBarX * 16, SpriteCoordinates::HealthBarY * 16, 16, 16);
+
+    sf::Texture enemyTex;
+    if (!enemyTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Enemy.png"))
+    {
+        throw std::runtime_error("Failed to load enemy texture");
+    }
+    textures[Enemy] = enemyTex;
+    textureCoordinates[Enemy] = sf::IntRect(SpriteCoordinates::EnemyX * 125, SpriteCoordinates::EnemyY * 125, 125, 125);
 }
 
 sf::Texture& TextureLoader::GetTexture(TextureType type)

@@ -12,7 +12,8 @@ public:
         Player,
         Background,
         Obstacle,
-        HealthBar
+        HealthBar,
+        Enemy
     };
 
     enum SpriteCoordinates
@@ -26,7 +27,9 @@ public:
         obstacleX = 27,
         obstacleY = 3,
         HealthBarX = 0,
-        HealthBarY = 0
+        HealthBarY = 0,
+        EnemyX = 0,
+        EnemyY = 0
     };
 
     void Initialize();

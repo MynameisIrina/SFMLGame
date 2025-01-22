@@ -41,8 +41,8 @@ void Obstacle::MoveObstacle(float dt)
 void Obstacle::UpdateTexture()
 {
     sprite.setPosition(position);
+    boundingRec.setPosition(position);
     sprite.setRotation(rotation);
-    
 }
 
 sf::Vector2f Obstacle::GetPosition() const
@@ -58,12 +58,16 @@ sf::Sprite Obstacle::GetSprite() const
 
 sf::RectangleShape Obstacle::CreateBoundingRec()
 {
-    sf::RectangleShape boundingRec;
     boundingRec.setSize(sf::Vector2f(32, 32));
     boundingRec.setFillColor(sf::Color::Transparent);
     boundingRec.setOutlineColor(sf::Color::Blue);
     boundingRec.setOutlineThickness(1);
     boundingRec.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
     boundingRec.setPosition(position);
+    return boundingRec;
+}
+
+sf::RectangleShape Obstacle::GetBoundingRec()
+{
     return boundingRec;
 }

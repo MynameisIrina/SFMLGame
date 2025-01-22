@@ -6,6 +6,7 @@
 #include "TextureLoader.h"
 #include "ObstacleManager.h"
 #include "Tile.h"
+#include "EnemyManager.h"
 
 class Level_TileBased
 {
@@ -32,8 +33,8 @@ public:
     int FindRightmostTileX();
     std::vector<Tile>& GetAllTiles();
     int GenerateDefaultTiles();
-    sf::Sprite CreateTile(TextureLoader::TextureType type, int coordX, int coordY, int x, int y, int globalPositionX);
-    void CreateBoundRec(Tile::Tile_Type type, sf::Vector2f position, const std::shared_ptr<Obstacle> &obstacle = nullptr);
+    sf::Sprite CreateSprite(TextureLoader::TextureType type, int coordX, int coordY, int x, int y, int globalPositionX);
+    sf::RectangleShape CreateBoundRec(sf::Vector2f position);
 
 private:
     const int GRID_WIDTH = 25;
@@ -43,11 +44,13 @@ private:
     const int TOTAL_GRID_WIDTH = GRID_WIDTH + BUFFER_COLUMNS;
 
     ObstacleManager obstacleManager;
-    std::vector<Tile> tilesGround;
-    std::vector<Tile> tilesObstacle;
+    EnemyManager enemyManager;
     std::vector<Tile> allTiles;
+    //std::vector<Tile> tilesGround;
+    //std::vector<Tile> tilesObstacle;
+    //std::vector<Tile> allTiles;
 
-    std::vector<std::vector<int>> grid;
+    std::vector<std::vector<Tile>> grid;
     using Pattern = std::vector<std::vector<int>>;
     std::vector<Pattern> patterns;
     std::vector<sf::Sprite> tiles;
@@ -125,6 +128,14 @@ private:
         {0, 0, 1, 1},
         {0, 1, 1, 1},
         {1, 1, 1, 1}};
+
+    Pattern pattern15 = {
+        {0, 1, 1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1, 1, 1}};
+
+    Pattern pattern16 = {
+        {1, 1, 1, 0, 1, 1, 0},
+        {1, 1, 1, 1, 1, 1, 1}};
 
 
 };

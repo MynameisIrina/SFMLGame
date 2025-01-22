@@ -1,7 +1,7 @@
 #include "ObstacleManager.h"
 #include "Level_TileBased.h"
 
-std::shared_ptr<TextureLoader> ObstacleManager::txLoader = nullptr; 
+std::shared_ptr<TextureLoader> ObstacleManager::txLoader = nullptr;
 
 ObstacleManager::ObstacleManager(std::shared_ptr<TextureLoader> txLoaderRef)
 {
@@ -13,32 +13,35 @@ void ObstacleManager::MoveObstacles(float dt)
 {
     for (auto &obstacle : obstacles)
     {
-        obstacle.first->MoveObstacle(dt);
-        obstacle.first->UpdateTexture();
-        obstacle.second.tileData.shape.setPosition(obstacle.first->GetPosition());
+        obstacle->MoveObstacle(dt);
+        obstacle->UpdateTexture();
     }
-
 }
 
-void ObstacleManager::SpawnObstacles(std::vector<std::vector<int>> &grid, int gridHeight, int gridWidth, int totalGridWidth, int lastX_atGridWidthPos, int tileSize)
+void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, int maxY, int minX, int maxX, int startX, int tileSize)
 {
-    for (int y = 0; y < gridHeight - 1; ++y)
+    for (int y = 0; y < maxY; ++y)
     {
-        for (int x = gridWidth; x < totalGridWidth - 1; ++x)
+        for (int x = minX; x < maxX ; ++x)
         {
-            if (CanPlaceObstacle(grid, x, y))
+            if (CanPlaceObstacle(grid, x, y, maxX, maxY))
             {
-                PlaceObstacle(grid, gridWidth, lastX_atGridWidthPos, tileSize, x, y);
+                PlaceObstacle(grid, minX, startX, tileSize, x, y);
             }
         }
     }
 }
 
-bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<int>> &grid, int currX, int currY)
+bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &grid, int x, int y, int maxX, int maxY)
 {
-    bool noTileCurrent = grid[currY][currX] == 0;
-    bool threeConsecutiveTilesUnderneath = ((grid[currY + 1][currX] == 2) && (grid[currY + 1][currX + 1] == 2) && (grid[currY + 1][currX - 1] == 2));
-    bool noTilesAlongPath = (grid[currY][currX + 1] == 0 && grid[currY][currX - 1] == 0);
+    if(y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0 )
+    {
+        return false;
+    }
+
+    bool noTileCurrent = grid[y][x].GetType() == Tile::Empty;
+    bool threeConsecutiveTilesUnderneath = ((grid[y + 1][x].GetType() == Tile::Grass) && (grid[y + 1][x + 1].GetType() == Tile::Grass) && (grid[y + 1][x - 1].GetType() == Tile::Grass));
+    bool noTilesAlongPath = (grid[y][x + 1].GetType() == Tile::Empty && grid[y][x- 1].GetType() == Tile::Empty);
 
     if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath)
     {
@@ -47,17 +50,18 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<int>> &grid
     return false;
 }
 
-void ObstacleManager::PlaceObstacle(std::vector<std::vector<int>> &grid, int gridWidth, int lastX_atGridWidthPos, int tileSize, int currX, int currY)
+void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, int minX, int startX, int tileSize, int x, int y)
 {
-    float globalTileX = lastX_atGridWidthPos + (currX - gridWidth) * tileSize;
+    float globalTileX = startX + (x - minX) * tileSize;
+
     if (rand() % OBSTACLE_PROBABILITY == 0)
     {
-        grid[currY][currX] = static_cast<int>(Tile::Tile_Type::Obstacle);
+        grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::RectangleShape());
         std::shared_ptr<Obstacle> obstacle = std::make_shared<Obstacle>();
         float speed = std::clamp(rand() % MAX_SPEED, MIN_SPEED, MAX_SPEED);
-        obstacle->Initialize(sprite, { globalTileX + sprite.getGlobalBounds().width / 2 , static_cast<float>(currY * tileSize + sprite.getGlobalBounds().height / 2)}, speed, globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2);
+        obstacle->Initialize(sprite, {globalTileX + sprite.getGlobalBounds().width / 2, static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2)}, speed, globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2);
         sf::RectangleShape boundRec = obstacle->CreateBoundingRec();
-        obstacles.emplace(std::make_pair(obstacle, Tile(Tile::Obstacle, boundRec)));
+        obstacles.push_back(obstacle);
     }
 }
 
@@ -65,12 +69,12 @@ void ObstacleManager::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {
     for (auto &obstacle : obstacles)
     {
-        window->draw(obstacle.first->GetSprite());
-        window->draw(obstacle.second.tileData.shape);
+        window->draw(obstacle->GetSprite());
+        window->draw(obstacle->GetBoundingRec());
     }
 }
 
-std::map<std::shared_ptr<Obstacle>, Tile> ObstacleManager::GetObstacles()
+std::vector<std::shared_ptr<Obstacle>> ObstacleManager::GetObstacles()
 {
     return obstacles;
 }

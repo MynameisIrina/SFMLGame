@@ -65,22 +65,22 @@ int main()
 
         background.GenerateNewSprite(player);
         float leftBound = camera->CalculateLeftBound();
-        std::vector<Tile>& tiles = level_tile.GetAllTiles();
+        std::vector<Tile> tiles = level_tile.GetAllTiles();
         player->Jump(jumped, deltaTime);
         player->Update(moveRight, moveLeft, leftBound, respawn, deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
         // Flag to ensure respawn happens only once per key press
         static bool respawnPressed = false;
 
-        if(respawn && !respawnPressed)
-        {
-            player->Respawn();
-            respawnPressed = true;
-        }
-        if(!respawn)
-        {
-            respawnPressed = false;
-        }
+        // if(respawn && !respawnPressed)
+        // {
+        //     player->Respawn();
+        //     respawnPressed = true;
+        // }
+        // if(!respawn)
+        // {
+        //     respawnPressed = false;
+        // }
         
         level_tile.UpdateLevel(player, deltaTime, respawn);
 

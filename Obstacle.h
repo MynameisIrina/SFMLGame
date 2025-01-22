@@ -15,9 +15,11 @@ public:
     sf::Vector2f GetPosition() const;
     sf::Sprite GetSprite() const;
     sf::RectangleShape CreateBoundingRec();
+    sf::RectangleShape GetBoundingRec();
 
 private:
     std::shared_ptr<TextureLoader> txLoader;
+    sf::RectangleShape boundingRec;
     sf::Sprite sprite;
     sf::Vector2f position;
     float rotation;
