@@ -1,17 +1,12 @@
 #include "Player.h"
 #include <iostream>
 
-std::shared_ptr<TextureLoader> Player::txLoader = nullptr;
+Player::Player(const std::shared_ptr<TextureLoader> &txLoader) : txLoader(txLoader) {}
 
-Player::Player(std::shared_ptr<TextureLoader> txLoaderRef)
+void Player::Initialize(sf::Vector2f position, int maxHealth, float scale)
 {
-    txLoader = txLoaderRef;
-}
-
-void Player::Initialize(sf::Vector2f pos, int maxHealthRef, float scale)
-{
-    position = pos;
-    maxHealth = maxHealthRef;
+    this->position = position;
+    this->maxHealth = maxHealth;
     this->scale = scale;
     health = maxHealth;
     condition = Normal;
@@ -20,15 +15,15 @@ void Player::Initialize(sf::Vector2f pos, int maxHealthRef, float scale)
 
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
     sprite.setScale(scale, scale);
-    sprite.setPosition(pos);
+    sprite.setPosition(position);
 
-    boundingRecPlayer.setSize(sf::Vector2f(sprite.getLocalBounds().width, sprite.getLocalBounds().height));
-    boundingRecPlayer.setFillColor(sf::Color::Transparent);
-    boundingRecPlayer.setOutlineColor(sf::Color::Red);
-    boundingRecPlayer.setOutlineThickness(1);
+    boundingBoxPlayer.setSize(sf::Vector2f(sprite.getLocalBounds().width, sprite.getLocalBounds().height));
+    boundingBoxPlayer.setFillColor(sf::Color::Transparent);
+    boundingBoxPlayer.setOutlineColor(sf::Color::Red);
+    boundingBoxPlayer.setOutlineThickness(1);
 }
 
-void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &boundRecs)
+void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles)
 {
     this->respawn = respawn;
     this->moveLeft = moveLeft;
@@ -39,8 +34,9 @@ void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn
     CalculateCurrAnimation(dt);
     HandleVerticalMovement(dt);
     HandleHorizontalMovement(dt, leftBound);
-    CheckCollisionGround(boundRecs);
-    CheckCollisionSide(boundRecs);
+    CheckCollisionGround(tiles);
+    CheckCollisionSide(tiles);
+    AddBlinking();
 }
 
 void Player::HandleFalling()
@@ -57,22 +53,16 @@ void Player::HandleHorizontalMovement(float dt, float leftBound)
 {
     if (moveRight)
     {
-        stopped = false;
         atRespawnPos = false;
         position.x += velocity.x * dt;
     }
     else if (moveLeft)
     {
-        stopped = false;
         atRespawnPos = false;
         if (position.x > leftBound + 27.f)
         {
             position.x -= velocity.x * dt;
         }
-    }
-    else
-    {
-        stopped = true;
     }
 
     if (collisionSide)
@@ -106,19 +96,19 @@ void Player::HandleVerticalMovement(float dt)
     position.y += velocity.y * dt;
 }
 
-void Player::CheckCollisionSide(std::vector<Tile> &platforms)
+void Player::CheckCollisionSide(const std::vector<Tile> &tiles)
 {
     collisionSide = false;
 
     bool isMovingRight = sprite.getScale().x > 0;
     float direction = isMovingRight ? 1.0f : -1.0f;
 
-    sf::Vector2f rayMiddle_Start = boundingRecPlayer.getPosition() + sf::Vector2f(boundingRecPlayer.getSize().x / 2, boundingRecPlayer.getSize().y / 2);
-    sf::Vector2f rayMiddle_End = rayMiddle_Start + sf::Vector2f(direction * boundingRecPlayer.getSize().x / 2 + epsilon, 0);
+    sf::Vector2f rayMiddle_Start = boundingBoxPlayer.getPosition() + sf::Vector2f(boundingBoxPlayer.getSize().x / 2, boundingBoxPlayer.getSize().y / 2);
+    sf::Vector2f rayMiddle_End = rayMiddle_Start + sf::Vector2f(direction * boundingBoxPlayer.getSize().x / 2 + epsilon, 0);
 
     ray = RayCast::Ray(rayMiddle_Start, rayMiddle_End);
 
-    auto hit = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, platforms);
+    auto hit = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, tiles);
 
     if (hit)
     {
@@ -127,21 +117,28 @@ void Player::CheckCollisionSide(std::vector<Tile> &platforms)
 
         if (!IsPlayerProtected() && hitInfo.typeTile == Tile::Obstacle)
         {
-            DecreaseHealth();
-            loseLifeCooldown.restart();
+            HandleObstacleCollision();
         }
 
         if (isMovingRight)
         {
-            position.x = hitInfo.hitRect.getGlobalBounds().left - (boundingRecPlayer.getGlobalBounds().width / 2 + epsilon) - epsilon;
+            position.x = hitInfo.hitRect.getGlobalBounds().left - (boundingBoxPlayer.getGlobalBounds().width / 2 + epsilon) - epsilon;
         }
         else
         {
-            position.x = hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width + (boundingRecPlayer.getGlobalBounds().width / 2 + epsilon) - epsilon;
+            position.x = hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width + (boundingBoxPlayer.getGlobalBounds().width / 2 + epsilon) - epsilon;
         }
 
         collisionSide = true;
     }
+}
+
+void Player::HandleObstacleCollision()
+{
+    isBlinking = true;
+    blinkingTimer.restart();
+    loseLifeCooldown.restart();
+    DecreaseHealth();
 }
 
 void Player::Jump(bool jump, float dt)
@@ -159,25 +156,55 @@ void Player::ResetAnimation(int animYIndex)
     sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 }
 
-void Player::CheckCollisionGround(std::vector<Tile> &platforms)
+void Player::AddBlinking()
+{
+    if (isBlinking)
+    {
+        if (IsPlayerProtected())
+        {
+            if (blinkingTimer.getElapsedTime().asSeconds() >= blinkingInterval)
+            {
+
+                if (isVisible)
+                {
+                    sprite.setColor(sf::Color(255, 255, 255, 0));
+                    isVisible = !isVisible;
+                }
+                else
+                {
+                    isVisible = !isVisible;
+                    sprite.setColor(sf::Color(255, 255, 255, 255));
+                }
+
+                blinkingTimer.restart();
+            }
+        }
+    }
+    else
+    {
+        isVisible = true;
+        sprite.setColor(sf::Color(255, 255, 255, 255));
+    }
+}
+
+void Player::CheckCollisionGround(const std::vector<Tile> &tiles)
 {
     collisionGround = false;
     collisionTop = false;
 
-    for (auto &platform : platforms)
+    for (auto &tile : tiles)
     {
-        sf::RectangleShape boundBox = platform.GetShape();
-        Tile::Tile_Type type = platform.GetType();
+        sf::RectangleShape boundBox = tile.GetShape();
+        Tile::Tile_Type type = tile.GetType();
 
-        sf::FloatRect playerBounds = boundingRecPlayer.getGlobalBounds();
+        sf::FloatRect playerBounds = boundingBoxPlayer.getGlobalBounds();
         sf::FloatRect tileBounds = boundBox.getGlobalBounds();
 
         if (Math::CheckRectCollision(playerBounds, tileBounds))
         {
             if (!IsPlayerProtected() && type == Tile::Obstacle)
             {
-                DecreaseHealth();
-                loseLifeCooldown.restart();
+                HandleObstacleCollision();
             }
 
             boundBox.setOutlineColor(sf::Color::Green);
@@ -206,22 +233,22 @@ void Player::CalculateCurrAnimation(float dt)
     animationTimer += dt;
     rebornAnimationTimer += dt;
 
-        if (isRespawnTimerRestarted && respawnTimer.getElapsedTime().asSeconds() <= rebirth_animation_duration)
+    if (isRespawnTimerRestarted && respawnTimer.getElapsedTime().asSeconds() <= rebirth_animation_duration)
+    {
+        if (rebornAnimationTimer >= rebirth_animation_interval)
         {
-            if (rebornAnimationTimer >= rebirth_animation_interval)
-            {
-                currentAnim++;
-                rebornAnimationTimer = 0.0f;
-            }
-
-            if (currentAnim >= max_frames)
-            {
-                currentAnim = 0;
-                isRespawnTimerRestarted = false;
-            }
-
-            sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::REBORN_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+            currentAnim++;
+            rebornAnimationTimer = 0.0f;
         }
+
+        if (currentAnim >= max_frames)
+        {
+            currentAnim = 0;
+            isRespawnTimerRestarted = false;
+        }
+
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::REBORN_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+    }
     else
     {
         if (animationTimer >= animationInterval)
@@ -229,6 +256,7 @@ void Player::CalculateCurrAnimation(float dt)
             currentAnim++;
 
             // if the player stopped moving, reset its animation
+            bool stopped = !moveLeft && !moveRight;
             if ((currentAnim >= max_frames || stopped) && !isJumping)
             {
                 currentAnim = 0;
@@ -285,18 +313,17 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     }
 
     sprite.setPosition(position);
-    boundingRecPlayer.setPosition(sprite.getPosition().x - 16, sprite.getPosition().y + 10);
+    boundingBoxPlayer.setPosition(sprite.getPosition().x - 16, sprite.getPosition().y + 10);
 }
 
 void Player::Draw(const std::shared_ptr<sf::RenderTarget> rt)
 {
     rt->draw(sprite);
-    rt->draw(boundingRecPlayer);
+    rt->draw(boundingBoxPlayer);
     DrawRay(rt, ray.start, ray.end);
-    
 }
 
-void Player::DrawRay(std::shared_ptr<sf::RenderTarget> window, const sf::Vector2f &start, const sf::Vector2f &end, sf::Color color)
+void Player::DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color)
 {
     sf::VertexArray ray(sf::Lines, 2);
 
@@ -305,7 +332,7 @@ void Player::DrawRay(std::shared_ptr<sf::RenderTarget> window, const sf::Vector2
     ray[1].position = end;
     ray[1].color = color;
 
-    window->draw(ray);
+    rt->draw(ray);
 }
 
 void Player::IncreaseHealth()
@@ -338,11 +365,10 @@ bool Player::IsPlayerProtected()
 {
     if (loseLifeCooldown.getElapsedTime().asSeconds() >= loseLifeDelay)
     {
-        condition = Normal;
+        isBlinking = false;
         return false;
     }
 
-    condition = Protected;
     return true;
 }
 

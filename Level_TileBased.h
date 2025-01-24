@@ -12,6 +12,7 @@ class Level_TileBased
 {
 
 public:
+
     enum LevelBounds
     {
         minX = 0,
@@ -21,20 +22,25 @@ public:
     };
 
 
-    Level_TileBased(const std::shared_ptr<Camera> cam, std::shared_ptr<TextureLoader> txLoaderRef);
-    void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
+    Level_TileBased(const std::shared_ptr<TextureLoader>& txLoaderRef);
+    void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
     void GenerateLevel(int startX);
-    void PlacePattern(int patternIndex, int currentX, int currentY);
+    void PlacePattern(int patternIndex, int height, int width, int currentX, int currentY);
     void ShowGrid() const;
     void Initialize();
-    void CheckGround(int curX, float v);
-    void UpdateLevel(const std::shared_ptr<Player> player, float dt, bool respawn);
+    void UpdateGround(int curX, float v);
+    void UpdateLevel(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt);
     void ShiftGridLeft();
     int FindRightmostTileX();
     std::vector<Tile>& GetAllTiles();
     int GenerateDefaultTiles();
     sf::Sprite CreateSprite(TextureLoader::TextureType type, int coordX, int coordY, int x, int y, int globalPositionX);
     sf::RectangleShape CreateBoundRec(sf::Vector2f position);
+    TextureLoader::TextureType DetermineTextureType(int x, int y) const;
+    Tile::Tile_Type DetermineTileType(int x, int y) const;
+    void TrackLastGeneratedPositions(int worldPositionX, int x);
+    void UpdateGrid(Tile tile, int x, int y);
+    int AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGap, int maxHeight, int minHeight) const;
 
 private:
     const int GRID_WIDTH = 25;
@@ -46,39 +52,33 @@ private:
     ObstacleManager obstacleManager;
     EnemyManager enemyManager;
     std::vector<Tile> allTiles;
-    //std::vector<Tile> tilesGround;
-    //std::vector<Tile> tilesObstacle;
-    //std::vector<Tile> allTiles;
 
-    std::vector<std::vector<Tile>> grid;
     using Pattern = std::vector<std::vector<int>>;
+    std::vector<std::vector<Tile>> grid;
     std::vector<Pattern> patterns;
-    std::vector<sf::Sprite> tiles;
+    std::vector<sf::Sprite> tileSprites;
+    std::vector<Tile> groundTiles;
 
     std::shared_ptr<TextureLoader> txLoader;
 
     const std::shared_ptr<Player> player;
-    const std::shared_ptr<Camera> camera;
     float previousPlayerX;
-    float lastX_atTotalGridWidthPos = 0;
-    float lastX_atGridWidthPos = 0;
+    float furthestTileX_totalGrid = 0;
+    float furthestTileX_gridWidth = 0;
 
     bool hasShifted = false;
     int shiftCounter = 0;
-    int prevYFromLevelGen = 2;
+    int prevYFromLevelGen = 8;
 
     Pattern defaultPattern = {
-        {0, 0, 0},
         {1, 1, 1},
         {1, 1, 1}};
 
     Pattern pattern1 = {
-        {0, 0},
         {1, 1},
         {0, 1}};
 
     Pattern pattern2 = {
-        {0, 0},
         {1, 0},
         {1, 1}};
 
@@ -88,7 +88,6 @@ private:
         {1, 1}};
 
     Pattern pattern4 = {
-        {0, 0},
         {1, 1},
         {1, 1}};
 
@@ -103,12 +102,10 @@ private:
         {1, 1, 0}};
 
     Pattern pattern7 = {
-        {0, 0},
         {0, 1},
         {1, 1}};
 
     Pattern pattern8 = {
-        {0, 0, 0},
         {1, 0, 0},
         {1, 1, 1}};
 

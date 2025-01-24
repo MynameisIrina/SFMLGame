@@ -1,11 +1,9 @@
 #include "ObstacleManager.h"
 #include "Level_TileBased.h"
 
-std::shared_ptr<TextureLoader> ObstacleManager::txLoader = nullptr;
 
-ObstacleManager::ObstacleManager(std::shared_ptr<TextureLoader> txLoaderRef)
+ObstacleManager::ObstacleManager(std::shared_ptr<TextureLoader> txLoaderRef): txLoader(txLoaderRef)
 {
-    txLoader = txLoaderRef;
     sprite = txLoader->SetSprite(TextureLoader::TextureType::Obstacle);
 }
 
@@ -13,8 +11,8 @@ void ObstacleManager::MoveObstacles(float dt)
 {
     for (auto &obstacle : obstacles)
     {
-        obstacle->MoveObstacle(dt);
-        obstacle->UpdateTexture();
+        obstacle.MoveObstacle(dt);
+        obstacle.UpdateTexture();
     }
 }
 
@@ -47,6 +45,7 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &gri
     {
         return true;
     }
+
     return false;
 }
 
@@ -57,10 +56,9 @@ void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, int mi
     if (rand() % OBSTACLE_PROBABILITY == 0)
     {
         grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::RectangleShape());
-        std::shared_ptr<Obstacle> obstacle = std::make_shared<Obstacle>();
+        Obstacle obstacle;
         float speed = std::clamp(rand() % MAX_SPEED, MIN_SPEED, MAX_SPEED);
-        obstacle->Initialize(sprite, {globalTileX + sprite.getGlobalBounds().width / 2, static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2)}, speed, globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2);
-        sf::RectangleShape boundRec = obstacle->CreateBoundingRec();
+        obstacle.Initialize(sprite, {globalTileX + sprite.getGlobalBounds().width / 2, static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2)}, speed, globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2);
         obstacles.push_back(obstacle);
     }
 }
@@ -69,12 +67,12 @@ void ObstacleManager::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {
     for (auto &obstacle : obstacles)
     {
-        window->draw(obstacle->GetSprite());
-        window->draw(obstacle->GetBoundingRec());
+        window->draw(obstacle.GetSprite());
+        window->draw(obstacle.GetBoundingBox());
     }
 }
 
-std::vector<std::shared_ptr<Obstacle>> ObstacleManager::GetObstacles()
+std::vector<Obstacle> ObstacleManager::GetObstacles() const
 {
     return obstacles;
 }

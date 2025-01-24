@@ -67,6 +67,8 @@ sf::Texture& TextureLoader::GetTexture(TextureType type)
 }
 
 
+
+
 sf::Sprite TextureLoader::SetSprite(TextureType type)
 {
     sf::Sprite sprite;
@@ -76,4 +78,25 @@ sf::Sprite TextureLoader::SetSprite(TextureType type)
         sprite.setTextureRect(textureCoordinates[type]);
     }
     return sprite;
+}
+
+sf::Vector2i TextureLoader::GetSpriteCoordinates(TextureType type)
+{
+    switch(type)
+    {
+        case Tile_Grass:
+            return sf::Vector2i(grassX, grassY);
+        case Tile_Dirt:
+            return sf::Vector2i(groundX, groundY);
+         case Obstacle:
+            return sf::Vector2i(obstacleX, obstacleY);
+         case Player:
+            return sf::Vector2i(playerX, playerY);
+         case HealthBar:
+            return sf::Vector2i(HealthBarX, HealthBarY);
+         case Enemy:
+            return sf::Vector2i(EnemyX, EnemyY);
+        default:
+            throw std::runtime_error("Invalid texture type");
+    }
 }

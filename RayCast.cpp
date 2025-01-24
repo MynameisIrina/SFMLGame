@@ -1,6 +1,6 @@
 #include "RayCast.h"
 
-std::optional<RayCast::RayCastHit> RayCast::DoRaycast(sf::Vector2f start, sf::Vector2f end, std::vector<Tile>& platforms)
+std::optional<RayCast::RayCastHit> RayCast::DoRaycast(sf::Vector2f start, sf::Vector2f end, const std::vector<Tile>& platforms)
 {
     for (auto &platform : platforms)
     {

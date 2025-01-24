@@ -28,16 +28,16 @@ int main()
 
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(window);
 
-    std::shared_ptr<HealthBar> healthBar = std::make_shared<HealthBar>(txLoader, camera);
+    std::shared_ptr<HealthBar> healthBar = std::make_shared<HealthBar>(txLoader);
 
-    Level_TileBased level_tile(camera, txLoader);
+    Level_TileBased level_tile(txLoader);
 
     Background background(txLoader);
 
 
     camera->Initialize();
     player->Initialize(sf::Vector2f(35.f, 20.f), 6, 2.5f);
-    healthBar->Initialize(player);
+    healthBar->Initialize(player, camera);
     level_tile.Initialize();
     background.Initialize(window);
     
@@ -71,21 +71,11 @@ int main()
         player->UpdateView(moveRight, moveLeft);
         // Flag to ensure respawn happens only once per key press
         static bool respawnPressed = false;
-
-        // if(respawn && !respawnPressed)
-        // {
-        //     player->Respawn();
-        //     respawnPressed = true;
-        // }
-        // if(!respawn)
-        // {
-        //     respawnPressed = false;
-        // }
         
-        level_tile.UpdateLevel(player, deltaTime, respawn);
+        level_tile.UpdateLevel(player, camera, deltaTime);
 
         camera->Update(player);
-        healthBar->Update(camera, player);
+        healthBar->Update(player, camera);
 
         // ----------------- UPDATE----------------
 

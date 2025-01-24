@@ -11,6 +11,7 @@ void Obstacle::Initialize(sf::Sprite& sprite, sf::Vector2f startPosition, float 
     this->minX = minX;
     this->maxX = maxX;
     this->sprite.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
+    boundingBox = CreateBoundingBox(); 
     rotation = 0;
 }
 
@@ -41,7 +42,7 @@ void Obstacle::MoveObstacle(float dt)
 void Obstacle::UpdateTexture()
 {
     sprite.setPosition(position);
-    boundingRec.setPosition(position);
+    boundingBox.setPosition(position);
     sprite.setRotation(rotation);
 }
 
@@ -56,18 +57,18 @@ sf::Sprite Obstacle::GetSprite() const
 }
 
 
-sf::RectangleShape Obstacle::CreateBoundingRec()
+sf::RectangleShape Obstacle::CreateBoundingBox()
 {
-    boundingRec.setSize(sf::Vector2f(32, 32));
-    boundingRec.setFillColor(sf::Color::Transparent);
-    boundingRec.setOutlineColor(sf::Color::Blue);
-    boundingRec.setOutlineThickness(1);
-    boundingRec.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
-    boundingRec.setPosition(position);
-    return boundingRec;
+    boundingBox.setSize(sf::Vector2f(32, 32));
+    boundingBox.setFillColor(sf::Color::Transparent);
+    boundingBox.setOutlineColor(sf::Color::Blue);
+    boundingBox.setOutlineThickness(1);
+    boundingBox.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
+    boundingBox.setPosition(position);
+    return boundingBox;
 }
 
-sf::RectangleShape Obstacle::GetBoundingRec()
+sf::RectangleShape Obstacle::GetBoundingBox() const
 {
-    return boundingRec;
+    return boundingBox;
 }

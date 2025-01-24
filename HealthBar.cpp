@@ -2,14 +2,10 @@
 #include <iostream>
 #include "Player.h"
 
-std::shared_ptr<TextureLoader> HealthBar::txLoader = nullptr; 
 
-HealthBar::HealthBar(std::shared_ptr<TextureLoader> txLoaderRef, std::shared_ptr<Camera> cam) : camera(cam)
-{
-    txLoader = txLoaderRef;
-}
+HealthBar::HealthBar(const std::shared_ptr<TextureLoader>& txLoader): txLoader(txLoader) {}
 
-void HealthBar::Initialize(const std::shared_ptr<Player> player)
+void HealthBar::Initialize(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera)
 {
     sf::Sprite sprite = txLoader->SetSprite(TextureLoader::TextureType::HealthBar);
 
@@ -17,14 +13,14 @@ void HealthBar::Initialize(const std::shared_ptr<Player> player)
     for (int i = 0; i < player->GetMaxHealth(); i++)
     {
         sprite.setScale(scale, scale);
-        sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX, offsetY);
+        const sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX, offsetY);
         Heart heart = {sprite, position, true};
         hearts.push_back(heart);
     }
 
 }
 
-void HealthBar::Draw(const std::shared_ptr<sf::RenderTarget> rt) const
+void HealthBar::Draw(const std::shared_ptr<sf::RenderTarget>& rt) const
 {
     for (const auto &heart : hearts)
     {
@@ -32,29 +28,27 @@ void HealthBar::Draw(const std::shared_ptr<sf::RenderTarget> rt) const
     }
 }
 
-void HealthBar::Update(const std::shared_ptr<Camera> cam, const std::shared_ptr<Player> player)
+void HealthBar::Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera)
 {
-    int currentHealth = player->GetHealth();
+    const int currentHealth = player->GetHealth();
 
     for (int i = 0; i < hearts.size(); i++)
     {
-        // update position
-        sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX + (i * 32), offsetY);
+        const sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX + (i * TILE_SIZE), offsetY);
         hearts[i].position = position;
 
         if(i < currentHealth)
         {
             hearts[i].isActive = true;
-            hearts[i].sprite.setColor(sf::Color(255,255,255, 255));
+            hearts[i].sprite.setColor(opaque);
         }
         else
         {
             hearts[i].isActive = false;
-            hearts[i].sprite.setColor(sf::Color(255,255,255, 0));
+            hearts[i].sprite.setColor(transparent);
         }
 
     }
-
 
     UpdateView();
 }
