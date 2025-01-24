@@ -97,7 +97,7 @@ public:
     // Animation
     void CalculateCurrAnimation(float dt);
     void ResetAnimation(int animYIndex);
-    void AddBlinking();
+    void HandleBlinking();
 
     // Respawn
     void Respawn();

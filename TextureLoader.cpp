@@ -35,7 +35,6 @@ void TextureLoader::Initialize()
     }
     textures[Background] = backgroundTex;
 
-
     sf::Texture obstacleTex;
     if (!obstacleTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/VillageDetails.png"))
     {
@@ -59,44 +58,51 @@ void TextureLoader::Initialize()
     }
     textures[Enemy] = enemyTex;
     textureCoordinates[Enemy] = sf::IntRect(SpriteCoordinates::EnemyX * 125, SpriteCoordinates::EnemyY * 125, 125, 125);
+
+    sf::Texture arrowTex;
+    if (!arrowTex.loadFromFile("SFMLGame/Assets/Player/Textures/Arrow.png"))
+    {
+        throw std::runtime_error("Failed to load arrow texture");
+    }
+    textures[Arrow] = arrowTex;
+    textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * 32, SpriteCoordinates::arrowY * 20, 16, 20);
 }
 
-sf::Texture& TextureLoader::GetTexture(TextureType type)
+sf::Texture TextureLoader::GetTexture(TextureType type) const
 {
-    return textures[type];
+    return textures.at(type);
 }
-
-
-
 
 sf::Sprite TextureLoader::SetSprite(TextureType type)
 {
     sf::Sprite sprite;
     sprite.setTexture(textures[type]);
-    if(type != Background)
+    if (type != Background)
     {
         sprite.setTextureRect(textureCoordinates[type]);
     }
     return sprite;
 }
 
-sf::Vector2i TextureLoader::GetSpriteCoordinates(TextureType type)
+sf::Vector2i TextureLoader::GetSpriteCoordinates(TextureType type) const
 {
-    switch(type)
+    switch (type)
     {
-        case Tile_Grass:
-            return sf::Vector2i(grassX, grassY);
-        case Tile_Dirt:
-            return sf::Vector2i(groundX, groundY);
-         case Obstacle:
-            return sf::Vector2i(obstacleX, obstacleY);
-         case Player:
-            return sf::Vector2i(playerX, playerY);
-         case HealthBar:
-            return sf::Vector2i(HealthBarX, HealthBarY);
-         case Enemy:
-            return sf::Vector2i(EnemyX, EnemyY);
-        default:
-            throw std::runtime_error("Invalid texture type");
+    case Tile_Grass:
+        return sf::Vector2i(grassX, grassY);
+    case Tile_Dirt:
+        return sf::Vector2i(groundX, groundY);
+    case Obstacle:
+        return sf::Vector2i(obstacleX, obstacleY);
+    case Player:
+        return sf::Vector2i(playerX, playerY);
+    case HealthBar:
+        return sf::Vector2i(HealthBarX, HealthBarY);
+    case Enemy:
+        return sf::Vector2i(EnemyX, EnemyY);
+    case Arrow:
+        return sf::Vector2i(arrowX, arrowY);
+    default:
+        throw std::runtime_error("Invalid texture type");
     }
 }

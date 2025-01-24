@@ -42,6 +42,9 @@ int main()
     background.Initialize(window);
     
 
+    sf::Sprite sprite = txLoader->SetSprite(TextureLoader::Arrow);
+    sprite.setPosition(10,10);
+
 
 
     // ----------------- INITIALIZE -----------------
@@ -82,6 +85,7 @@ int main()
         // ----------------- DRAW -----------------
         window->clear();
         background.Draw(window);
+        window->draw(sprite);
         player->Draw(window);
         level_tile.Draw(window);
         healthBar->Draw(window);

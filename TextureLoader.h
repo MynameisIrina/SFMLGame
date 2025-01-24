@@ -13,7 +13,8 @@ public:
         Background,
         Obstacle,
         HealthBar,
-        Enemy
+        Enemy,
+        Arrow
     };
 
     enum SpriteCoordinates
@@ -29,13 +30,15 @@ public:
         HealthBarX = 0,
         HealthBarY = 0,
         EnemyX = 0,
-        EnemyY = 0
+        EnemyY = 0,
+        arrowX = 1,
+        arrowY = 0
     };
 
     void Initialize();
-    sf::Texture& GetTexture(TextureType type);
+    sf::Texture GetTexture(TextureType type) const;
     sf::Sprite SetSprite(TextureType type);
-    sf::Vector2i GetSpriteCoordinates(TextureType type);
+    sf::Vector2i GetSpriteCoordinates(TextureType type) const;
 
 private:
     const int TILE_SIZE = 32;

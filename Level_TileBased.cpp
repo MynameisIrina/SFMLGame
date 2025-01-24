@@ -90,7 +90,7 @@ void Level_TileBased::GenerateLevel(int startX)
     UpdateGround(startX, renderOffset);
 
     obstacleManager.SpawnObstacles(grid, GRID_HEIGHT, GRID_WIDTH, TOTAL_GRID_WIDTH, furthestTileX_gridWidth, TILE_SIZE);
-    // enemyManager.SpawnEnemies(grid, GRID_HEIGHT, GRID_WIDTH, TOTAL_GRID_WIDTH, lastX_atGridWidthPos, TILE_SIZE);
+    enemyManager.SpawnEnemies(grid, GRID_HEIGHT, GRID_WIDTH, TOTAL_GRID_WIDTH, furthestTileX_gridWidth, TILE_SIZE);
 }
 
 int Level_TileBased::AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGap, int minHeight, int maxHeight) const
@@ -163,7 +163,6 @@ void Level_TileBased::PlacePattern(int patternIndex, int height, int width, int 
 
 void Level_TileBased::TrackLastGeneratedPositions(int worldPositionX, int x)
 {
-
     if (worldPositionX > furthestTileX_totalGrid)
     {
         furthestTileX_totalGrid = worldPositionX;

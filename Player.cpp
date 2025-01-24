@@ -36,7 +36,7 @@ void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn
     HandleHorizontalMovement(dt, leftBound);
     CheckCollisionGround(tiles);
     CheckCollisionSide(tiles);
-    AddBlinking();
+    HandleBlinking();
 }
 
 void Player::HandleFalling()
@@ -156,7 +156,7 @@ void Player::ResetAnimation(int animYIndex)
     sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
 }
 
-void Player::AddBlinking()
+void Player::HandleBlinking()
 {
     if (isBlinking)
     {
