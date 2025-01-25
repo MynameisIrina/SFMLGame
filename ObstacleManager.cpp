@@ -59,6 +59,7 @@ void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, int mi
         Obstacle obstacle;
         float speed = std::clamp(rand() % MAX_SPEED, MIN_SPEED, MAX_SPEED);
         obstacle.Initialize(sprite, {globalTileX + sprite.getGlobalBounds().width / 2, static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2)}, speed, globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2);
+        obstacle.CreateVisualLine(globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2, static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2), static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2));
         obstacles.push_back(obstacle);
     }
 }
@@ -67,8 +68,7 @@ void ObstacleManager::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {
     for (auto &obstacle : obstacles)
     {
-        window->draw(obstacle.GetSprite());
-        window->draw(obstacle.GetBoundingBox());
+        obstacle.Draw(window);
     }
 }
 

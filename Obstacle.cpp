@@ -59,6 +59,7 @@ sf::Sprite Obstacle::GetSprite() const
 
 sf::RectangleShape Obstacle::CreateBoundingBox()
 {
+    sf::RectangleShape boundingBox;
     boundingBox.setSize(sf::Vector2f(32, 32));
     boundingBox.setFillColor(sf::Color::Transparent);
     boundingBox.setOutlineColor(sf::Color::Blue);
@@ -71,4 +72,17 @@ sf::RectangleShape Obstacle::CreateBoundingBox()
 sf::RectangleShape Obstacle::GetBoundingBox() const
 {
     return boundingBox;
+}
+
+void Obstacle::CreateVisualLine(float minX, float maxX, float minY, float maxY)
+{
+    line[0] = sf::Vertex(sf::Vector2f(minX, minY), sf::Color::Black);
+    line[1] = sf::Vertex(sf::Vector2f(maxX, maxY), sf::Color::Black);
+}
+
+void Obstacle::Draw(const std::shared_ptr<sf::RenderWindow> window) const
+{
+    window->draw(sprite);
+    window->draw(boundingBox);
+    window->draw(line, 2, sf::Lines);
 }

@@ -16,6 +16,8 @@ public:
     sf::Sprite GetSprite() const;
     sf::RectangleShape CreateBoundingBox();
     sf::RectangleShape GetBoundingBox() const;
+    void CreateVisualLine(float minX, float maxX, float minY, float maxY);
+    void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
 
 private:
     std::shared_ptr<TextureLoader> txLoader;
@@ -28,4 +30,5 @@ private:
     bool movingForward = true;;
     float maxX;
     float minX;
+    sf::Vertex line[2];
 };
