@@ -13,12 +13,12 @@ void EnemyArrow::Initialize(sf::Sprite &sprite, sf::Vector2f startPosition, int 
     this->sprite.setScale(- 1 * scale, 1 * scale);
 }
 
-void EnemyArrow::Update(const std::shared_ptr<Player> player, float dt)
+void EnemyArrow::Update(const std::shared_ptr<Player> player,const std::shared_ptr<Camera> camera, float dt)
 {
-    Enemy::Update(player, dt);
+    Enemy::Update(player,camera, dt);
     UpdateAnimation(dt);
     UpdateView();
-    arrowPool.Update(player, dt);
+    arrowPool.Update(player, camera, dt);
 }
 
 void EnemyArrow::UpdateAnimation(float dt)

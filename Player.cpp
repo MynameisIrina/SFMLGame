@@ -17,10 +17,7 @@ void Player::Initialize(sf::Vector2f position, int maxHealth, float scale)
     sprite.setScale(scale, scale);
     sprite.setPosition(position);
 
-    boundingBoxPlayer.setSize(sf::Vector2f(sprite.getLocalBounds().width, sprite.getLocalBounds().height));
-    boundingBoxPlayer.setFillColor(sf::Color::Transparent);
-    boundingBoxPlayer.setOutlineColor(sf::Color::Red);
-    boundingBoxPlayer.setOutlineThickness(1);
+    boundingBoxPlayer = CreateBoundingBox();
 }
 
 void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles)
@@ -139,6 +136,16 @@ void Player::HandleObstacleCollision()
     blinkingTimer.restart();
     loseLifeCooldown.restart();
     DecreaseHealth();
+}
+
+sf::RectangleShape Player::CreateBoundingBox()
+{
+    sf::RectangleShape boundingBox;
+    boundingBox.setSize(sf::Vector2f(sprite.getLocalBounds().width, sprite.getLocalBounds().height));
+    boundingBox.setFillColor(sf::Color::Transparent);
+    boundingBox.setOutlineColor(sf::Color::Red);
+    boundingBox.setOutlineThickness(1);
+    return boundingBox;
 }
 
 void Player::Jump(bool jump, float dt)
@@ -385,6 +392,11 @@ bool Player::IsMoveLeft() const
 sf::Vector2f Player::GetMaxPosition() const
 {
     return maxPosition;
+}
+
+sf::RectangleShape Player::GetBoundingBox()
+{
+    return boundingBoxPlayer;
 }
 
 sf::Vector2f Player::GetPosition() const

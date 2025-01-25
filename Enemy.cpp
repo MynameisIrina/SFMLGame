@@ -2,8 +2,9 @@
 
 Enemy::Enemy(){}
 
-void Enemy::Update(const std::shared_ptr<Player> player, float dt)
+void Enemy::Update(const std::shared_ptr<Player> player, const std::shared_ptr<Camera> camera, float dt)
 {
+    
 }
 
 void Enemy::TakeDamage(int amount)

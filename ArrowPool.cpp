@@ -16,7 +16,12 @@ Arrow *ArrowPool::GetArrow()
     {
         if (!arrow->isActive)
         {
-             arrow->isActive = true;
+            if(arrow->recentlyDeactivated)
+            {
+                continue;
+            }
+            
+            arrow->isActive = true;
             return arrow.get();
         }
     }
@@ -27,12 +32,12 @@ Arrow *ArrowPool::GetArrow()
     return arrowPool.back().get();
 }
 
-void ArrowPool::Update(const std::shared_ptr<Player> &player,float dt)
+void ArrowPool::Update(const std::shared_ptr<Player> &player,const std::shared_ptr<Camera> camera,float dt)
 {
     for (const auto &arrow : arrowPool)
     {
         if (arrow->isActive)
-            arrow->Update(player, dt);
+            arrow->Update(player,camera, dt);
     }
 }
 
@@ -43,6 +48,7 @@ void ArrowPool::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
         if (arrow->isActive)
         {
             window->draw(arrow->GetSprite());
+            window->draw(arrow->GetBoundingBox());
         }
     }
 }

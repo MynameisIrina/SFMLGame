@@ -45,6 +45,10 @@ int main()
     sf::Sprite sprite = txLoader->SetSprite(TextureLoader::Arrow);
     sprite.setPosition(10,10);
 
+    Arrow arrow(sprite);
+    sf::RectangleShape bb = arrow.CreateBoundingBox();
+
+
 
 
     // ----------------- INITIALIZE -----------------
@@ -86,6 +90,7 @@ int main()
         window->clear();
         background.Draw(window);
         window->draw(sprite);
+        window->draw(bb);
         player->Draw(window);
         level_tile.Draw(window);
         healthBar->Draw(window);

@@ -93,6 +93,7 @@ public:
     void CheckCollisionGround(const std::vector<Tile> &tiles);
     void CheckCollisionSide(const std::vector<Tile> &tiles);
     void HandleObstacleCollision();
+    sf::RectangleShape CreateBoundingBox();
 
     // Animation
     void CalculateCurrAnimation(float dt);
@@ -114,6 +115,7 @@ public:
     void Draw(const std::shared_ptr<sf::RenderTarget> rt);
     sf::Vector2f GetPosition() const;
     sf::Vector2f GetMaxPosition() const;
+    sf::RectangleShape GetBoundingBox();
     bool IsRespawn() const;
     bool IsMoveLeft() const;
 

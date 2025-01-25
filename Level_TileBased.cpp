@@ -142,7 +142,7 @@ void Level_TileBased::UpdateLevel(const std::shared_ptr<Player>& player, const s
     }
 
     obstacleManager.MoveObstacles(dt);
-    enemyManager.MoveEnemies(player, dt);
+    enemyManager.MoveEnemies(player, camera, dt);
 }
 
 void Level_TileBased::PlacePattern(int patternIndex, int height, int width, int currentX, int currentY)

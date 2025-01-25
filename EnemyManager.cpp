@@ -43,10 +43,10 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>>& grid, int gridWidt
     }
 }
 
-void EnemyManager::MoveEnemies(const std::shared_ptr<Player> player, float dt)
+void EnemyManager::MoveEnemies(const std::shared_ptr<Player> player, const std::shared_ptr<Camera> camera, float dt)
 {
     for (auto& enemy : enemies) {
-        enemy->Update(player, dt);
+        enemy->Update(player, camera, dt);
     }
 }
 

@@ -65,7 +65,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load arrow texture");
     }
     textures[Arrow] = arrowTex;
-    textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * 32, SpriteCoordinates::arrowY * 20, 16, 20);
+    textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * 32, SpriteCoordinates::arrowY * 20, 16, 10);
 }
 
 sf::Texture TextureLoader::GetTexture(TextureType type) const
