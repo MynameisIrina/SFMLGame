@@ -8,9 +8,8 @@ class Arrow
 {
 
 public:
-    Arrow(const sf::Sprite& sprite);
-    void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera> camera, float dt);
-    sf::RectangleShape CreateBoundingBox();
+    Arrow(sf::Sprite& sprite);
+    void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, float dt);
     sf::RectangleShape GetBoundingBox();
     void UpdateView();
     sf::Sprite GetSprite();

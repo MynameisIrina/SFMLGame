@@ -9,12 +9,12 @@ class ObstacleManager
 {
 
 private:
-    std::vector<Obstacle> obstacles;
+    std::vector<std::unique_ptr<Obstacle>> obstacles;
     sf::Sprite sprite;
     std::shared_ptr<TextureLoader> txLoader;
-    const int MIN_SPEED = 45;
-    const int MAX_SPEED = 60;
-    const int OBSTACLE_PROBABILITY = 8;
+    const int minSpeed = 45;
+    const int maxSpeed = 60;
+    const int obstacleProbability = 8;
 public:
     ObstacleManager(std::shared_ptr<TextureLoader> txLoaderRef);
     void MoveObstacles(float dt);
@@ -22,5 +22,5 @@ public:
     bool CanPlaceObstacle(const std::vector<std::vector<Tile>> &grid, int x, int y,  int maxX, int maxY);
     void PlaceObstacle(std::vector<std::vector<Tile>> &grid,  int gridWidth, int startX, int tileSize, int x, int y);
     void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
-    std::vector<Obstacle> GetObstacles() const;
+    std::vector<std::unique_ptr<Obstacle>>& GetObstacles();
 };

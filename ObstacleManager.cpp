@@ -1,5 +1,5 @@
 #include "ObstacleManager.h"
-#include "Level_TileBased.h"
+#include "Level.h"
 
 
 ObstacleManager::ObstacleManager(std::shared_ptr<TextureLoader> txLoaderRef): txLoader(txLoaderRef)
@@ -11,8 +11,8 @@ void ObstacleManager::MoveObstacles(float dt)
 {
     for (auto &obstacle : obstacles)
     {
-        obstacle.MoveObstacle(dt);
-        obstacle.UpdateTexture();
+        obstacle->MoveObstacle(dt);
+        obstacle->UpdateTexture();
     }
 }
 
@@ -53,14 +53,17 @@ void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, int mi
 {
     float globalTileX = startX + (x - minX) * tileSize;
 
-    if (rand() % OBSTACLE_PROBABILITY == 0)
+    if (rand() % obstacleProbability == 0)
     {
         grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::RectangleShape());
-        Obstacle obstacle;
-        float speed = std::clamp(rand() % MAX_SPEED, MIN_SPEED, MAX_SPEED);
-        obstacle.Initialize(sprite, {globalTileX + sprite.getGlobalBounds().width / 2, static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2)}, speed, globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2);
-        obstacle.CreateVisualLine(globalTileX - tileSize + sprite.getGlobalBounds().width / 2, globalTileX + tileSize + sprite.getGlobalBounds().width / 2, static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2), static_cast<float>(y * tileSize + sprite.getGlobalBounds().height / 2));
-        obstacles.push_back(obstacle);
+        std::unique_ptr<Obstacle> obstacle = std::make_unique<Obstacle>();
+        float speed = std::clamp(rand() % maxSpeed, minSpeed, maxSpeed);
+        sf::Vector2f obstaclePosition{globalTileX, static_cast<float>(y * tileSize)};
+        float minX = globalTileX - tileSize;
+        float maxX = globalTileX + tileSize;
+        obstacle->Initialize(sprite, obstaclePosition, speed, minX, maxX);
+        obstacle->CreateVisualLine(minX, maxX , obstaclePosition.y, obstaclePosition.y);
+        obstacles.push_back(std::move(obstacle));
     }
 }
 
@@ -68,11 +71,11 @@ void ObstacleManager::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {
     for (auto &obstacle : obstacles)
     {
-        obstacle.Draw(window);
+        obstacle->Draw(window);
     }
 }
 
-std::vector<Obstacle> ObstacleManager::GetObstacles() const
+std::vector<std::unique_ptr<Obstacle>>& ObstacleManager::GetObstacles()
 {
     return obstacles;
 }

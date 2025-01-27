@@ -1,6 +1,7 @@
 #include "Obstacle.h"
 #include "Tile.h"
-#include "Level_TileBased.h"
+#include "Level.h"
+#include "Utilities.h"
 
 
 void Obstacle::Initialize(sf::Sprite& sprite, sf::Vector2f startPosition, float speed, float minX, float maxX)
@@ -10,9 +11,10 @@ void Obstacle::Initialize(sf::Sprite& sprite, sf::Vector2f startPosition, float 
     this->speed = speed;
     this->minX = minX;
     this->maxX = maxX;
-    this->sprite.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
-    boundingBox = CreateBoundingBox(); 
     rotation = 0;
+
+    this->sprite.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
+    boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
 }
 
 void Obstacle::MoveObstacle(float dt)
@@ -54,19 +56,6 @@ sf::Vector2f Obstacle::GetPosition() const
 sf::Sprite Obstacle::GetSprite() const
 {
     return sprite;
-}
-
-
-sf::RectangleShape Obstacle::CreateBoundingBox()
-{
-    sf::RectangleShape boundingBox;
-    boundingBox.setSize(sf::Vector2f(32, 32));
-    boundingBox.setFillColor(sf::Color::Transparent);
-    boundingBox.setOutlineColor(sf::Color::Blue);
-    boundingBox.setOutlineThickness(1);
-    boundingBox.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
-    boundingBox.setPosition(position);
-    return boundingBox;
 }
 
 sf::RectangleShape Obstacle::GetBoundingBox() const

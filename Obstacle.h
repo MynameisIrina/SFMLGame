@@ -14,7 +14,6 @@ public:
     void UpdateTexture();
     sf::Vector2f GetPosition() const;
     sf::Sprite GetSprite() const;
-    sf::RectangleShape CreateBoundingBox();
     sf::RectangleShape GetBoundingBox() const;
     void CreateVisualLine(float minX, float maxX, float minY, float maxY);
     void Draw(const std::shared_ptr<sf::RenderWindow> window) const;

@@ -1,5 +1,5 @@
 #include "EnemyManager.h"
-#include "Level_TileBased.h"
+#include "Level.h"
 
 EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader>& txLoader)
     : txLoader(txLoader)
@@ -7,12 +7,12 @@ EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader>& txLoader)
     enemySprite = txLoader->SetSprite(TextureLoader::TextureType::Enemy);
 }
 
-void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>>& grid, int gridHeight, int gridWidth, int totalGridWidth, int lastX_atGridWidthPos, int tileSize)
+void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, int maxY, int minX, int maxX, int startX, int tileSize)
 {
-    for (int y = 0; y < gridHeight - 1; ++y) {
-        for (int x = gridWidth; x < totalGridWidth - 1; ++x) {
+    for (int y = 0; y < maxY - 1; ++y) {
+        for (int x = minX; x < maxX - 1; ++x) {
             if (CanPlaceEnemy(grid, x, y)) {
-                PlaceEnemy(grid, gridWidth, lastX_atGridWidthPos, tileSize, x, y);
+                PlaceEnemy(grid, minX, startX, tileSize, x, y);
             }
         }
     }
@@ -31,14 +31,16 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, int
     return false;
 }
 
-void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>>& grid, int gridWidth, int lastX_atGridWidthPos, int tileSize, int currX, int currY)
+void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, int startX, int tileSize, int x, int y)
 {
-    float globalTileX = lastX_atGridWidthPos + (currX - gridWidth) * tileSize;
-    if (rand() % 4 == 0) {
-        grid[currY][currX] = Tile(Tile::Enemy, sf::RectangleShape());
+    float globalTileX = startX + (x - minX) * tileSize;
+    if (rand() % 4 == 0) 
+    {
+        grid[y][x] = Tile(Tile::Enemy, sf::RectangleShape());
         ArrowPool pool(txLoader, 10);
         std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>(std::move(pool));
-        enemyArrow->Initialize(enemySprite, { globalTileX , static_cast<float>(currY * tileSize)}, 100, 10);
+        sf::Vector2f position{globalTileX , static_cast<float>(y * tileSize) - offsetY };
+        enemyArrow->Initialize(enemySprite, position, 100, 10);
         enemies.push_back(std::move(enemyArrow));
     }
 }
@@ -55,4 +57,10 @@ void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow> window) const
     for (auto& enemy : enemies) {
         enemy->Draw(window);
     }
+}
+
+
+std::vector<std::unique_ptr<Enemy>>& EnemyManager::GetEnemies()
+{
+    return enemies;
 }

@@ -8,7 +8,7 @@
 #include "Tile.h"
 #include "EnemyManager.h"
 
-class Level_TileBased
+class Level
 {
 
 public:
@@ -22,7 +22,7 @@ public:
     };
 
 
-    Level_TileBased(const std::shared_ptr<TextureLoader>& txLoaderRef);
+    Level(const std::shared_ptr<TextureLoader>& txLoaderRef);
     void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
     void GenerateLevel(int startX);
     void PlacePattern(int patternIndex, int height, int width, int currentX, int currentY);
@@ -35,7 +35,6 @@ public:
     std::vector<Tile>& GetAllTiles();
     int GenerateDefaultTiles();
     sf::Sprite CreateSprite(TextureLoader::TextureType type, int coordX, int coordY, int x, int y, int globalPositionX);
-    sf::RectangleShape CreateBoundRec(sf::Vector2f position);
     TextureLoader::TextureType DetermineTextureType(int x, int y) const;
     Tile::Tile_Type DetermineTileType(int x, int y) const;
     void TrackLastGeneratedPositions(int worldPositionX, int x);
@@ -43,11 +42,11 @@ public:
     int AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGap, int maxHeight, int minHeight) const;
 
 private:
-    const int GRID_WIDTH = 25;
-    const int GRID_HEIGHT = 15;
-    const int TILE_SIZE = 32;
-    const int BUFFER_COLUMNS = 10;
-    const int TOTAL_GRID_WIDTH = GRID_WIDTH + BUFFER_COLUMNS;
+    const int gridWidth = 25;
+    const int gridHeight = 15;
+    const int tileSize = 32;
+    const int bufferColumns = 10;
+    const int totalGridWidth = gridWidth + bufferColumns;
 
     ObstacleManager obstacleManager;
     EnemyManager enemyManager;

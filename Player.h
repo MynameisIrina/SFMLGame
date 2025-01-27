@@ -45,10 +45,15 @@ private:
     const float gravity = 600.f;
     const float rebirth_animation_duration = 0.8f;
     const float rebirth_animation_interval = 0.1f;
-    const int max_frames = 8;
+    const int maxFrames = 8;
     const float animationInterval = 0.1f;
     const float loseLifeDelay = 2.0f;
     const float blinkingInterval = 0.1f;
+    const int rectWidthPlayer = 22;
+    const int rectHeightPlayer = 16;
+    const int playerOffset_x = 4;
+    const int tileSize = 32;
+    const int boundingBoxOffsetX = 15;
 
     // Flags
     bool isJumping = false;
@@ -93,6 +98,7 @@ public:
     void CheckCollisionGround(const std::vector<Tile> &tiles);
     void CheckCollisionSide(const std::vector<Tile> &tiles);
     void HandleObstacleCollision();
+    void HandleEnemyCollision();
     sf::RectangleShape CreateBoundingBox();
 
     // Animation

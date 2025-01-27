@@ -2,9 +2,8 @@
 
 Enemy::Enemy(){}
 
-void Enemy::Update(const std::shared_ptr<Player> player, const std::shared_ptr<Camera> camera, float dt)
+void Enemy::Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt)
 {
-    
 }
 
 void Enemy::TakeDamage(int amount)
@@ -16,6 +15,10 @@ void Enemy::TakeDamage(int amount)
     }
 }
 
+sf::RectangleShape Enemy::GetBoundingBox()
+{
+    return boundingBox;
+}
 
 void Enemy::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {

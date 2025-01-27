@@ -7,8 +7,8 @@ class TextureLoader
 public:
     enum TextureType
     {
-        Tile_Grass,
-        Tile_Dirt,
+        TileGrass,
+        TileDirt,
         Player,
         Background,
         Obstacle,
@@ -24,16 +24,18 @@ public:
         grassX = 2,
         grassY = 8,
         playerX = 0,
-        playerY = 4,
+        playerY = 9,
         obstacleX = 27,
         obstacleY = 3,
         HealthBarX = 0,
         HealthBarY = 0,
         EnemyX = 0,
         EnemyY = 0,
-        arrowX = 1,
+        arrowX = 2,
         arrowY = 0
     };
+
+    
 
     void Initialize();
     sf::Texture GetTexture(TextureType type) const;
@@ -41,7 +43,19 @@ public:
     sf::Vector2i GetSpriteCoordinates(TextureType type) const;
 
 private:
-    const int TILE_SIZE = 32;
+    const int rectWidthDefault = 32;
+    const int rectHeightDefault = 32;
+    const int tileSizeHealthBar = 16;
+    const int playerOffsetX = 4;
+    const int rectWidthPlayer = 22;
+    const int rectHeightPlayer = 16;
+    const int rectWidthHealthBar = 16;
+    const int rectHeightHealthBar = 16;
+    const int rectWidthEnemy = 128;
+    const int rectHeightEnemy = 128;
+    const int rectWidthArrow = 16;
+    const int rectHeightArrow = 10;
+
     std::map <TextureType, sf::Texture> textures;
     std::map<TextureType, sf::IntRect> textureCoordinates;
 };

@@ -9,16 +9,16 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load ground texture");
     }
-    textures[Tile_Dirt] = groundTex;
-    textureCoordinates[Tile_Dirt] = sf::IntRect(SpriteCoordinates::groundX * TILE_SIZE, SpriteCoordinates::groundY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    textures[TileDirt] = groundTex;
+    textureCoordinates[TileDirt] = sf::IntRect(SpriteCoordinates::groundX * rectWidthDefault, SpriteCoordinates::groundY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture grassTex;
     if (!grassTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Ground.png"))
     {
         throw std::runtime_error("Failed to load grass texture");
     }
-    textures[Tile_Grass] = grassTex;
-    textureCoordinates[Tile_Grass] = sf::IntRect(SpriteCoordinates::grassX * TILE_SIZE, SpriteCoordinates::grassY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    textures[TileGrass] = grassTex;
+    textureCoordinates[TileGrass] = sf::IntRect(SpriteCoordinates::grassX * rectWidthDefault, SpriteCoordinates::grassY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture playerTex;
     if (!playerTex.loadFromFile("SFMLGame/Assets/Player/Textures/Cat-Sheet.png"))
@@ -26,7 +26,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load player texture");
     }
     textures[Player] = playerTex;
-    textureCoordinates[Player] = sf::IntRect(SpriteCoordinates::playerX * TILE_SIZE, SpriteCoordinates::playerY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    textureCoordinates[Player] = sf::IntRect(playerX + playerOffsetX, playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer);
 
     sf::Texture backgroundTex;
     if (!backgroundTex.loadFromFile("SFMLGame/Assets/Background/Background.png"))
@@ -41,7 +41,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load obstacle texture");
     }
     textures[Obstacle] = obstacleTex;
-    textureCoordinates[Obstacle] = sf::IntRect(SpriteCoordinates::obstacleX * TILE_SIZE, SpriteCoordinates::obstacleY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    textureCoordinates[Obstacle] = sf::IntRect(SpriteCoordinates::obstacleX * rectWidthDefault, SpriteCoordinates::obstacleY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture healthBarTex;
     if (!healthBarTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/hearts.png"))
@@ -49,7 +49,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load lifebar texture");
     }
     textures[HealthBar] = healthBarTex;
-    textureCoordinates[HealthBar] = sf::IntRect(SpriteCoordinates::HealthBarX * 16, SpriteCoordinates::HealthBarY * 16, 16, 16);
+    textureCoordinates[HealthBar] = sf::IntRect(SpriteCoordinates::HealthBarX * rectWidthHealthBar, SpriteCoordinates::HealthBarY * rectHeightHealthBar, rectWidthHealthBar, rectHeightHealthBar);
 
     sf::Texture enemyTex;
     if (!enemyTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Enemy.png"))
@@ -57,7 +57,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load enemy texture");
     }
     textures[Enemy] = enemyTex;
-    textureCoordinates[Enemy] = sf::IntRect(SpriteCoordinates::EnemyX * 125, SpriteCoordinates::EnemyY * 125, 125, 125);
+    textureCoordinates[Enemy] = sf::IntRect(SpriteCoordinates::EnemyX, SpriteCoordinates::EnemyY, rectWidthEnemy, rectHeightEnemy);
 
     sf::Texture arrowTex;
     if (!arrowTex.loadFromFile("SFMLGame/Assets/Player/Textures/Arrow.png"))
@@ -65,7 +65,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load arrow texture");
     }
     textures[Arrow] = arrowTex;
-    textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * 32, SpriteCoordinates::arrowY * 20, 16, 10);
+    textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * rectWidthArrow , SpriteCoordinates::arrowY * rectHeightArrow , rectWidthArrow , rectHeightArrow);
 }
 
 sf::Texture TextureLoader::GetTexture(TextureType type) const
@@ -88,9 +88,9 @@ sf::Vector2i TextureLoader::GetSpriteCoordinates(TextureType type) const
 {
     switch (type)
     {
-    case Tile_Grass:
+    case TileGrass:
         return sf::Vector2i(grassX, grassY);
-    case Tile_Dirt:
+    case TileDirt:
         return sf::Vector2i(groundX, groundY);
     case Obstacle:
         return sf::Vector2i(obstacleX, obstacleY);

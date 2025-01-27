@@ -20,7 +20,7 @@ Arrow *ArrowPool::GetArrow()
             {
                 continue;
             }
-            
+
             arrow->isActive = true;
             return arrow.get();
         }

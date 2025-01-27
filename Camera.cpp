@@ -39,3 +39,10 @@ int Camera::CalculateLeftBound() const
     return view.getCenter().x - view.getSize().x / 2.f;
 }
 
+int Camera::CalculateRightBound() const
+{
+    return view.getCenter().x + view.getSize().x / 2.f;
+}
+
+
+

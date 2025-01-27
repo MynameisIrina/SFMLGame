@@ -27,7 +27,5 @@ private:
     float offsetX = 200.f;
     float offsetY = 10.f;
     float scale = 2;
-    sf::Color opaque = sf::Color(255,255,255, 255);
-    sf::Color transparent = sf::Color(255,255,255, 0);
 
 };

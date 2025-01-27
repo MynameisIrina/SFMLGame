@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <iostream>
+#include "Utilities.h"
 
 Player::Player(const std::shared_ptr<TextureLoader> &txLoader) : txLoader(txLoader) {}
 
@@ -15,9 +16,9 @@ void Player::Initialize(sf::Vector2f position, int maxHealth, float scale)
 
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
     sprite.setScale(scale, scale);
-    sprite.setPosition(position);
 
-    boundingBoxPlayer = CreateBoundingBox();
+    boundingBoxPlayer = Utilities::CreateBoundingBox(sprite, position);
+    boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - 2 * boundingBoxOffsetX, sprite.getGlobalBounds().height));
 }
 
 void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles)
@@ -71,6 +72,7 @@ void Player::HandleHorizontalMovement(float dt, float leftBound)
     {
         velocity.x = horizontalVelocity;
     }
+
 }
 
 void Player::HandleVerticalMovement(float dt)
@@ -100,8 +102,8 @@ void Player::CheckCollisionSide(const std::vector<Tile> &tiles)
     bool isMovingRight = sprite.getScale().x > 0;
     float direction = isMovingRight ? 1.0f : -1.0f;
 
-    sf::Vector2f rayMiddle_Start = boundingBoxPlayer.getPosition() + sf::Vector2f(boundingBoxPlayer.getSize().x / 2, boundingBoxPlayer.getSize().y / 2);
-    sf::Vector2f rayMiddle_End = rayMiddle_Start + sf::Vector2f(direction * boundingBoxPlayer.getSize().x / 2 + epsilon, 0);
+    sf::Vector2f rayMiddle_Start = sprite.getPosition();
+    sf::Vector2f rayMiddle_End = rayMiddle_Start + sf::Vector2f(direction * boundingBoxPlayer.getSize().x + epsilon, 0);
 
     ray = RayCast::Ray(rayMiddle_Start, rayMiddle_End);
 
@@ -117,13 +119,19 @@ void Player::CheckCollisionSide(const std::vector<Tile> &tiles)
             HandleObstacleCollision();
         }
 
+        if (!IsPlayerProtected() && hitInfo.typeTile == Tile::Enemy)
+        {
+            std::cout << "Im here" << std::endl;
+            HandleEnemyCollision();
+        }
+
         if (isMovingRight)
         {
-            position.x = hitInfo.hitRect.getGlobalBounds().left - (boundingBoxPlayer.getGlobalBounds().width / 2 + epsilon) - epsilon;
+            position.x = hitInfo.hitRect.getGlobalBounds().left - (boundingBoxPlayer.getGlobalBounds().width) + epsilon;
         }
         else
         {
-            position.x = hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width + (boundingBoxPlayer.getGlobalBounds().width / 2 + epsilon) - epsilon;
+            position.x = hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width + boundingBoxPlayer.getGlobalBounds().width - (2 * epsilon);
         }
 
         collisionSide = true;
@@ -138,15 +146,14 @@ void Player::HandleObstacleCollision()
     DecreaseHealth();
 }
 
-sf::RectangleShape Player::CreateBoundingBox()
+void Player::HandleEnemyCollision()
 {
-    sf::RectangleShape boundingBox;
-    boundingBox.setSize(sf::Vector2f(sprite.getLocalBounds().width, sprite.getLocalBounds().height));
-    boundingBox.setFillColor(sf::Color::Transparent);
-    boundingBox.setOutlineColor(sf::Color::Red);
-    boundingBox.setOutlineThickness(1);
-    return boundingBox;
+    isBlinking = true;
+    blinkingTimer.restart();
+    loseLifeCooldown.restart();
+    DecreaseHealth();
 }
+
 
 void Player::Jump(bool jump, float dt)
 {
@@ -160,11 +167,12 @@ void Player::Jump(bool jump, float dt)
 
 void Player::ResetAnimation(int animYIndex)
 {
-    sprite.setTextureRect(sf::IntRect(0, animYIndex * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+    sprite.setTextureRect(sf::IntRect(TextureLoader::playerX + playerOffset_x, TextureLoader::playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer));
 }
 
 void Player::HandleBlinking()
 {
+    
     if (isBlinking)
     {
         if (IsPlayerProtected())
@@ -174,13 +182,13 @@ void Player::HandleBlinking()
 
                 if (isVisible)
                 {
-                    sprite.setColor(sf::Color(255, 255, 255, 0));
+                    sprite.setColor(Utilities::GetTransparentColor());
                     isVisible = !isVisible;
                 }
                 else
                 {
                     isVisible = !isVisible;
-                    sprite.setColor(sf::Color(255, 255, 255, 255));
+                    sprite.setColor(Utilities::GetOpaqueColor());
                 }
 
                 blinkingTimer.restart();
@@ -190,7 +198,7 @@ void Player::HandleBlinking()
     else
     {
         isVisible = true;
-        sprite.setColor(sf::Color(255, 255, 255, 255));
+        sprite.setColor(Utilities::GetOpaqueColor());
     }
 }
 
@@ -212,6 +220,11 @@ void Player::CheckCollisionGround(const std::vector<Tile> &tiles)
             if (!IsPlayerProtected() && type == Tile::Obstacle)
             {
                 HandleObstacleCollision();
+            }
+
+            if(!IsPlayerProtected() && type == Tile::Enemy)
+            {
+                HandleEnemyCollision();
             }
 
             boundBox.setOutlineColor(sf::Color::Green);
@@ -248,29 +261,29 @@ void Player::CalculateCurrAnimation(float dt)
             rebornAnimationTimer = 0.0f;
         }
 
-        if (currentAnim >= max_frames)
+        if (currentAnim >= maxFrames)
         {
             currentAnim = 0;
             isRespawnTimerRestarted = false;
         }
 
-        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::REBORN_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + playerOffset_x, AnimationPlayer::REBORN_Y * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer));
     }
     else
     {
         if (animationTimer >= animationInterval)
         {
-            currentAnim++;
+            currentAnim += 1;
 
             // if the player stopped moving, reset its animation
             bool stopped = !moveLeft && !moveRight;
-            if ((currentAnim >= max_frames || stopped) && !isJumping)
+            if ((currentAnim >= maxFrames || stopped) && !isJumping)
             {
                 currentAnim = 0;
                 ResetAnimation(AnimationPlayer::STOP_MOVING);
             }
             // if the player is jumping, play only one animation unit
-            else if (currentAnim >= max_frames && isJumping)
+            else if (currentAnim >= maxFrames && isJumping)
             {
                 currentAnim = 0;
                 ResetAnimation(AnimationPlayer::STOPP_JUMPING);
@@ -311,16 +324,16 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     if (moveRight)
     {
         sprite.setScale(scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + playerOffset_x, TextureLoader::playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer));
     }
     else if (moveLeft)
     {
         sprite.setScale(-scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationPlayer::TILE_SIZE, AnimationPlayer::MOVING_Y * AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE, AnimationPlayer::TILE_SIZE));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + playerOffset_x,TextureLoader::playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer));
     }
 
     sprite.setPosition(position);
-    boundingBoxPlayer.setPosition(sprite.getPosition().x - 16, sprite.getPosition().y + 10);
+    boundingBoxPlayer.setPosition(sprite.getPosition().x + boundingBoxOffsetX, sprite.getPosition().y);
 }
 
 void Player::Draw(const std::shared_ptr<sf::RenderTarget> rt)

@@ -15,4 +15,5 @@ public:
     void Update(const std::shared_ptr<Player>& player);
     sf::View GetView() const;
     int CalculateLeftBound() const;
+    int CalculateRightBound() const;
 };

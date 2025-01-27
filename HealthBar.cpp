@@ -1,6 +1,7 @@
 #include "HealthBar.h"
 #include <iostream>
 #include "Player.h"
+#include "Utilities.h"
 
 
 HealthBar::HealthBar(const std::shared_ptr<TextureLoader>& txLoader): txLoader(txLoader) {}
@@ -40,12 +41,12 @@ void HealthBar::Update(const std::shared_ptr<Player>& player, const std::shared_
         if(i < currentHealth)
         {
             hearts[i].isActive = true;
-            hearts[i].sprite.setColor(opaque);
+            hearts[i].sprite.setColor(Utilities::GetOpaqueColor());
         }
         else
         {
             hearts[i].isActive = false;
-            hearts[i].sprite.setColor(transparent);
+            hearts[i].sprite.setColor(Utilities::GetTransparentColor());
         }
 
     }

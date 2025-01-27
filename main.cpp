@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Background.h"
 #include "Perlin.h"
-#include "Level_TileBased.h"
+#include "Level.h"
 #include "Camera.h"
 #include "Obstacle.h"
 #include "HealthBar.h"
@@ -30,26 +30,15 @@ int main()
 
     std::shared_ptr<HealthBar> healthBar = std::make_shared<HealthBar>(txLoader);
 
-    Level_TileBased level_tile(txLoader);
+    Level level(txLoader);
 
     Background background(txLoader);
-
 
     camera->Initialize();
     player->Initialize(sf::Vector2f(35.f, 20.f), 6, 2.5f);
     healthBar->Initialize(player, camera);
-    level_tile.Initialize();
+    level.Initialize();
     background.Initialize(window);
-    
-
-    sf::Sprite sprite = txLoader->SetSprite(TextureLoader::Arrow);
-    sprite.setPosition(10,10);
-
-    Arrow arrow(sprite);
-    sf::RectangleShape bb = arrow.CreateBoundingBox();
-
-
-
 
     // ----------------- INITIALIZE -----------------
 
@@ -72,14 +61,14 @@ int main()
 
         background.GenerateNewSprite(player);
         float leftBound = camera->CalculateLeftBound();
-        std::vector<Tile> tiles = level_tile.GetAllTiles();
+        std::vector<Tile> tiles = level.GetAllTiles();
         player->Jump(jumped, deltaTime);
         player->Update(moveRight, moveLeft, leftBound, respawn, deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
         // Flag to ensure respawn happens only once per key press
         static bool respawnPressed = false;
-        
-        level_tile.UpdateLevel(player, camera, deltaTime);
+
+        level.UpdateLevel(player, camera, deltaTime);
 
         camera->Update(player);
         healthBar->Update(player, camera);
@@ -89,10 +78,8 @@ int main()
         // ----------------- DRAW -----------------
         window->clear();
         background.Draw(window);
-        window->draw(sprite);
-        window->draw(bb);
         player->Draw(window);
-        level_tile.Draw(window);
+        level.Draw(window);
         healthBar->Draw(window);
         window->display();
         // ----------------- DRAW -----------------

@@ -1,15 +1,15 @@
 #include <iostream>
-#include "Level_TileBased.h"
+#include "Level.h"
+#include "Utilities.h"
 
-Level_TileBased::Level_TileBased(const std::shared_ptr<TextureLoader>& txLoader)
+Level::Level(const std::shared_ptr<TextureLoader> &txLoader)
     : txLoader(txLoader),
       obstacleManager(txLoader),
       enemyManager(txLoader) {}
 
-
-void Level_TileBased::Initialize()
+void Level::Initialize()
 {
-    grid.resize(GRID_HEIGHT, std::vector<Tile>(TOTAL_GRID_WIDTH, Tile(Tile::Tile_Type::Empty, sf::RectangleShape())));
+    grid.resize(gridHeight, std::vector<Tile>(totalGridWidth, Tile(Tile::Tile_Type::Empty, sf::RectangleShape())));
     patterns = {defaultPattern};
 
     int initialWidthPattern = GenerateDefaultTiles();
@@ -17,7 +17,7 @@ void Level_TileBased::Initialize()
     ShowGrid();
 }
 
-int Level_TileBased::GenerateDefaultTiles()
+int Level::GenerateDefaultTiles()
 {
     int currY = 8;
     int patternWidth = defaultPattern[0].size();
@@ -27,7 +27,7 @@ int Level_TileBased::GenerateDefaultTiles()
     for (int x = 0; x < patternWidth; x += patternWidth)
     {
         int newX = x + patternWidth;
-        bool inBounds = newX < GRID_WIDTH + BUFFER_COLUMNS;
+        bool inBounds = newX < gridWidth + bufferColumns;
         if (!inBounds)
         {
             break;
@@ -41,15 +41,15 @@ int Level_TileBased::GenerateDefaultTiles()
     return patternWidth;
 }
 
-void Level_TileBased::GenerateLevel(int startX)
+void Level::GenerateLevel(int startX)
 {
     const int numPatterns = patterns.size();
     const int minPlatformHeight = LevelBounds::minY;
-    int maxPlatformHeight = GRID_HEIGHT;
+    int maxPlatformHeight = gridHeight;
 
     for (const auto &pattern : patterns)
     {
-        maxPlatformHeight = std::min(maxPlatformHeight, static_cast<int>(GRID_HEIGHT - pattern.size()));
+        maxPlatformHeight = std::min(maxPlatformHeight, static_cast<int>(gridHeight - pattern.size()));
     }
     const int maxPlatformGap = 2;
 
@@ -58,19 +58,19 @@ void Level_TileBased::GenerateLevel(int startX)
     int patternWidth = 0;
     int patternHeight = 0;
 
-    int renderOffset = furthestTileX_totalGrid + TILE_SIZE;
+    int renderOffset = furthestTileX_totalGrid + tileSize;
 
-    for (int x = startX; x < GRID_WIDTH + BUFFER_COLUMNS; x += patternWidth)
+    for (int x = startX; x < gridWidth + bufferColumns; x += patternWidth)
     {
         const int patternIndex = rand() % numPatterns;
         patternWidth = patterns[patternIndex][0].size();
         patternHeight = patterns[patternIndex].size();
 
         // cut the width if it exceeds agrid bound
-        bool widthExceedsGridBounds = x + patternWidth > GRID_WIDTH + BUFFER_COLUMNS;
+        bool widthExceedsGridBounds = x + patternWidth > gridWidth + bufferColumns;
         if (widthExceedsGridBounds)
         {
-            patternWidth = GRID_WIDTH + BUFFER_COLUMNS - x;
+            patternWidth = gridWidth + bufferColumns - x;
         }
 
         previousY = currentY;
@@ -81,7 +81,7 @@ void Level_TileBased::GenerateLevel(int startX)
         // Prevent excessive height gaps between platforms
         currentY = AdjustPlatformHeight(previousY, currentY, maxPlatformGap, minPlatformHeight, maxPlatformHeight);
 
-        PlacePattern(patternIndex, patternHeight , patternWidth, x, currentY);
+        PlacePattern(patternIndex, patternHeight, patternWidth, x, currentY);
     }
 
     prevYFromLevelGen = currentY;
@@ -89,15 +89,15 @@ void Level_TileBased::GenerateLevel(int startX)
     // Check generated grid to differentiate between different tile types
     UpdateGround(startX, renderOffset);
 
-    obstacleManager.SpawnObstacles(grid, GRID_HEIGHT, GRID_WIDTH, TOTAL_GRID_WIDTH, furthestTileX_gridWidth, TILE_SIZE);
-    enemyManager.SpawnEnemies(grid, GRID_HEIGHT, GRID_WIDTH, TOTAL_GRID_WIDTH, furthestTileX_gridWidth, TILE_SIZE);
+    obstacleManager.SpawnObstacles(grid, gridHeight, gridWidth, totalGridWidth, furthestTileX_gridWidth, tileSize);
+    enemyManager.SpawnEnemies(grid, gridHeight, gridWidth, totalGridWidth, furthestTileX_gridWidth, tileSize);
 }
 
-int Level_TileBased::AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGap, int minHeight, int maxHeight) const
+int Level::AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGap, int minHeight, int maxHeight) const
 {
     bool currentPlatformBelow = currentHeight - previousHeight > maxGap;
     bool currentPlatformTooHigh = previousHeight - currentHeight > maxGap;
-    
+
     if (currentPlatformBelow)
     {
         currentHeight = previousHeight + maxGap;
@@ -115,10 +115,10 @@ int Level_TileBased::AdjustPlatformHeight(int previousHeight, int currentHeight,
     return currentHeight;
 }
 
-void Level_TileBased::UpdateLevel(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt)
+void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, float dt)
 {
     // Track when the player has moved a full tile
-    int playerPosInGameUnits = (int)(player->GetPosition().x) % TILE_SIZE;
+    int playerPosInGameUnits = (int)(player->GetPosition().x) % tileSize;
     bool playerAtThreshold = player->GetPosition().x >= camera->GetView().getCenter().x;
     bool playerHasReturned = player->GetPosition().x >= player->GetMaxPosition().x;
     bool shouldShiftGrid = playerAtThreshold && playerPosInGameUnits == 0 && playerHasReturned;
@@ -134,18 +134,17 @@ void Level_TileBased::UpdateLevel(const std::shared_ptr<Player>& player, const s
     }
 
     // Place new tiles when grid buffer becomes empty
-    if (shiftCounter == BUFFER_COLUMNS && playerHasReturned)
+    if (shiftCounter == bufferColumns && playerHasReturned)
     {
         shiftCounter = 0;
-        GenerateLevel(GRID_WIDTH);
-
+        GenerateLevel(gridWidth);
     }
 
     obstacleManager.MoveObstacles(dt);
     enemyManager.MoveEnemies(player, camera, dt);
 }
 
-void Level_TileBased::PlacePattern(int patternIndex, int height, int width, int currentX, int currentY)
+void Level::PlacePattern(int patternIndex, int height, int width, int currentX, int currentY)
 {
     std::vector<std::vector<int>> pattern = patterns[patternIndex];
 
@@ -161,41 +160,41 @@ void Level_TileBased::PlacePattern(int patternIndex, int height, int width, int 
     }
 }
 
-void Level_TileBased::TrackLastGeneratedPositions(int worldPositionX, int x)
+void Level::TrackLastGeneratedPositions(int worldPositionX, int x)
 {
     if (worldPositionX > furthestTileX_totalGrid)
     {
         furthestTileX_totalGrid = worldPositionX;
     }
 
-    if (x <= GRID_WIDTH && worldPositionX > furthestTileX_gridWidth)
+    if (x <= gridWidth && worldPositionX > furthestTileX_gridWidth)
     {
         furthestTileX_gridWidth = worldPositionX;
     }
 }
 
-void Level_TileBased::UpdateGrid(Tile tile, int x, int y)
+void Level::UpdateGrid(Tile tile, int x, int y)
 {
     grid[y][x] = tile;
 }
 
-void Level_TileBased::UpdateGround(int startX, float renderOffset)
+void Level::UpdateGround(int startX, float renderOffset)
 {
     int worldPositionX;
-    for (int y = 0; y < GRID_HEIGHT; ++y)
+    for (int y = 0; y < gridHeight; ++y)
     {
-        for (int x = startX; x < TOTAL_GRID_WIDTH; ++x)
+        for (int x = startX; x < totalGridWidth; ++x)
         {
             if (grid[y][x].GetType() == 1)
             {
                 // Calculate the global X position for the tile to render it in the correct screen location
-                worldPositionX = renderOffset + (x - startX) * TILE_SIZE;
+                worldPositionX = renderOffset + (x - startX) * tileSize;
 
                 TextureLoader::TextureType textureType = DetermineTextureType(x, y);
                 sf::Vector2i spriteCoordinates = txLoader->GetSpriteCoordinates(textureType);
                 Tile::Tile_Type tileType = DetermineTileType(x, y);
                 sf::Sprite sprite = CreateSprite(textureType, spriteCoordinates.x, spriteCoordinates.y, x, y, worldPositionX);
-                Tile tile = Tile(tileType, CreateBoundRec(sf::Vector2f(worldPositionX, y * TILE_SIZE)));
+                Tile tile = Tile(tileType, Utilities::CreateBoundingBox(sprite, sf::Vector2f(worldPositionX, y * tileSize)));
 
                 UpdateGrid(tile, x, y);
                 groundTiles.push_back(tile);
@@ -206,52 +205,40 @@ void Level_TileBased::UpdateGround(int startX, float renderOffset)
     }
 }
 
-
-
-sf::Sprite Level_TileBased::CreateSprite(TextureLoader::TextureType textureType, int spriteCoord_X, int spriteCoord_Y, int x, int y, int worldPositionX)
+sf::Sprite Level::CreateSprite(TextureLoader::TextureType textureType, int spriteCoord_X, int spriteCoord_Y, int x, int y, int worldPositionX)
 {
     sf::Sprite sprite(txLoader->SetSprite(textureType));
-    sprite.setTextureRect(sf::IntRect(spriteCoord_X * TILE_SIZE, spriteCoord_Y * TILE_SIZE, TILE_SIZE, TILE_SIZE));
-    sprite.setPosition(worldPositionX, y * TILE_SIZE);
+    sprite.setTextureRect(sf::IntRect(spriteCoord_X * tileSize, spriteCoord_Y * tileSize, tileSize, tileSize));
+    sprite.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2);
+    sprite.setPosition(worldPositionX, y * tileSize);
     return sprite;
 }
 
-void Level_TileBased::ShiftGridLeft()
+void Level::ShiftGridLeft()
 {
     if (!hasShifted)
     {
-        for (int y = 0; y < GRID_HEIGHT; ++y)
+        for (int y = 0; y < gridHeight; ++y)
         {
-            for (int x = 0; x < TOTAL_GRID_WIDTH - 1; ++x)
+            for (int x = 0; x < totalGridWidth - 1; ++x)
             {
                 grid[y][x] = grid[y][x + 1];
             }
-            grid[y][TOTAL_GRID_WIDTH - 1] = Tile(Tile::Tile_Type::Empty, sf::RectangleShape());
+            grid[y][totalGridWidth - 1] = Tile(Tile::Tile_Type::Empty, sf::RectangleShape());
         }
 
         shiftCounter++;
         hasShifted = true;
-        ShowGrid();
+        // ShowGrid();
     }
 }
 
-sf::RectangleShape Level_TileBased::CreateBoundRec(sf::Vector2f position)
+void Level::ShowGrid() const
 {
-    sf::RectangleShape boundingRec;
-    boundingRec.setSize(sf::Vector2f(32, 32));
-    boundingRec.setFillColor(sf::Color::Transparent);
-    boundingRec.setOutlineColor(sf::Color::Blue);
-    boundingRec.setOutlineThickness(1);
-    boundingRec.setPosition(position);
-    return boundingRec;
-}
-
-void Level_TileBased::ShowGrid() const
-{
-    for (int y = 0; y < GRID_HEIGHT; y++)
+    for (int y = 0; y < gridHeight; y++)
     {
         std::cout << "" << std::endl;
-        for (int x = 0; x < TOTAL_GRID_WIDTH; x++)
+        for (int x = 0; x < totalGridWidth; x++)
         {
             std::cout << grid[y][x].GetType();
         }
@@ -259,33 +246,38 @@ void Level_TileBased::ShowGrid() const
     std::cout << "" << std::endl;
 }
 
-std::vector<Tile> &Level_TileBased::GetAllTiles()
+std::vector<Tile> &Level::GetAllTiles()
 {
     // Keep the vector updated due to new generated tiles
     allTiles.clear();
 
-    // Combine ground and obstacle tiles to check collision
-    for(const auto& groundTile: groundTiles)
+    // Combine all tiles to check collision
+    for (const auto &groundTile : groundTiles)
     {
         allTiles.push_back(groundTile);
     }
 
     for (const auto &obstacle : obstacleManager.GetObstacles())
     {
-        allTiles.push_back(Tile(Tile::Obstacle, obstacle.GetBoundingBox()));
+        allTiles.push_back(Tile(Tile::Obstacle, obstacle->GetBoundingBox()));
+    }
+
+    for (const auto &enemy : enemyManager.GetEnemies())
+    {
+        allTiles.push_back(Tile(Tile::Enemy, enemy->GetBoundingBox()));
     }
 
     return allTiles;
 }
 
-void Level_TileBased::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
+void Level::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
 {
     for (const sf::Sprite &sprite : tileSprites)
     {
         window->draw(sprite);
     }
 
-    for(const auto& groundTile: groundTiles)
+    for (const auto &groundTile : groundTiles)
     {
         window->draw(groundTile.GetShape());
     }
@@ -294,18 +286,18 @@ void Level_TileBased::Draw(const std::shared_ptr<sf::RenderWindow>& window) cons
     enemyManager.Draw(window);
 }
 
-TextureLoader::TextureType Level_TileBased::DetermineTextureType(int x, int y) const
+TextureLoader::TextureType Level::DetermineTextureType(int x, int y) const
 {
     bool nothingAbove = grid[y - 1][x].GetType() == Tile::Tile_Type::Empty;
     if (y - 1 >= 0 && nothingAbove || y == 0)
     {
-        return TextureLoader::Tile_Grass;
+        return TextureLoader::TileGrass;
     }
 
-    return TextureLoader::Tile_Dirt;
+    return TextureLoader::TileDirt;
 }
 
-Tile::Tile_Type Level_TileBased::DetermineTileType(int x, int y) const
+Tile::Tile_Type Level::DetermineTileType(int x, int y) const
 {
     bool nothingAbove = grid[y - 1][x].GetType() == Tile::Tile_Type::Empty;
     if (y - 1 >= 0 && nothingAbove || y == 0)
