@@ -7,7 +7,7 @@ class EnemyArrow: public Enemy
 {
 
 public:
-    EnemyArrow(ArrowPool&& arrowPool);
+    EnemyArrow(ArrowPool arrowPool);
     void Initialize(sf::Sprite &sprite, sf::Vector2f startPosition, int health, int damage) override;
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, float dt) override;
     void UpdateAnimation(float dt) override;
@@ -15,6 +15,10 @@ public:
     void ShootArrow();
     void Draw(const std::shared_ptr<sf::RenderWindow> window) const override;
     void HandleShooting(const std::shared_ptr<Camera> camera);
+    void HandleRotation(const std::shared_ptr<Player>& player);
+    void HandleCollision(const std::shared_ptr<Player>& player);
+    void HandleDeath() override;
+    State GetState();
 
 private:
     ArrowPool arrowPool;
@@ -29,5 +33,4 @@ private:
     float rotation = 0.f;
     const float scale = 0.45f;
     bool isShooting = false;
-    //sf::RectangleShape boundingBox;
 };

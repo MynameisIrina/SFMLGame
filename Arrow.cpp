@@ -21,13 +21,13 @@ void Arrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<
         return;
     }
 
+
     if (isActive)
     {
         position.x -= velocity * dt;
 
-        bool outOfCameraBounds = position.x < camera->CalculateLeftBound();
+        bool outOfCameraBounds =  sprite.getScale().x < 0? position.x < camera->CalculateLeftBound() : position.x > camera->CalculateRightBound();
         bool collisionWithPlayer = Math::CheckRectCollision(player->GetBoundingBox().getGlobalBounds(), boundingBox.getGlobalBounds());
-
 
         if (outOfCameraBounds || collisionWithPlayer)
         {
@@ -51,13 +51,9 @@ sf::RectangleShape Arrow::GetBoundingBox()
     return boundingBox;
 }
 
+
 void Arrow::UpdateView()
 {
     sprite.setPosition(position);
     boundingBox.setPosition(position);
-}
-
-sf::Sprite Arrow::GetSprite()
-{
-    return sprite;
 }

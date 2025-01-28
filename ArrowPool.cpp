@@ -12,7 +12,7 @@ ArrowPool::ArrowPool(const std::shared_ptr<TextureLoader> &txLoader, int size)
 
 Arrow *ArrowPool::GetArrow()
 {
-    for (auto &arrow : arrowPool)
+    for (const auto &arrow : arrowPool)
     {
         if (!arrow->isActive)
         {
@@ -32,7 +32,7 @@ Arrow *ArrowPool::GetArrow()
     return arrowPool.back().get();
 }
 
-void ArrowPool::Update(const std::shared_ptr<Player> &player,const std::shared_ptr<Camera> camera,float dt)
+void ArrowPool::Update(const std::shared_ptr<Player> &player,const std::shared_ptr<Camera>& camera,float dt)
 {
     for (const auto &arrow : arrowPool)
     {
@@ -47,7 +47,7 @@ void ArrowPool::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
     {
         if (arrow->isActive)
         {
-            window->draw(arrow->GetSprite());
+            window->draw(arrow->sprite);
             window->draw(arrow->GetBoundingBox());
         }
     }

@@ -7,9 +7,10 @@
 
 class EnemyManager {
 public:
+
     EnemyManager(const std::shared_ptr<TextureLoader>& txLoader);
     void SpawnEnemies(std::vector<std::vector<Tile>> &grid, int maxY, int minX, int maxX, int startX, int tileSize);
-    void MoveEnemies(const std::shared_ptr<Player> player,const std::shared_ptr<Camera> camera, float dt);
+    void UpdateEnemies(const std::shared_ptr<Player> player,const std::shared_ptr<Camera> camera, float dt);
     void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
     bool CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, int currX, int currY);
     std::vector<std::unique_ptr<Enemy>>& GetEnemies();

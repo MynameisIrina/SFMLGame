@@ -6,6 +6,7 @@
 #include "HealthBar.h"
 #include "Tile.h"
 #include "RayCast.h"
+#include "ProjectilePool.h"
 
 class Player
 {
@@ -16,7 +17,6 @@ public:
         Protected,
         Dead
     };
-
 
 private:
     // Private data
@@ -37,6 +37,7 @@ private:
     sf::Clock respawnTimer;
     sf::Clock blinkingTimer;
     PlayerCondition currentState;
+    ProjectilePool &projectilePool;
 
     // const variables
     const float epsilon = 3.0f;
@@ -54,6 +55,9 @@ private:
     const int playerOffset_x = 4;
     const int tileSize = 32;
     const int boundingBoxOffsetX = 15;
+    const float projectileOffsetX = 10.f;
+    const float projectileVelocity = 500.f;
+    const float jumpVelocity = 280.f;
 
     // Flags
     bool isJumping = false;
@@ -68,6 +72,8 @@ private:
     bool isRespawnTimerRestarted = false;
     bool isVisible = true;
     bool isBlinking = false;
+    bool shoot = false;
+    bool isShooting = false;
 
     // Animation
     float animationTimer = 0.f;
@@ -79,13 +85,13 @@ private:
 
 public:
     // Constructor
-    Player(const std::shared_ptr<TextureLoader>& txLoader);
+    Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool);
 
     // Initialization
     void Initialize(sf::Vector2f pos, int maxHealthRef, float scale);
 
     // Update
-    void Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles);
+    void Update(bool moveRight, bool moveLeft, bool shoot, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles);
     void UpdateView(bool moveRight, bool moveLeft);
 
     // Movement
@@ -93,6 +99,8 @@ public:
     void HandleHorizontalMovement(float dt, float leftBound);
     void HandleVerticalMovement(float dt);
     void Jump(bool jumped, float dt);
+    void HandleShooting(bool shoot, float dt);
+    int CalculateDirection();
 
     // Collisions
     void CheckCollisionGround(const std::vector<Tile> &tiles);
@@ -102,7 +110,7 @@ public:
     sf::RectangleShape CreateBoundingBox();
 
     // Animation
-    void CalculateCurrAnimation(float dt);
+    void CalculateCurrentAnimation(float dt);
     void ResetAnimation(int animYIndex);
     void HandleBlinking();
 
@@ -111,24 +119,24 @@ public:
     void HandleRespawn(bool respawn);
 
     // Health
-    void IncreaseHealth();    // Increase health
-    void DecreaseHealth();    // Decrease health
-    int GetHealth() const;    // Get current health
-    int GetMaxHealth() const; // Get max health
-    bool IsPlayerProtected(); // Check if the player is protected
+    void IncreaseHealth(); 
+    void DecreaseHealth(); 
+    int GetHealth() const; 
+    int GetMaxHealth() const;
+    bool IsPlayerProtected();
+    void LoseLife();
+    void GainLife();
 
     // Other
     void Draw(const std::shared_ptr<sf::RenderTarget> rt);
     sf::Vector2f GetPosition() const;
     sf::Vector2f GetMaxPosition() const;
+    std::vector<Projectile*> GetActiveProjectiles();
     sf::RectangleShape GetBoundingBox();
     bool IsRespawn() const;
     bool IsMoveLeft() const;
 
     // Utilities
-    static void DrawRay(const std::shared_ptr<sf::RenderTarget>& rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color = sf::Color::Red);
+    static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color = sf::Color::Red);
 
-    // Health management methods
-    void LoseLife(); // Lose a life
-    void GainLife(); // Gain a life
 };

@@ -7,7 +7,7 @@ ObstacleManager::ObstacleManager(std::shared_ptr<TextureLoader> txLoaderRef): tx
     sprite = txLoader->SetSprite(TextureLoader::TextureType::Obstacle);
 }
 
-void ObstacleManager::MoveObstacles(float dt)
+void ObstacleManager::UpdateObstacles(float dt)
 {
     for (auto &obstacle : obstacles)
     {

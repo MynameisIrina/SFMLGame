@@ -9,6 +9,7 @@
 #include "Obstacle.h"
 #include "HealthBar.h"
 #include "Tile.h"
+#include "ProjectilePool.h"
 
 int main()
 {
@@ -24,7 +25,9 @@ int main()
     std::shared_ptr<TextureLoader> txLoader = std::make_shared<TextureLoader>();
     txLoader->Initialize();
 
-    std::shared_ptr<Player> player = std::make_shared<Player>(txLoader);
+    ProjectilePool projectilePool(10);
+
+    std::shared_ptr<Player> player = std::make_shared<Player>(txLoader, projectilePool);
 
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(window);
 
@@ -58,12 +61,13 @@ int main()
         bool moveLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
         bool jumped = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
         bool respawn = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
+        bool shoot = sf::Keyboard::isKeyPressed(sf::Keyboard::Enter);
 
         background.GenerateNewSprite(player);
         float leftBound = camera->CalculateLeftBound();
         std::vector<Tile> tiles = level.GetAllTiles();
         player->Jump(jumped, deltaTime);
-        player->Update(moveRight, moveLeft, leftBound, respawn, deltaTime, tiles);
+        player->Update(moveRight, moveLeft, shoot, leftBound, respawn, deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
         // Flag to ensure respawn happens only once per key press
         static bool respawnPressed = false;

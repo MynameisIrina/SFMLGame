@@ -140,8 +140,8 @@ void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared
         GenerateLevel(gridWidth);
     }
 
-    obstacleManager.MoveObstacles(dt);
-    enemyManager.MoveEnemies(player, camera, dt);
+    obstacleManager.UpdateObstacles(dt);
+    enemyManager.UpdateEnemies(player, camera, dt);
 }
 
 void Level::PlacePattern(int patternIndex, int height, int width, int currentX, int currentY)

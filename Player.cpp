@@ -1,19 +1,20 @@
 #include "Player.h"
 #include <iostream>
 #include "Utilities.h"
+#include "ProjectilePool.h"
 
-Player::Player(const std::shared_ptr<TextureLoader> &txLoader) : txLoader(txLoader) {}
+Player::Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool) : txLoader(txLoader), projectilePool(projectilePool) {}
 
 void Player::Initialize(sf::Vector2f position, int maxHealth, float scale)
 {
     this->position = position;
     this->maxHealth = maxHealth;
     this->scale = scale;
+
     health = maxHealth;
     condition = Normal;
 
     sprite = txLoader->SetSprite(TextureLoader::TextureType::Player);
-
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
     sprite.setScale(scale, scale);
 
@@ -21,16 +22,18 @@ void Player::Initialize(sf::Vector2f position, int maxHealth, float scale)
     boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - 2 * boundingBoxOffsetX, sprite.getGlobalBounds().height));
 }
 
-void Player::Update(bool moveRight, bool moveLeft, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles)
+void Player::Update(bool moveRight, bool moveLeft, bool shoot, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles)
 {
     this->respawn = respawn;
     this->moveLeft = moveLeft;
     this->moveRight = moveRight;
+    this->shoot = shoot;
 
     HandleRespawn(respawn);
     HandleFalling();
-    CalculateCurrAnimation(dt);
+    CalculateCurrentAnimation(dt);
     HandleVerticalMovement(dt);
+    HandleShooting(shoot, dt);
     HandleHorizontalMovement(dt, leftBound);
     CheckCollisionGround(tiles);
     CheckCollisionSide(tiles);
@@ -72,7 +75,6 @@ void Player::HandleHorizontalMovement(float dt, float leftBound)
     {
         velocity.x = horizontalVelocity;
     }
-
 }
 
 void Player::HandleVerticalMovement(float dt)
@@ -99,8 +101,7 @@ void Player::CheckCollisionSide(const std::vector<Tile> &tiles)
 {
     collisionSide = false;
 
-    bool isMovingRight = sprite.getScale().x > 0;
-    float direction = isMovingRight ? 1.0f : -1.0f;
+    int direction = CalculateDirection();
 
     sf::Vector2f rayMiddle_Start = sprite.getPosition();
     sf::Vector2f rayMiddle_End = rayMiddle_Start + sf::Vector2f(direction * boundingBoxPlayer.getSize().x + epsilon, 0);
@@ -121,11 +122,10 @@ void Player::CheckCollisionSide(const std::vector<Tile> &tiles)
 
         if (!IsPlayerProtected() && hitInfo.typeTile == Tile::Enemy)
         {
-            std::cout << "Im here" << std::endl;
             HandleEnemyCollision();
         }
 
-        if (isMovingRight)
+        if (direction > 0)
         {
             position.x = hitInfo.hitRect.getGlobalBounds().left - (boundingBoxPlayer.getGlobalBounds().width) + epsilon;
         }
@@ -154,15 +154,46 @@ void Player::HandleEnemyCollision()
     DecreaseHealth();
 }
 
-
 void Player::Jump(bool jump, float dt)
 {
     if (jump && !isJumping)
     {
         isJumping = true;
         collisionGround = false;
-        velocity.y = -280.f;
+        velocity.y = -jumpVelocity;
     }
+}
+
+void Player::HandleShooting(bool shoot, float dt)
+{
+    if (shoot && !isShooting)
+    {
+        Projectile *projectile = projectilePool.GetProjectile();
+
+        if (projectile != nullptr)
+        {
+            int direction = CalculateDirection();
+            projectile->position = direction > 0 ? sf::Vector2f(position.x + projectileOffsetX, position.y) : sf::Vector2f(position.x - projectileOffsetX, position.y);
+            projectile->velocity = direction > 0 ? projectileVelocity : -projectileVelocity;
+            isShooting = true;
+        }
+    }
+
+    // prevent continuous shooting
+    if (!shoot && isShooting)
+    {
+        isShooting = false;
+    }
+
+    projectilePool.Update(dt);
+}
+
+int Player::CalculateDirection()
+{
+    bool isMovingRight = sprite.getScale().x > 0;
+    int direction = isMovingRight ? 1.0f : -1.0f;
+
+    return direction;
 }
 
 void Player::ResetAnimation(int animYIndex)
@@ -172,7 +203,7 @@ void Player::ResetAnimation(int animYIndex)
 
 void Player::HandleBlinking()
 {
-    
+
     if (isBlinking)
     {
         if (IsPlayerProtected())
@@ -222,7 +253,7 @@ void Player::CheckCollisionGround(const std::vector<Tile> &tiles)
                 HandleObstacleCollision();
             }
 
-            if(!IsPlayerProtected() && type == Tile::Enemy)
+            if (!IsPlayerProtected() && type == Tile::Enemy)
             {
                 HandleEnemyCollision();
             }
@@ -232,14 +263,20 @@ void Player::CheckCollisionGround(const std::vector<Tile> &tiles)
             float overlapTop = playerBounds.top - (tileBounds.top + tileBounds.height);
             float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
 
-            if (overlapBottom <= 0.f && overlapBottom >= -5.f)
+            if (overlapBottom <= 0.f)
             {
+                // snapping
+                position.y = tileBounds.top - playerBounds.getSize().y / 2;
+
                 collisionGround = true;
                 isJumping = false;
                 continue;
             }
-            if (overlapTop <= 0.f && overlapTop >= -5.f)
+            if (overlapTop <= 0.f)
             {
+                // snapping
+                position.y = (tileBounds.top + tileBounds.height) + playerBounds.getSize().y / 2;
+
                 collisionTop = true;
                 continue;
             }
@@ -247,7 +284,7 @@ void Player::CheckCollisionGround(const std::vector<Tile> &tiles)
     }
 }
 
-void Player::CalculateCurrAnimation(float dt)
+void Player::CalculateCurrentAnimation(float dt)
 {
     // calculate current sprite sheet image
     animationTimer += dt;
@@ -329,7 +366,7 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     else if (moveLeft)
     {
         sprite.setScale(-scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + playerOffset_x,TextureLoader::playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + playerOffset_x, TextureLoader::playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer));
     }
 
     sprite.setPosition(position);
@@ -341,6 +378,7 @@ void Player::Draw(const std::shared_ptr<sf::RenderTarget> rt)
     rt->draw(sprite);
     rt->draw(boundingBoxPlayer);
     DrawRay(rt, ray.start, ray.end);
+    projectilePool.Draw(rt);
 }
 
 void Player::DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color)
@@ -405,6 +443,11 @@ bool Player::IsMoveLeft() const
 sf::Vector2f Player::GetMaxPosition() const
 {
     return maxPosition;
+}
+
+std::vector<Projectile*> Player::GetActiveProjectiles()
+{
+    return projectilePool.GetActiveProjectiles();
 }
 
 sf::RectangleShape Player::GetBoundingBox()

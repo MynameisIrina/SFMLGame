@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include "TextureLoader.h"
 #include "Player.h"
-#include "Math.h"
 
 class Arrow
 {
@@ -11,8 +10,9 @@ public:
     Arrow(sf::Sprite& sprite);
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, float dt);
     sf::RectangleShape GetBoundingBox();
+    void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, float dt);
     void UpdateView();
-    sf::Sprite GetSprite();
+    sf::Sprite sprite;
     bool isActive = false;
     sf::Vector2f position;
     float velocity;
@@ -20,5 +20,4 @@ public:
 
 private:
     sf::RectangleShape boundingBox;
-    sf::Sprite sprite;
 };

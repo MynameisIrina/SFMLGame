@@ -37,18 +37,29 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, in
     if (rand() % 4 == 0) 
     {
         grid[y][x] = Tile(Tile::Enemy, sf::RectangleShape());
-        ArrowPool pool(txLoader, 10);
-        std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>(std::move(pool));
+        
+        std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>((ArrowPool(txLoader, 10)));
         sf::Vector2f position{globalTileX , static_cast<float>(y * tileSize) - offsetY };
-        enemyArrow->Initialize(enemySprite, position, 100, 10);
+        enemyArrow->Initialize(enemySprite, position, 50, 10);
         enemies.push_back(std::move(enemyArrow));
     }
 }
 
-void EnemyManager::MoveEnemies(const std::shared_ptr<Player> player, const std::shared_ptr<Camera> camera, float dt)
+void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> player, const std::shared_ptr<Camera> camera, float dt)
 {
-    for (auto& enemy : enemies) {
-        enemy->Update(player, camera, dt);
+    for(auto it = enemies.begin(); it != enemies.end();)
+    {
+        if((*it)->GetState() == Enemy::State::Alive)
+        {
+            (*it)->Update(player, camera, dt);
+            it++;
+        }
+        else if((*it)->GetState()== Enemy::State::Dead)
+        {
+            (*it)->HandleDeath();
+            it = enemies.erase(it);
+        }
+
     }
 }
 

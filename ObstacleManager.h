@@ -17,7 +17,7 @@ private:
     const int obstacleProbability = 8;
 public:
     ObstacleManager(std::shared_ptr<TextureLoader> txLoaderRef);
-    void MoveObstacles(float dt);
+    void UpdateObstacles(float dt);
     void SpawnObstacles(std::vector<std::vector<Tile>> &grid,int startX, int startY, int totalGridWidth, int x, int tileSize);
     bool CanPlaceObstacle(const std::vector<std::vector<Tile>> &grid, int x, int y,  int maxX, int maxY);
     void PlaceObstacle(std::vector<std::vector<Tile>> &grid,  int gridWidth, int startX, int tileSize, int x, int y);
