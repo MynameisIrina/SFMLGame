@@ -8,9 +8,9 @@ class Arrow
 
 public:
     Arrow(sf::Sprite& sprite);
-    void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, float dt);
-    sf::RectangleShape GetBoundingBox();
-    void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, float dt);
+    void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, const float dt);
+    sf::RectangleShape GetBoundingBox() const;
+    void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, const float dt);
     void UpdateView();
     sf::Sprite sprite;
     bool isActive = false;

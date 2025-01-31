@@ -41,12 +41,12 @@ void HealthBar::Update(const std::shared_ptr<Player>& player, const std::shared_
         if(i < currentHealth)
         {
             hearts[i].isActive = true;
-            hearts[i].sprite.setColor(Utilities::GetOpaqueColor());
+            hearts[i].sprite.setColor(Utilities::GetOpaqueColor(sf::Color(255,255,255)));
         }
         else
         {
             hearts[i].isActive = false;
-            hearts[i].sprite.setColor(Utilities::GetTransparentColor());
+            hearts[i].sprite.setColor(Utilities::GetTransparentColor(sf::Color(255,255,255)));
         }
 
     }

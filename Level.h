@@ -24,22 +24,22 @@ public:
 
     Level(const std::shared_ptr<TextureLoader>& txLoaderRef);
     void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
-    void GenerateLevel(int startX);
-    void PlacePattern(int patternIndex, int height, int width, int currentX, int currentY);
+    void GenerateLevel(const int startX);
+    void PlacePattern(const int patternIndex, const int height, const int width, const int currentX, const int currentY);
     void ShowGrid() const;
-    void Initialize();
-    void UpdateGround(int curX, float v);
-    void UpdateLevel(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt);
+    void Initialize(const int firstPlatformHeight);
+    void UpdateGround(const int startX, const float renderOffset);
+    void UpdateLevel(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, const float dt);
     void ShiftGridLeft();
     int FindRightmostTileX();
     std::vector<Tile>& GetAllTiles();
     int GenerateDefaultTiles();
-    sf::Sprite CreateSprite(TextureLoader::TextureType type, int coordX, int coordY, int x, int y, int globalPositionX);
+    sf::Sprite CreateSprite(TextureLoader::TextureType type, const int coordX, const int coordY, const int x, const int y, const int globalPositionX);
     TextureLoader::TextureType DetermineTextureType(int x, int y) const;
     Tile::Tile_Type DetermineTileType(int x, int y) const;
     void TrackLastGeneratedPositions(int worldPositionX, int x);
-    void UpdateGrid(Tile tile, int x, int y);
-    int AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGap, int maxHeight, int minHeight) const;
+    void UpdateGrid(const Tile& tile, const int x, const int y);
+    int AdjustPlatformHeight(const int previousHeight, const int currentHeight, const int maxGap, const int maxHeight, const int minHeight) const;
 
 private:
     const int gridWidth = 25;
@@ -47,6 +47,7 @@ private:
     const int tileSize = 32;
     const int bufferColumns = 10;
     const int totalGridWidth = gridWidth + bufferColumns;
+    int firstPlatformHeight = 5;
 
     ObstacleManager obstacleManager;
     EnemyManager enemyManager;
@@ -70,8 +71,8 @@ private:
     int prevYFromLevelGen = 8;
 
     Pattern defaultPattern = {
-        {1, 1, 1},
-        {1, 1, 1}};
+        {1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1}};
 
     Pattern pattern1 = {
         {1, 1},

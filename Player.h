@@ -11,6 +11,7 @@
 class Player
 {
 public:
+
     enum PlayerCondition
     {
         Normal,
@@ -18,7 +19,19 @@ public:
         Dead
     };
 
+    enum State
+    {
+        Moving = 1 << 0,
+        Jumping = 1 << 1,
+        Shooting = 1 << 2,
+        Respawning = 1 << 3,
+        Blinking = 1 << 4
+    };
+
+    
+
 private:
+
     // Private data
     std::shared_ptr<TextureLoader> txLoader;
     sf::Sprite sprite;
@@ -27,9 +40,9 @@ private:
     sf::RectangleShape boundingBoxPlayer;
     RayCast::Ray ray{sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)};
     sf::Vector2f velocity = sf::Vector2f(100.f, 10.f);
-    sf::Vector2f saveLastPos = sf::Vector2f(35.f, 20.f);
-    sf::Vector2f respawnPos = sf::Vector2f(35.f, 20.f);
-    sf::Vector2f maxPosition = sf::Vector2f(35.f, 20.f);
+    sf::Vector2f saveLastPos;
+    sf::Vector2f respawnPos;
+    sf::Vector2f maxPosition;
     sf::Vector2f position;
     float scale;
     PlayerCondition condition;
@@ -38,6 +51,10 @@ private:
     sf::Clock blinkingTimer;
     PlayerCondition currentState;
     ProjectilePool &projectilePool;
+    int state;
+    float positionThresholdY;
+    int projectilesCount = 0;
+    int maxProjectileCount = 0;
 
     // const variables
     const float epsilon = 3.0f;
@@ -50,9 +67,6 @@ private:
     const float animationInterval = 0.1f;
     const float loseLifeDelay = 2.0f;
     const float blinkingInterval = 0.1f;
-    const int rectWidthPlayer = 22;
-    const int rectHeightPlayer = 16;
-    const int playerOffset_x = 4;
     const int tileSize = 32;
     const int boundingBoxOffsetX = 15;
     const float projectileOffsetX = 10.f;
@@ -60,19 +74,12 @@ private:
     const float jumpVelocity = 280.f;
 
     // Flags
-    bool isJumping = false;
     bool collisionGround = false;
     bool collisionSide = false;
     bool collisionTop = false;
-    bool respawn = false;
-    bool moveRight = false;
-    bool moveLeft = false;
-    bool atRespawnPos = false;
     bool collisionObstacle = false;
     bool isRespawnTimerRestarted = false;
     bool isVisible = true;
-    bool isBlinking = false;
-    bool shoot = false;
     bool isShooting = false;
 
     // Animation
@@ -88,18 +95,18 @@ public:
     Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool);
 
     // Initialization
-    void Initialize(sf::Vector2f pos, int maxHealthRef, float scale);
+    void Initialize(const sf::Vector2f position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
 
     // Update
-    void Update(bool moveRight, bool moveLeft, bool shoot, float leftBound, bool respawn, float dt, std::vector<Tile> &tiles);
-    void UpdateView(bool moveRight, bool moveLeft);
+    void Update(const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const float dt, const std::vector<Tile> &tiles);
+    void UpdateView(const bool moveRight, const bool moveLeft);
 
     // Movement
     void HandleFalling();
-    void HandleHorizontalMovement(float dt, float leftBound);
-    void HandleVerticalMovement(float dt);
-    void Jump(bool jumped, float dt);
-    void HandleShooting(bool shoot, float dt);
+    void HandleHorizontalMovement(const float dt, const float leftBound);
+    void HandleVerticalMovement(const float dt);
+    void Jump(const bool jumped, const float dt);
+    void HandleShooting(const bool shoot, const float dt);
     int CalculateDirection();
 
     // Collisions
@@ -110,13 +117,12 @@ public:
     sf::RectangleShape CreateBoundingBox();
 
     // Animation
-    void CalculateCurrentAnimation(float dt);
-    void ResetAnimation(int animYIndex);
+    void CalculateCurrentAnimation(const float dt);
+    void ResetAnimation(const int animYIndex);
     void HandleBlinking();
 
     // Respawn
-    void Respawn();
-    void HandleRespawn(bool respawn);
+    void HandleRespawn();
 
     // Health
     void IncreaseHealth(); 
@@ -128,15 +134,20 @@ public:
     void GainLife();
 
     // Other
-    void Draw(const std::shared_ptr<sf::RenderTarget> rt);
+    void Draw(const std::shared_ptr<sf::RenderTarget> rt) const;
     sf::Vector2f GetPosition() const;
     sf::Vector2f GetMaxPosition() const;
-    std::vector<Projectile*> GetActiveProjectiles();
-    sf::RectangleShape GetBoundingBox();
-    bool IsRespawn() const;
-    bool IsMoveLeft() const;
+    int GetProjectilesCount();
+    std::vector<Projectile*> GetActiveProjectiles() const;
+    sf::RectangleShape GetBoundingBox() const;
+    void ResetProjectilesCount();
 
     // Utilities
     static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color = sf::Color::Red);
 
+    // States
+    void SetState(State stateToSet);
+    void ClearState(State stateToClear);
+    bool IfStateActive(State stateToCheck);
+    void InputToState(bool moveRight, bool moveLeft, bool shoot, bool respawn);
 };

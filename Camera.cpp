@@ -14,13 +14,15 @@ void Camera::Update(const std::shared_ptr<Player>& player)
     const sf::Vector2f playerPosition = player->GetPosition();
     const float viewThreshold = view.getCenter().x;
 
-    if (player->IsRespawn())
+
+    if (player->IfStateActive(Player::State::Respawning))
     {
         view.setCenter(window->getSize().x / 2, window->getSize().y / 2);
     }
     else
     {
-        if (playerPosition.x >= viewThreshold && !player->IsMoveLeft())
+        bool isMovingRight = player->CalculateDirection() > 0 && (player->IfStateActive(Player::State::Moving));
+        if (playerPosition.x >= viewThreshold && isMovingRight)
         {
             view.setCenter(playerPosition.x, view.getSize().y / 2);
         }

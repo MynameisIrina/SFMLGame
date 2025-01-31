@@ -24,8 +24,8 @@ public:
 private:
     std::vector<Heart> hearts;
     std::shared_ptr<TextureLoader> txLoader;
-    float offsetX = 200.f;
-    float offsetY = 10.f;
-    float scale = 2;
+    const float offsetX = 200.f;
+    const float offsetY = 10.f;
+    const float scale = 2;
 
 };

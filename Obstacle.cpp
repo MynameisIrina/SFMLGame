@@ -4,41 +4,37 @@
 #include "Utilities.h"
 
 
-void Obstacle::Initialize(sf::Sprite& sprite, sf::Vector2f startPosition, float speed, float minX, float maxX)
+void Obstacle::Initialize(const sf::Sprite& sprite, const sf::Vector2f startPosition, const float speed, const float minX, const float maxX)
 {
     this->sprite = sprite;
-    this->position = startPosition;
+    position = startPosition;
     this->speed = speed;
     this->minX = minX;
     this->maxX = maxX;
     rotation = 0;
 
-    this->sprite.setOrigin(this->sprite.getGlobalBounds().width / 2, this->sprite.getGlobalBounds().height / 2);
-    boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
+    const sf::FloatRect localBounds = this->sprite.getLocalBounds();
+    this->sprite.setOrigin(localBounds.width * 0.5f, localBounds.height * 0.5f);
+
+    boundingBox = Utilities::CreateBoundingBox(this->sprite, position);
+    
+    // Adjust vertical position to account for bounding box height
+    this->position.y += boundingBox.getGlobalBounds().height * 0.5f;
 }
 
 void Obstacle::MoveObstacle(float dt)
 {
-    if (movingForward)
-    {
-        position.x += speed * dt;
-        rotation += rotationSpeed;
+    const float deltaMove = speed * dt;
+    const float deltaRotation = rotationSpeed * (movingForward ? 1.0f : -1.0f);
 
-        if (position.x >= maxX)
-        {
-            movingForward = false;
-        }
-    }
-    else
-    {
-        position.x -= speed * dt;
-        rotation -= rotationSpeed;
+    position.x += movingForward ? deltaMove : -deltaMove;
+    rotation += deltaRotation;
 
-        if (position.x <= minX)
-        {
-            movingForward = true;
-        }
-    }
+    movingForward = (position.x >= maxX) ? false : 
+                    (position.x <= minX) ? true : movingForward;
+
+
+    UpdateTexture();
 }
 
 void Obstacle::UpdateTexture()
@@ -63,7 +59,7 @@ sf::RectangleShape Obstacle::GetBoundingBox() const
     return boundingBox;
 }
 
-void Obstacle::CreateVisualLine(float minX, float maxX, float minY, float maxY)
+void Obstacle::CreateVisualLine(const float minX, const float maxX, const float minY, const float maxY)
 {
     line[0] = sf::Vertex(sf::Vector2f(minX, minY), sf::Color::Black);
     line[1] = sf::Vertex(sf::Vector2f(maxX, maxY), sf::Color::Black);

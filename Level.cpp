@@ -7,8 +7,10 @@ Level::Level(const std::shared_ptr<TextureLoader> &txLoader)
       obstacleManager(txLoader),
       enemyManager(txLoader) {}
 
-void Level::Initialize()
+void Level::Initialize(const int firstPlatformHeight)
 {
+    this->firstPlatformHeight = firstPlatformHeight;
+
     grid.resize(gridHeight, std::vector<Tile>(totalGridWidth, Tile(Tile::Tile_Type::Empty, sf::RectangleShape())));
     patterns = {defaultPattern};
 
@@ -19,7 +21,7 @@ void Level::Initialize()
 
 int Level::GenerateDefaultTiles()
 {
-    int currY = 8;
+    int currY = firstPlatformHeight;
     int patternWidth = defaultPattern[0].size();
     int patternHeight = defaultPattern.size();
 
@@ -28,10 +30,7 @@ int Level::GenerateDefaultTiles()
     {
         int newX = x + patternWidth;
         bool inBounds = newX < gridWidth + bufferColumns;
-        if (!inBounds)
-        {
-            break;
-        }
+        if (!inBounds) break;
 
         PlacePattern(0, patternHeight, patternWidth, x, currY);
     }
@@ -41,7 +40,7 @@ int Level::GenerateDefaultTiles()
     return patternWidth;
 }
 
-void Level::GenerateLevel(int startX)
+void Level::GenerateLevel(const int startX)
 {
     const int numPatterns = patterns.size();
     const int minPlatformHeight = LevelBounds::minY;
@@ -93,7 +92,7 @@ void Level::GenerateLevel(int startX)
     enemyManager.SpawnEnemies(grid, gridHeight, gridWidth, totalGridWidth, furthestTileX_gridWidth, tileSize);
 }
 
-int Level::AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGap, int minHeight, int maxHeight) const
+int Level::AdjustPlatformHeight(const int previousHeight, int currentHeight, const int maxGap, const int minHeight, const int maxHeight) const
 {
     bool currentPlatformBelow = currentHeight - previousHeight > maxGap;
     bool currentPlatformTooHigh = previousHeight - currentHeight > maxGap;
@@ -115,13 +114,13 @@ int Level::AdjustPlatformHeight(int previousHeight, int currentHeight, int maxGa
     return currentHeight;
 }
 
-void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, float dt)
+void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
 {
     // Track when the player has moved a full tile
-    int playerPosInGameUnits = (int)(player->GetPosition().x) % tileSize;
-    bool playerAtThreshold = player->GetPosition().x >= camera->GetView().getCenter().x;
-    bool playerHasReturned = player->GetPosition().x >= player->GetMaxPosition().x;
-    bool shouldShiftGrid = playerAtThreshold && playerPosInGameUnits == 0 && playerHasReturned;
+    const int playerPosInGameUnits = (int)(player->GetPosition().x) % tileSize;
+    const bool playerAtThreshold = player->GetPosition().x >= camera->GetView().getCenter().x;
+    const bool playerHasReturned = player->GetPosition().x >= player->GetMaxPosition().x;
+    const bool shouldShiftGrid = playerAtThreshold && playerPosInGameUnits == 0 && playerHasReturned;
 
     if (shouldShiftGrid)
     {
@@ -144,7 +143,7 @@ void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared
     enemyManager.UpdateEnemies(player, camera, dt);
 }
 
-void Level::PlacePattern(int patternIndex, int height, int width, int currentX, int currentY)
+void Level::PlacePattern(const int patternIndex, const int height, const int width, const int currentX, const int currentY)
 {
     std::vector<std::vector<int>> pattern = patterns[patternIndex];
 
@@ -160,7 +159,7 @@ void Level::PlacePattern(int patternIndex, int height, int width, int currentX, 
     }
 }
 
-void Level::TrackLastGeneratedPositions(int worldPositionX, int x)
+void Level::TrackLastGeneratedPositions(const int worldPositionX, const int x)
 {
     if (worldPositionX > furthestTileX_totalGrid)
     {
@@ -173,12 +172,12 @@ void Level::TrackLastGeneratedPositions(int worldPositionX, int x)
     }
 }
 
-void Level::UpdateGrid(Tile tile, int x, int y)
+void Level::UpdateGrid(const Tile& tile, const int x, const int y)
 {
     grid[y][x] = tile;
 }
 
-void Level::UpdateGround(int startX, float renderOffset)
+void Level::UpdateGround(const int startX, const float renderOffset)
 {
     int worldPositionX;
     for (int y = 0; y < gridHeight; ++y)
@@ -194,22 +193,24 @@ void Level::UpdateGround(int startX, float renderOffset)
                 sf::Vector2i spriteCoordinates = txLoader->GetSpriteCoordinates(textureType);
                 Tile::Tile_Type tileType = DetermineTileType(x, y);
                 sf::Sprite sprite = CreateSprite(textureType, spriteCoordinates.x, spriteCoordinates.y, x, y, worldPositionX);
-                Tile tile = Tile(tileType, Utilities::CreateBoundingBox(sprite, sf::Vector2f(worldPositionX, y * tileSize)));
+                sf::RectangleShape bb = Utilities::CreateBoundingBox(sprite, sf::Vector2f(worldPositionX, y * tileSize));
+                bb.setOrigin(sprite.getOrigin().x ,sprite.getOrigin().y);
+                Tile tile = Tile(tileType, bb);
 
                 UpdateGrid(tile, x, y);
-                groundTiles.push_back(tile);
-                tileSprites.push_back(sprite);
+                groundTiles.emplace_back(tile);
+                tileSprites.emplace_back(sprite);
                 TrackLastGeneratedPositions(worldPositionX, x);
             }
         }
     }
 }
 
-sf::Sprite Level::CreateSprite(TextureLoader::TextureType textureType, int spriteCoord_X, int spriteCoord_Y, int x, int y, int worldPositionX)
+sf::Sprite Level::CreateSprite(const TextureLoader::TextureType textureType, const int spriteCoord_X, const int spriteCoord_Y, const int x, const int y, const int worldPositionX)
 {
     sf::Sprite sprite(txLoader->SetSprite(textureType));
     sprite.setTextureRect(sf::IntRect(spriteCoord_X * tileSize, spriteCoord_Y * tileSize, tileSize, tileSize));
-    sprite.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2);
+    //sprite.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2);
     sprite.setPosition(worldPositionX, y * tileSize);
     return sprite;
 }
@@ -250,6 +251,7 @@ std::vector<Tile> &Level::GetAllTiles()
 {
     // Keep the vector updated due to new generated tiles
     allTiles.clear();
+    allTiles.reserve(groundTiles.size() + obstacleManager.GetObstacles().size() + enemyManager.GetEnemies().size());
 
     // Combine all tiles to check collision
     for (const auto &groundTile : groundTiles)
@@ -286,7 +288,7 @@ void Level::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
     enemyManager.Draw(window);
 }
 
-TextureLoader::TextureType Level::DetermineTextureType(int x, int y) const
+TextureLoader::TextureType Level::DetermineTextureType(const int x, const int y) const
 {
     bool nothingAbove = grid[y - 1][x].GetType() == Tile::Tile_Type::Empty;
     if (y - 1 >= 0 && nothingAbove || y == 0)
@@ -297,7 +299,7 @@ TextureLoader::TextureType Level::DetermineTextureType(int x, int y) const
     return TextureLoader::TileDirt;
 }
 
-Tile::Tile_Type Level::DetermineTileType(int x, int y) const
+Tile::Tile_Type Level::DetermineTileType(const int x, const int y) const
 {
     bool nothingAbove = grid[y - 1][x].GetType() == Tile::Tile_Type::Empty;
     if (y - 1 >= 0 && nothingAbove || y == 0)

@@ -8,7 +8,7 @@ class EnemyArrow: public Enemy
 
 public:
     EnemyArrow(ArrowPool arrowPool);
-    void Initialize(sf::Sprite &sprite, sf::Vector2f startPosition, int health, int damage) override;
+    void Initialize(const sf::Sprite &sprite, const sf::Vector2f startPosition, const int health, const int damage) override;
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, float dt) override;
     void UpdateAnimation(float dt) override;
     void UpdateView() override;

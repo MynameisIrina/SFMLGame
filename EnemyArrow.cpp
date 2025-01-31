@@ -4,21 +4,25 @@
 
 EnemyArrow::EnemyArrow(ArrowPool arrowPool) : arrowPool(std::move(arrowPool)) {}
 
-void EnemyArrow::Initialize(sf::Sprite &sprite, sf::Vector2f startPosition, int health, int damage)
+void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f startPosition, const int health, const int damage)
 {
     this->sprite = sprite;
     this->position = startPosition;
     this->health = health;
     this->damage = damage;
 
-    this->sprite.setOrigin(this->sprite.getLocalBounds().width / 2, this->sprite.getLocalBounds().height / 2);
-    this->sprite.setScale(-1.f * scale, 1.f * scale);
+    const auto &bounds = this->sprite.getLocalBounds();
+    this->sprite.setOrigin(bounds.width * 0.5f, bounds.height * 0.5f);
+    this->sprite.setScale(-1.f * scale, scale);
 
     boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
 }
 
 void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, float dt)
 {
+    if (state == State::Dead)
+        return;
+
     Enemy::Update(player, camera, dt);
     HandleShooting(camera);
     HandleCollision(player);
@@ -28,7 +32,7 @@ void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared
     arrowPool.Update(player, camera, dt);
 }
 
-void EnemyArrow::UpdateAnimation(float dt)
+void EnemyArrow::UpdateAnimation(const float dt)
 {
     animationTimer += dt;
     if (animationTimer >= animationInterval)
@@ -54,15 +58,12 @@ void EnemyArrow::UpdateView()
 
 void EnemyArrow::HandleShooting(const std::shared_ptr<Camera> camera)
 {
-    bool enemyWithinCamera = camera->CalculateRightBound() >= position.x;
+    const bool enemyWithinCamera = camera->CalculateRightBound() >= position.x;
 
-    if (enemyWithinCamera && !isShooting)
+    if (enemyWithinCamera && !isShooting && (currentAnim == shootingFrame))
     {
-        if (currentAnim == shootingFrame)
-        {
-            isShooting = true;
-            ShootArrow();
-        }
+        isShooting = true;
+        ShootArrow();
     }
 }
 
@@ -80,18 +81,20 @@ void EnemyArrow::HandleRotation(const std::shared_ptr<Player> &player)
 
 void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
 {
-    std::vector<Projectile *> activeProjectiles = player->GetActiveProjectiles();
+    const auto &activeProjectiles = player->GetActiveProjectiles();
+    const auto &enemyBounds = boundingBox.getGlobalBounds();
 
     for (const auto &activeProjectile : activeProjectiles)
     {
-        if (activeProjectile != nullptr)
+        if (activeProjectile != nullptr && activeProjectile->isActive)
         {
-            bool collision = Math::CheckRectCollision(activeProjectile->circle.getGlobalBounds(), boundingBox.getGlobalBounds());
+            bool collision = Math::CheckRectCollision(activeProjectile->circle.getGlobalBounds(), enemyBounds);
 
             if (collision)
             {
                 activeProjectile->isActive = false;
                 Enemy::TakeDamage(damage);
+                break;
             }
         }
     }
@@ -113,16 +116,21 @@ void EnemyArrow::ShootArrow()
     if (arrow != nullptr)
     {
         bool facingLeft = this->sprite.getScale().x < 0;
-        arrow->position = facingLeft ? sf::Vector2f(position.x - shootingOffset, position.y) : sf::Vector2f(position.x + shootingOffset, position.y);
-        arrow->sprite.setScale(facingLeft ? arrow->sprite.getScale().x : -1 * arrow->sprite.getScale().x, arrow->sprite.getScale().y);
+        const float xOffset = facingLeft ? -shootingOffset : shootingOffset;
+        arrow->position = sf::Vector2f(position.x + xOffset, position.y);
+        arrow->sprite.setScale(facingLeft ? arrow->sprite.getScale().x
+                                          : -arrow->sprite.getScale().x,
+                               arrow->sprite.getScale().y);
         arrow->velocity = facingLeft ? velocity : -velocity;
     }
 }
 
 void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {
-    Enemy::Draw(window);
+    if (state == State::Dead)
+        return;
 
+    Enemy::Draw(window);
     arrowPool.Draw(window);
     window->draw(boundingBox);
 }

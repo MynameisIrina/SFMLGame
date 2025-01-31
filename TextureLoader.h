@@ -14,7 +14,8 @@ public:
         Obstacle,
         HealthBar,
         Enemy,
-        Arrow
+        Arrow,
+        ProjectileBar
     };
 
     enum SpriteCoordinates
@@ -32,7 +33,9 @@ public:
         EnemyX = 0,
         EnemyY = 0,
         arrowX = 2,
-        arrowY = 0
+        arrowY = 0,
+        projectileBarX = 1,
+        projectileBarY = 0
     };
 
     
@@ -42,7 +45,7 @@ public:
     sf::Sprite SetSprite(TextureType type);
     sf::Vector2i GetSpriteCoordinates(TextureType type) const;
 
-private:
+
     const int rectWidthDefault = 32;
     const int rectHeightDefault = 32;
     const int tileSizeHealthBar = 16;
@@ -55,6 +58,10 @@ private:
     const int rectHeightEnemy = 128;
     const int rectWidthArrow = 16;
     const int rectHeightArrow = 10;
+    const int rectWidthProjectileBar = 48;
+    const int rectHeightProjectileBar = 12;
+
+private:
 
     std::map <TextureType, sf::Texture> textures;
     std::map<TextureType, sf::IntRect> textureCoordinates;

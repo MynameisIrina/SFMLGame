@@ -10,6 +10,7 @@
 #include "HealthBar.h"
 #include "Tile.h"
 #include "ProjectilePool.h"
+#include "ProjectileBar.h"
 
 int main()
 {
@@ -33,14 +34,17 @@ int main()
 
     std::shared_ptr<HealthBar> healthBar = std::make_shared<HealthBar>(txLoader);
 
+    std::shared_ptr<ProjectileBar> projectileBar = std::make_shared<ProjectileBar>(); 
+
     Level level(txLoader);
 
     Background background(txLoader);
 
     camera->Initialize();
-    player->Initialize(sf::Vector2f(35.f, 20.f), 6, 2.5f);
+    player->Initialize(sf::Vector2f(30.f, 8.f * 32.f - 50.f), 6, 5, 2.5f, window->getSize().y);
     healthBar->Initialize(player, camera);
-    level.Initialize();
+    projectileBar->Initialize(player, camera);
+    level.Initialize(8);
     background.Initialize(window);
 
     // ----------------- INITIALIZE -----------------
@@ -66,16 +70,16 @@ int main()
         background.GenerateNewSprite(player);
         float leftBound = camera->CalculateLeftBound();
         std::vector<Tile> tiles = level.GetAllTiles();
+
         player->Jump(jumped, deltaTime);
         player->Update(moveRight, moveLeft, shoot, leftBound, respawn, deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
-        // Flag to ensure respawn happens only once per key press
-        static bool respawnPressed = false;
 
         level.UpdateLevel(player, camera, deltaTime);
 
         camera->Update(player);
         healthBar->Update(player, camera);
+        projectileBar->Update(player, camera, deltaTime);
 
         // ----------------- UPDATE----------------
 
@@ -85,6 +89,7 @@ int main()
         player->Draw(window);
         level.Draw(window);
         healthBar->Draw(window);
+        projectileBar->Draw(window);
         window->display();
         // ----------------- DRAW -----------------
     }

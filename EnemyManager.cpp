@@ -7,7 +7,7 @@ EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader>& txLoader)
     enemySprite = txLoader->SetSprite(TextureLoader::TextureType::Enemy);
 }
 
-void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, int maxY, int minX, int maxX, int startX, int tileSize)
+void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int startX, const int tileSize)
 {
     for (int y = 0; y < maxY - 1; ++y) {
         for (int x = minX; x < maxX - 1; ++x) {
@@ -18,13 +18,17 @@ void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, int maxY, 
     }
 }
 
-bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, int currX, int currY)
+bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, const int currX, const int currY)
 {
-    bool noTileCurrent = grid[currY][currX].GetType() == 0;
-    bool threeConsecutiveTilesUnderneath = ((grid[currY + 1][currX].GetType() == 2) && (grid[currY + 1][currX + 1].GetType() == 2) && (grid[currY + 1][currX - 1].GetType() == 2));
-    bool noTilesAlongPath = (grid[currY][currX + 1].GetType() == 0 && grid[currY][currX - 1].GetType() == 0);
+    const auto& currentRow = grid[currY];
+    const auto& bottomRow = grid[currY + 1];
 
-    if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath)
+    bool noTileCurrent = currentRow[currX].GetType() == 0;
+    bool threeConsecutiveTilesUnderneath = ((bottomRow[currX].GetType() == 2) && (bottomRow[currX + 1].GetType() == 2) && (bottomRow[currX - 1].GetType() == 2));
+    bool noTilesAlongPath = (currentRow[currX + 1].GetType() == 0 && currentRow[currX - 1].GetType() == 0);
+    bool noEnemiesNear = (currentRow[currX + 1].GetType() != 4 && currentRow[currX - 1].GetType() != 4);
+
+    if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noEnemiesNear)
     {
         return true;
     }
@@ -37,9 +41,9 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, in
     if (rand() % 4 == 0) 
     {
         grid[y][x] = Tile(Tile::Enemy, sf::RectangleShape());
-        
+
         std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>((ArrowPool(txLoader, 10)));
-        sf::Vector2f position{globalTileX , static_cast<float>(y * tileSize) - offsetY };
+        sf::Vector2f position{globalTileX , static_cast<float>(y * tileSize)};
         enemyArrow->Initialize(enemySprite, position, 50, 10);
         enemies.push_back(std::move(enemyArrow));
     }
@@ -65,7 +69,7 @@ void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> player, const std
 
 void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow> window) const
 {
-    for (auto& enemy : enemies) {
+    for (const auto& enemy : enemies) {
         enemy->Draw(window);
     }
 }

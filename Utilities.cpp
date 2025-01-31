@@ -2,37 +2,46 @@
 #include <iostream>
 
 
-sf::RectangleShape Utilities::CreateBoundingBox(sf::Sprite& sprite, sf::Vector2f position)
+sf::RectangleShape Utilities::CreateBoundingBox(const sf::Sprite& sprite, const sf::Vector2f position)
 {
-    sf::FloatRect spriteBounds = sprite.getGlobalBounds();
+    const sf::FloatRect spriteBounds = sprite.getGlobalBounds();
+    const float halfWidth = spriteBounds.width / 2.0f;
+    const float halfHeight = spriteBounds.height / 2.0f;
+
     sf::RectangleShape boundingBox(sf::Vector2f(spriteBounds.width, spriteBounds.height));;
     boundingBox.setFillColor(sf::Color::Transparent);
     boundingBox.setOutlineColor(sf::Color::Blue);
     boundingBox.setOutlineThickness(1);
     boundingBox.setPosition(position);
-    boundingBox.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2);
+    boundingBox.setOrigin(halfWidth, halfHeight);
     return boundingBox;
 }
 
-sf::CircleShape Utilities::CreateBoundingCircle(sf::Sprite &sprite, sf::Vector2f position)
+sf::CircleShape Utilities::CreateBoundingCircle(const sf::Sprite &sprite, const sf::Vector2f position)
 {
-    sf::FloatRect spriteBounds = sprite.getGlobalBounds();
-    float radius = std::max(spriteBounds.width, spriteBounds.height) / 2.0f;
+    const sf::FloatRect spriteBounds = sprite.getGlobalBounds();
+    const float radius = std::max(spriteBounds.width, spriteBounds.height) / 2.0f;
+    const float halfWidth = spriteBounds.width / 2.0f;
+    const float halfHeight = spriteBounds.height / 2.0f;
+
     sf::CircleShape boundingCircle(radius);;
     boundingCircle.setFillColor(sf::Color::Transparent);
     boundingCircle.setOutlineColor(sf::Color::Blue);
     boundingCircle.setOutlineThickness(1);
     boundingCircle.setPosition(position);
-    boundingCircle.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2);
+    boundingCircle.setOrigin(halfWidth, halfHeight);
     return boundingCircle;
 }
 
-sf::Color Utilities::GetOpaqueColor()
+sf::Color Utilities::GetOpaqueColor(const sf::Color color) 
 {
-    return  sf::Color(255, 255, 255, 255);
+    return sf::Color(color.r, color.g, color.b, color.a);
 }
 
-sf::Color Utilities::GetTransparentColor()
+sf::Color Utilities::GetTransparentColor(const sf::Color color)
 {
-    return  sf::Color(255, 255, 255, 0);
+    return sf::Color(color.r, color.g, color.b, 0);
 }
+
+
+
