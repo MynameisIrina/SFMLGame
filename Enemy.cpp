@@ -29,7 +29,7 @@ sf::RectangleShape Enemy::GetBoundingBox() const
     return boundingBox;
 }
 
-void Enemy::Draw(const std::shared_ptr<sf::RenderWindow> window) const
+void Enemy::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
     if(state == Dead) return;
     window->draw(sprite);
