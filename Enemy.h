@@ -2,6 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Player.h"
+#include "CollectibleManager.h"
+
 
 class Enemy {
 public:
@@ -19,13 +21,13 @@ public:
     virtual void Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt);
     virtual void UpdateView() = 0;
     virtual void UpdateAnimation(float dt) = 0;
-    virtual void HandleDeath() = 0;
+    virtual void HandleDeath(CollectibleManager& collectibleManager) = 0;
 
 
     void TakeDamage(int amount);
     State GetState() const;
     sf::RectangleShape GetBoundingBox() const; 
-    virtual void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
+    virtual void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
 
 protected:
     State state;

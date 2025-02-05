@@ -5,7 +5,9 @@
 Level::Level(const std::shared_ptr<TextureLoader> &txLoader)
     : txLoader(txLoader),
       obstacleManager(txLoader),
-      enemyManager(txLoader) {}
+      enemyManager(txLoader),
+      collectibleManager(txLoader) {}
+
 
 void Level::Initialize(const int firstPlatformHeight)
 {
@@ -140,7 +142,8 @@ void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared
     }
 
     obstacleManager.UpdateObstacles(dt);
-    enemyManager.UpdateEnemies(player, camera, dt);
+    enemyManager.UpdateEnemies(player, camera, collectibleManager, dt);
+    collectibleManager.UpdateCollectibles(dt);
 }
 
 void Level::PlacePattern(const int patternIndex, const int height, const int width, const int currentX, const int currentY)
@@ -286,6 +289,7 @@ void Level::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
 
     obstacleManager.Draw(window);
     enemyManager.Draw(window);
+    collectibleManager.Draw(window);
 }
 
 TextureLoader::TextureType Level::DetermineTextureType(const int x, const int y) const

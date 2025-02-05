@@ -8,16 +8,16 @@ class EnemyArrow: public Enemy
 
 public:
     EnemyArrow(ArrowPool arrowPool);
-    void Initialize(const sf::Sprite &sprite, const sf::Vector2f startPosition, const int health, const int damage) override;
-    void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, float dt) override;
-    void UpdateAnimation(float dt) override;
+    void Initialize(const sf::Sprite &sprite, const sf::Vector2f position, const int health, const int damage) override;
+    void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, const float dt) override;
+    void UpdateAnimation(const float dt) override;
     void UpdateView() override;
     void ShootArrow();
-    void Draw(const std::shared_ptr<sf::RenderWindow> window) const override;
-    void HandleShooting(const std::shared_ptr<Camera> camera);
+    void Draw(const std::shared_ptr<sf::RenderWindow>& window) const override;
+    void HandleShooting(const std::shared_ptr<Camera>& camera);
     void HandleRotation(const std::shared_ptr<Player>& player);
     void HandleCollision(const std::shared_ptr<Player>& player);
-    void HandleDeath() override;
+    void HandleDeath(CollectibleManager& collectibleManager) override;
     State GetState();
 
 private:

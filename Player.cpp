@@ -257,7 +257,7 @@ int Player::CalculateDirection()
 
 void Player::ResetAnimation(int animYIndex)
 {
-    sprite.setTextureRect(sf::IntRect(TextureLoader::playerX + txLoader->playerOffsetX, TextureLoader::playerY * txLoader->rectHeightPlayer, txLoader->rectWidthPlayer, txLoader->rectHeightPlayer));
+    sprite.setTextureRect(sf::IntRect(TextureLoader::playerX + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
 }
 
 void Player::HandleBlinking()
@@ -350,7 +350,7 @@ void Player::CalculateCurrentAnimation(const float dt)
             isRespawnTimerRestarted = false;
         }
 
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + txLoader->playerOffsetX, AnimationPlayer::REBORN_Y * txLoader->rectHeightPlayer, txLoader->rectWidthPlayer, txLoader->rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
     }
     else
     {
@@ -400,12 +400,12 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     if (moveRight)
     {
         sprite.setScale(scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + txLoader->playerOffsetX, TextureLoader::playerY * txLoader->rectHeightPlayer, txLoader->rectWidthPlayer, txLoader->rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
     }
     else if (moveLeft)
     {
         sprite.setScale(-scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + txLoader->playerOffsetX, TextureLoader::playerY * txLoader->rectHeightPlayer, txLoader->rectWidthPlayer, txLoader->rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
     }
 
     sprite.setPosition(position);

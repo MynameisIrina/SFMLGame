@@ -17,7 +17,6 @@ public:
     void UpdateAnimation();
     void AddVisualEffects(const float dt);
 
-
 private:
     std::shared_ptr<TextureLoader> txLoader;
     sf::RectangleShape projectileBar;
@@ -34,4 +33,5 @@ private:
     float blinkingInterval = 0.4f;
     bool isVisible = false;
     const sf::Color color = sf::Color(150, 0, 0, 255);
+    int maxProjectiles;
 };

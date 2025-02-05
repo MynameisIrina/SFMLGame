@@ -15,7 +15,8 @@ public:
         HealthBar,
         Enemy,
         Arrow,
-        ProjectileBar
+        ProjectileBar,
+        Coin
     };
 
     enum SpriteCoordinates
@@ -35,7 +36,9 @@ public:
         arrowX = 2,
         arrowY = 0,
         projectileBarX = 1,
-        projectileBarY = 0
+        projectileBarY = 0,
+        coinX = 0,
+        coinY = 0
     };
 
     
@@ -46,20 +49,23 @@ public:
     sf::Vector2i GetSpriteCoordinates(TextureType type) const;
 
 
-    const int rectWidthDefault = 32;
-    const int rectHeightDefault = 32;
-    const int tileSizeHealthBar = 16;
-    const int playerOffsetX = 4;
-    const int rectWidthPlayer = 22;
-    const int rectHeightPlayer = 16;
-    const int rectWidthHealthBar = 16;
-    const int rectHeightHealthBar = 16;
-    const int rectWidthEnemy = 128;
-    const int rectHeightEnemy = 128;
-    const int rectWidthArrow = 16;
-    const int rectHeightArrow = 10;
-    const int rectWidthProjectileBar = 48;
-    const int rectHeightProjectileBar = 12;
+    static const int rectWidthDefault = 32;
+    static const int rectHeightDefault = 32;
+    static const int tileSizeHealthBar = 16;
+    static const int playerOffsetX = 4;
+    static const int rectWidthPlayer = 22;
+    static const int rectHeightPlayer = 16;
+    static const int rectWidthHealthBar = 16;
+    static const int rectHeightHealthBar = 16;
+    static const int rectWidthEnemy = 128;
+    static const int rectHeightEnemy = 128;
+    static const int rectWidthArrow = 16;
+    static const int rectHeightArrow = 10;
+    static const int rectWidthProjectileBar = 48;
+    static const int rectHeightProjectileBar = 12;
+    static const int rectWidthCoin = 25;
+    static const int rectHeightCoin = 30;
+    static const int coinOffsetX = 4;
 
 private:
 

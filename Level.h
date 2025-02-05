@@ -7,6 +7,7 @@
 #include "ObstacleManager.h"
 #include "Tile.h"
 #include "EnemyManager.h"
+#include "CollectibleManager.h"
 
 class Level
 {
@@ -51,6 +52,8 @@ private:
 
     ObstacleManager obstacleManager;
     EnemyManager enemyManager;
+    CollectibleManager collectibleManager;
+    
     std::vector<Tile> allTiles;
 
     using Pattern = std::vector<std::vector<int>>;

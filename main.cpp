@@ -11,6 +11,7 @@
 #include "Tile.h"
 #include "ProjectilePool.h"
 #include "ProjectileBar.h"
+#include <cstdlib>
 
 int main()
 {

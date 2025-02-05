@@ -67,13 +67,13 @@ void TextureLoader::Initialize()
     textures[Arrow] = arrowTex;
     textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * rectWidthArrow , SpriteCoordinates::arrowY * rectHeightArrow , rectWidthArrow , rectHeightArrow);
 
-    // sf::Texture projectileBarTex;
-    // if (!projectileBarTex.loadFromFile("SFMLGame/Assets/UI/ProjectileBar.png"))
-    // {
-    //     throw std::runtime_error("Failed to load projectile bar texture");
-    // }
-    // textures[ProjectileBar] = projectileBarTex;
-    // textureCoordinates[ProjectileBar] = sf::IntRect(SpriteCoordinates::projectileBarX * rectWidthProjectileBar , SpriteCoordinates::projectileBarY * rectHeightProjectileBar , rectWidthProjectileBar , rectHeightProjectileBar);
+    sf::Texture coinTex;
+    if (!coinTex.loadFromFile("SFMLGame/Assets/UI/coin_rotate.png"))
+    {
+        throw std::runtime_error("Failed to load coin texture");
+    }
+    textures[Coin] = coinTex;
+    textureCoordinates[Coin] = sf::IntRect(SpriteCoordinates::coinX * rectWidthCoin + coinOffsetX , SpriteCoordinates::coinY * rectHeightCoin , rectWidthCoin , rectHeightCoin);
 }
 
 sf::Texture TextureLoader::GetTexture(TextureType type) const

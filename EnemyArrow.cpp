@@ -1,13 +1,15 @@
 #include "EnemyArrow.h"
 #include "Utilities.h"
 #include "Projectile.h"
+#include "Coin.h"
+#include "Collectible.h"
 
 EnemyArrow::EnemyArrow(ArrowPool arrowPool) : arrowPool(std::move(arrowPool)) {}
 
-void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f startPosition, const int health, const int damage)
+void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f position, const int health, const int damage)
 {
     this->sprite = sprite;
-    this->position = startPosition;
+    this->position = position;
     this->health = health;
     this->damage = damage;
 
@@ -18,7 +20,7 @@ void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f startPo
     boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
 }
 
-void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, float dt)
+void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
 {
     if (state == State::Dead)
         return;
@@ -56,7 +58,7 @@ void EnemyArrow::UpdateView()
     boundingBox.setPosition(position);
 }
 
-void EnemyArrow::HandleShooting(const std::shared_ptr<Camera> camera)
+void EnemyArrow::HandleShooting(const std::shared_ptr<Camera>& camera)
 {
     const bool enemyWithinCamera = camera->CalculateRightBound() >= position.x;
 
@@ -100,9 +102,15 @@ void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
     }
 }
 
-void EnemyArrow::HandleDeath()
+void EnemyArrow::HandleDeath(CollectibleManager& collectibleManager)
 {
+    if(state == Dead)
+    {
+        std::unique_ptr<Collectible> collectible = collectibleManager.CreateCoin(position);
+        collectibleManager.AddCollectible(std::move(collectible));
+    }
 }
+
 
 Enemy::State EnemyArrow::GetState()
 {
@@ -125,7 +133,7 @@ void EnemyArrow::ShootArrow()
     }
 }
 
-void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow> window) const
+void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
     if (state == State::Dead)
         return;

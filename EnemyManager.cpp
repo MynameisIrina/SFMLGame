@@ -49,7 +49,7 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, in
     }
 }
 
-void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> player, const std::shared_ptr<Camera> camera, float dt)
+void EnemyManager::UpdateEnemies(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, CollectibleManager& collectibleManager, float dt)
 {
     for(auto it = enemies.begin(); it != enemies.end();)
     {
@@ -60,7 +60,7 @@ void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> player, const std
         }
         else if((*it)->GetState()== Enemy::State::Dead)
         {
-            (*it)->HandleDeath();
+            (*it)->HandleDeath(collectibleManager);
             it = enemies.erase(it);
         }
 
