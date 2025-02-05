@@ -10,6 +10,6 @@ enum AnimationPlayer
     STOPP_JUMPING = 41,
     STOP_MOVING = 4,
     REBORN_X = 0,
-    REBORN_Y = 37,
+    REBORN_Y = 75,
     TILE_SIZE = 32
 };

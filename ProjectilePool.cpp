@@ -1,6 +1,6 @@
 #include "ProjectilePool.h"
 
-ProjectilePool::ProjectilePool(int size)
+ProjectilePool::ProjectilePool(const int size)
 {
     for(int i = 0; i < size; i++)
     {
@@ -29,13 +29,13 @@ Projectile *ProjectilePool::GetProjectile()
     return projectiles.back().get();
 }
 
-void ProjectilePool::Update(float dt)
+void ProjectilePool::Update(const std::shared_ptr<Camera> &camera, const float dt)
 {
     for(const auto& projectile: projectiles)
     {
         if(projectile->isActive)
         {
-            projectile->Update(dt);
+            projectile->Update(camera, dt);
         }
     }
 }

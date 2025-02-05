@@ -1,7 +1,7 @@
 #include "CollectibleManager.h"
 #include "Coin.h"
 
-CollectibleManager::CollectibleManager(const std::shared_ptr<TextureLoader> txLoader)
+CollectibleManager::CollectibleManager(const std::shared_ptr<TextureLoader>& txLoader)
 {
     this->sprite = txLoader->SetSprite(TextureLoader::Coin);
 }
@@ -26,10 +26,18 @@ std::unique_ptr<Collectible> CollectibleManager::CreateCoin(const sf::Vector2f& 
     return coin;
 }
 
-void CollectibleManager::UpdateCollectibles(float dt)
+void CollectibleManager::UpdateCollectibles(const std::shared_ptr<Player>& player, const float dt)
 {
-    for (auto &collectible : collectibles)
+    for(auto it = collectibles.begin(); it != collectibles.end();)
     {
-        collectible->Update(dt);
+        if((*it)->isPickedUp)
+        {
+            it = collectibles.erase(it);
+            continue;
+        }
+        
+        (*it)->Update(player,dt);
+        it++;
+
     }
 }

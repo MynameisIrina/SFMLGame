@@ -7,7 +7,7 @@ void Enemy::Update(const std::shared_ptr<Player>& player, const std::shared_ptr<
     if(state == Dead) return;
 }
 
-void Enemy::TakeDamage(int amount)
+void Enemy::TakeDamage(const int amount)
 {
     if(state == Dead) return;
 

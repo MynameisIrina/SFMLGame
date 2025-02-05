@@ -11,7 +11,7 @@
 #include "Tile.h"
 #include "ProjectilePool.h"
 #include "ProjectileBar.h"
-#include <cstdlib>
+#include "CoinBar.h"
 
 int main()
 {
@@ -37,6 +37,8 @@ int main()
 
     std::shared_ptr<ProjectileBar> projectileBar = std::make_shared<ProjectileBar>(); 
 
+    std::shared_ptr<CoinBar> coinBar = std::make_shared<CoinBar>(txLoader);
+
     Level level(txLoader);
 
     Background background(txLoader);
@@ -45,6 +47,7 @@ int main()
     player->Initialize(sf::Vector2f(30.f, 8.f * 32.f - 50.f), 6, 5, 2.5f, window->getSize().y);
     healthBar->Initialize(player, camera);
     projectileBar->Initialize(player, camera);
+    coinBar->Initialize(player, camera);
     level.Initialize(8);
     background.Initialize(window);
 
@@ -73,13 +76,14 @@ int main()
         std::vector<Tile> tiles = level.GetAllTiles();
 
         player->Jump(jumped, deltaTime);
-        player->Update(moveRight, moveLeft, shoot, leftBound, respawn, deltaTime, tiles);
+        player->Update(camera, moveRight, moveLeft, shoot, leftBound, respawn, deltaTime, tiles);
         player->UpdateView(moveRight, moveLeft);
 
         level.UpdateLevel(player, camera, deltaTime);
 
         camera->Update(player);
         healthBar->Update(player, camera);
+        coinBar->Update(player, camera);
         projectileBar->Update(player, camera, deltaTime);
 
         // ----------------- UPDATE----------------
@@ -90,6 +94,7 @@ int main()
         player->Draw(window);
         level.Draw(window);
         healthBar->Draw(window);
+        coinBar->Draw(window);
         projectileBar->Draw(window);
         window->display();
         // ----------------- DRAW -----------------

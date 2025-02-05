@@ -5,17 +5,15 @@
 class CollectibleManager
 {
 
-public: 
+public:
 
-CollectibleManager(const std::shared_ptr<TextureLoader> txLoader);  
-void AddCollectible(std::unique_ptr<Collectible> collectible);
-void Draw(const std::shared_ptr<sf::RenderWindow> &window) const;
-std::unique_ptr<Collectible> CreateCoin(const sf::Vector2f& position);
-void UpdateCollectibles(float dt);
+    CollectibleManager(const std::shared_ptr<TextureLoader>& txLoader);
+    void AddCollectible(std::unique_ptr<Collectible> collectible);
+    void Draw(const std::shared_ptr<sf::RenderWindow> &window) const;
+    std::unique_ptr<Collectible> CreateCoin(const sf::Vector2f &position);
+    void UpdateCollectibles(const std::shared_ptr<Player>& player ,const float dt);
 
 private:
-
-sf::Sprite sprite;
-std::vector<std::unique_ptr<Collectible>> collectibles;
-
+    sf::Sprite sprite;
+    std::vector<std::unique_ptr<Collectible>> collectibles;
 };

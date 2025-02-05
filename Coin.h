@@ -9,7 +9,7 @@ public:
     void Pickup(const std::shared_ptr<Player> &player) override;
     void ConvertEnemyToCoin(sf::Sprite &sprite, const sf::Vector2f position);
     void Initialize(sf::Sprite &sprite, const sf::Vector2f position);
-    void Update(float dt) override;
+    void Update(const std::shared_ptr<Player>& player, const float dt) override;
     void UpdateAnimation(float dt);
     void UpdateView();
 

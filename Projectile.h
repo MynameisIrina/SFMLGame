@@ -1,12 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Camera.h"
+
 
 class Projectile
 {
 
 public:
     Projectile();
-    void Update(float dt);
+    void Update(const std::shared_ptr<Camera> &camera, const float dt);
     void UpdateView();
 
     sf::Sprite sprite;

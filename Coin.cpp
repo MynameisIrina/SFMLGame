@@ -14,8 +14,9 @@ void Coin::Initialize(sf::Sprite &sprite, const sf::Vector2f position)
     boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
 }
 
-void Coin::Update(float dt)
+void Coin::Update(const std::shared_ptr<Player>& player, const float dt)
 {
+    Collectible::Update(player, dt);
     UpdateAnimation(dt);
     UpdateView();
 }   

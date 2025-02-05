@@ -29,7 +29,7 @@ void Player::Initialize(const sf::Vector2f position, const int maxHealth, const 
     boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - 2 * boundingBoxOffsetX, sprite.getGlobalBounds().height));
 }
 
-void Player::Update(const bool moveRight, const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const float dt, const std::vector<Tile> &tiles)
+void Player::Update(const std::shared_ptr<Camera> &camera, const bool moveRight, const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const float dt, const std::vector<Tile> &tiles)
 {
     // std::bitset<4> stateBits(state);
     // std::cout << "Player States: " << stateBits << std::endl;
@@ -63,7 +63,7 @@ void Player::Update(const bool moveRight, const bool moveLeft, const bool shoot,
     CheckCollisionSide(tiles);
     HandleFalling();
     HandleBlinking();
-    projectilePool.Update(dt);
+    projectilePool.Update(camera, dt);
 }
 
 void Player::InputToState(bool moveRight, bool moveLeft, bool shoot, bool respawn)
@@ -267,7 +267,7 @@ void Player::HandleBlinking()
     {
         if (blinkingTimer.getElapsedTime().asSeconds() >= blinkingInterval)
         {
-            sprite.setColor(isVisible ? Utilities::GetTransparentColor(sf::Color(255,255,255)) : Utilities::GetOpaqueColor(sf::Color(255,255,255)));
+            sprite.setColor(isVisible ? Utilities::GetTransparentColor(sf::Color(255, 255, 255)) : Utilities::GetOpaqueColor(sf::Color(255, 255, 255)));
             isVisible = !isVisible;
             blinkingTimer.restart();
         }
@@ -275,7 +275,7 @@ void Player::HandleBlinking()
     else
     {
         isVisible = true;
-        sprite.setColor(Utilities::GetOpaqueColor(sf::Color(255,255,255)));
+        sprite.setColor(Utilities::GetOpaqueColor(sf::Color(255, 255, 255)));
     }
 }
 
@@ -336,7 +336,7 @@ void Player::CalculateCurrentAnimation(const float dt)
     animationTimer += dt;
     rebornAnimationTimer += dt;
 
-    if (isRespawnTimerRestarted && respawnTimer.getElapsedTime().asSeconds() <= rebirth_animation_duration)
+    if (IsInRebirth())
     {
         if (rebornAnimationTimer >= rebirth_animation_interval)
         {
@@ -350,7 +350,7 @@ void Player::CalculateCurrentAnimation(const float dt)
             isRespawnTimerRestarted = false;
         }
 
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer) , TextureLoader::rectWidthPlayer, 31));
     }
     else
     {
@@ -373,6 +373,7 @@ void Player::CalculateCurrentAnimation(const float dt)
             }
             animationTimer = 0.f;
         }
+
     }
 }
 
@@ -408,8 +409,18 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
         sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
     }
 
-    sprite.setPosition(position);
-    boundingBoxPlayer.setPosition(sprite.getPosition().x + boundingBoxOffsetX, sprite.getPosition().y);
+
+    if(IsInRebirth())
+    {
+        sprite.setPosition(position - sf::Vector2f(0, rebirthVerticaloffset));
+        boundingBoxPlayer.setPosition(sprite.getPosition().x + boundingBoxOffsetX, sprite.getPosition().y + rebirthVerticaloffset);
+    }
+    else
+    {
+        sprite.setPosition(position);
+        boundingBoxPlayer.setPosition(sprite.getPosition().x + boundingBoxOffsetX, sprite.getPosition().y);
+
+    }
 }
 
 void Player::Draw(const std::shared_ptr<sf::RenderTarget> rt) const
@@ -512,6 +523,21 @@ sf::RectangleShape Player::GetBoundingBox() const
 void Player::ResetProjectilesCount()
 {
     projectilesCount = maxProjectileCount;
+}
+
+void Player::PickUpCoin()
+{
+    coinsCollected++;
+}
+
+int Player::GetCoins()
+{
+    return coinsCollected;
+}
+
+bool Player::IsInRebirth()
+{
+    return isRespawnTimerRestarted && respawnTimer.getElapsedTime().asSeconds() <= rebirth_animation_duration;
 }
 
 sf::Vector2f Player::GetPosition() const

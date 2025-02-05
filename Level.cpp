@@ -143,7 +143,7 @@ void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared
 
     obstacleManager.UpdateObstacles(dt);
     enemyManager.UpdateEnemies(player, camera, collectibleManager, dt);
-    collectibleManager.UpdateCollectibles(dt);
+    collectibleManager.UpdateCollectibles(player, dt);
 }
 
 void Level::PlacePattern(const int patternIndex, const int height, const int width, const int currentX, const int currentY)

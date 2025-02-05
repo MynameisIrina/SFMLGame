@@ -20,11 +20,11 @@ public:
     virtual void Initialize(const sf::Sprite &sprite, const sf::Vector2f startPosition, const int health, const int damage) = 0;
     virtual void Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt);
     virtual void UpdateView() = 0;
-    virtual void UpdateAnimation(float dt) = 0;
+    virtual void UpdateAnimation(const float dt) = 0;
     virtual void HandleDeath(CollectibleManager& collectibleManager) = 0;
 
 
-    void TakeDamage(int amount);
+    void TakeDamage(const int amount);
     State GetState() const;
     sf::RectangleShape GetBoundingBox() const; 
     virtual void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;

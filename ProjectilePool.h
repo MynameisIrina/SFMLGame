@@ -1,15 +1,16 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Projectile.h"
+#include "Camera.h"
 
 class ProjectilePool
 {
 
 public:
 
-    ProjectilePool(int size);
+    ProjectilePool(const int size);
     Projectile* GetProjectile();
-    void Update(float dt);
+    void Update(const std::shared_ptr<Camera> &camera, const float dt);
     void Draw(const std::shared_ptr<sf::RenderTarget> &rt) const;
     std::vector<Projectile*> GetActiveProjectiles();
 

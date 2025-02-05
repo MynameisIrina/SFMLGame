@@ -28,7 +28,6 @@ public:
         Blinking = 1 << 4
     };
 
-    
 
 private:
 
@@ -55,6 +54,7 @@ private:
     float positionThresholdY;
     int projectilesCount = 0;
     int maxProjectileCount = 0;
+    int coinsCollected = 0;
 
     // const variables
     const float epsilon = 3.0f;
@@ -72,6 +72,7 @@ private:
     const float projectileOffsetX = 10.f;
     const float projectileVelocity = 500.f;
     const float jumpVelocity = 280.f;
+    const float rebirthVerticaloffset = 35.f;
 
     // Flags
     bool collisionGround = false;
@@ -98,7 +99,7 @@ public:
     void Initialize(const sf::Vector2f position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
 
     // Update
-    void Update(const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const float dt, const std::vector<Tile> &tiles);
+    void Update(const std::shared_ptr<Camera> &camera, const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const float dt, const std::vector<Tile> &tiles);
     void UpdateView(const bool moveRight, const bool moveLeft);
 
     // Movement
@@ -141,6 +142,9 @@ public:
     std::vector<Projectile*> GetActiveProjectiles() const;
     sf::RectangleShape GetBoundingBox() const;
     void ResetProjectilesCount();
+    void PickUpCoin();
+    int GetCoins();
+    bool IsInRebirth();
 
     // Utilities
     static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color = sf::Color::Red);
