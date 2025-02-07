@@ -41,8 +41,6 @@ void Coin::UpdateView()
     sprite.setTextureRect(sf::IntRect(currentAnim * frameSize + TextureLoader::coinOffsetX , 0, TextureLoader::rectWidthCoin, TextureLoader::rectHeightCoin));
 }
 
-void Coin::Pickup(const std::shared_ptr<Player> &player) {}
-
 void Coin::ConvertEnemyToCoin(sf::Sprite &sprite, const sf::Vector2f position)
 {
     Initialize(sprite, position);

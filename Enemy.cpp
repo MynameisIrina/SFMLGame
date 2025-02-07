@@ -7,6 +7,15 @@ void Enemy::Update(const std::shared_ptr<Player>& player, const std::shared_ptr<
     if(state == Dead) return;
 }
 
+void Enemy::Respawn()
+{
+    state = Alive;
+    position = startPosition;
+    boundingBox = initialBoundingBox;
+    handledDeath = false;
+    health = maxHealth;
+}
+
 void Enemy::TakeDamage(const int amount)
 {
     if(state == Dead) return;

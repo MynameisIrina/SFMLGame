@@ -24,5 +24,5 @@ public:
     bool CanPlaceObstacle(const std::vector<std::vector<Tile>> &grid, int x, int y,  int maxX, int maxY);
     void PlaceObstacle(std::vector<std::vector<Tile>> &grid, const int minX, const int startX, const int tileSize, const int x, const int y);
     void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
-    std::vector<std::unique_ptr<Obstacle>>& GetObstacles();
+    std::vector<sf::RectangleShape>& GetObstaclesBoundingBoxes() const;
 };

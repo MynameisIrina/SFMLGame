@@ -17,8 +17,9 @@ public:
     void HandleShooting(const std::shared_ptr<Camera>& camera);
     void HandleRotation(const std::shared_ptr<Player>& player);
     void HandleCollision(const std::shared_ptr<Player>& player);
-    void HandleDeath(CollectibleManager& collectibleManager) override;
+    void HandleDeath(const std::shared_ptr<CollectibleManager>& collectibleManager) override;
     State GetState();
+    void ClearArrowPool();
 
 private:
     ArrowPool arrowPool;

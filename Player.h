@@ -8,6 +8,9 @@
 #include "RayCast.h"
 #include "ProjectilePool.h"
 
+class Enemy;
+class RespawnManager;
+
 class Player
 {
 public:
@@ -25,7 +28,8 @@ public:
         Jumping = 1 << 1,
         Shooting = 1 << 2,
         Respawning = 1 << 3,
-        Blinking = 1 << 4
+        Blinking = 1 << 4,
+        Idle = 1 << 5
     };
 
 
@@ -48,6 +52,7 @@ private:
     sf::Clock loseLifeCooldown;
     sf::Clock respawnTimer;
     sf::Clock blinkingTimer;
+    sf::Clock projectileResetTimer;
     PlayerCondition currentState;
     ProjectilePool &projectilePool;
     int state;
@@ -55,24 +60,28 @@ private:
     int projectilesCount = 0;
     int maxProjectileCount = 0;
     int coinsCollected = 0;
+    sf::Vector2f previousPosition;
+
 
     // const variables
     const float epsilon = 3.0f;
     const float horizontalVelocity = 100.0f;
     const float speed = 0.05f;
     const float gravity = 600.f;
-    const float rebirth_animation_duration = 0.8f;
-    const float rebirth_animation_interval = 0.1f;
+    const float rebirth_animation_duration = 1.f;
+    const float rebirth_animation_interval = 0.2f;
     const int maxFrames = 8;
     const float animationInterval = 0.1f;
     const float loseLifeDelay = 2.0f;
     const float blinkingInterval = 0.1f;
+    const float projectileResetInterval = 5.0f;
     const int tileSize = 32;
     const int boundingBoxOffsetX = 15;
     const float projectileOffsetX = 10.f;
     const float projectileVelocity = 500.f;
     const float jumpVelocity = 280.f;
-    const float rebirthVerticaloffset = 35.f;
+    const float rebirthVerticaloffset = 10.f;
+    const sf::Color normalColor = sf::Color(255,255,255);
 
     // Flags
     bool collisionGround = false;
@@ -82,6 +91,7 @@ private:
     bool isRespawnTimerRestarted = false;
     bool isVisible = true;
     bool isShooting = false;
+    bool coinsExchanged = false;
 
     // Animation
     float animationTimer = 0.f;
@@ -99,7 +109,7 @@ public:
     void Initialize(const sf::Vector2f position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
 
     // Update
-    void Update(const std::shared_ptr<Camera> &camera, const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const float dt, const std::vector<Tile> &tiles);
+    void Update(const std::shared_ptr<RespawnManager>& respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape>& enemiesShapes, std::vector<sf::RectangleShape>& obstaclesShapes);
     void UpdateView(const bool moveRight, const bool moveLeft);
 
     // Movement
@@ -111,8 +121,8 @@ public:
     int CalculateDirection();
 
     // Collisions
-    void CheckCollisionGround(const std::vector<Tile> &tiles);
-    void CheckCollisionSide(const std::vector<Tile> &tiles);
+    void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies, std::vector<sf::RectangleShape>& obstaclesShapes);
+    void CheckCollisionSide(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies, std::vector<sf::RectangleShape>& obstaclesShapes);
     void HandleObstacleCollision();
     void HandleEnemyCollision();
     sf::RectangleShape CreateBoundingBox();
@@ -145,6 +155,12 @@ public:
     void PickUpCoin();
     int GetCoins();
     bool IsInRebirth();
+    void ResetHealth();
+    void ResetCoins();
+    void ResetProjectiles();
+    void ResetBlinking();
+    void HandleProjectileReset();
+    void DecreaseCoins();
 
     // Utilities
     static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color = sf::Color::Red);

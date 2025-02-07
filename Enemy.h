@@ -21,8 +21,8 @@ public:
     virtual void Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt);
     virtual void UpdateView() = 0;
     virtual void UpdateAnimation(const float dt) = 0;
-    virtual void HandleDeath(CollectibleManager& collectibleManager) = 0;
-
+    virtual void HandleDeath(const std::shared_ptr<CollectibleManager>& collectibleManager) = 0;
+    virtual void Respawn();
 
     void TakeDamage(const int amount);
     State GetState() const;
@@ -32,8 +32,12 @@ public:
 protected:
     State state;
     sf::Sprite sprite;
+    sf::Vector2f startPosition;
     sf::Vector2f position;
     sf::RectangleShape boundingBox;
+    sf::RectangleShape initialBoundingBox;
     int health;
+    int maxHealth;
     int damage;
+    bool handledDeath = false;
 };

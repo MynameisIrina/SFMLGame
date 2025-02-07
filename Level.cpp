@@ -2,11 +2,11 @@
 #include "Level.h"
 #include "Utilities.h"
 
-Level::Level(const std::shared_ptr<TextureLoader> &txLoader)
+Level::Level(std::shared_ptr<ObstacleManager> obstacleManager, std::shared_ptr<EnemyManager> enemyManager, std::shared_ptr<CollectibleManager> collectibleManager, const std::shared_ptr<TextureLoader> &txLoader)
     : txLoader(txLoader),
-      obstacleManager(txLoader),
-      enemyManager(txLoader),
-      collectibleManager(txLoader) {}
+      obstacleManager(obstacleManager),
+      enemyManager(enemyManager),
+      collectibleManager(collectibleManager) {}
 
 
 void Level::Initialize(const int firstPlatformHeight)
@@ -90,8 +90,8 @@ void Level::GenerateLevel(const int startX)
     // Check generated grid to differentiate between different tile types
     UpdateGround(startX, renderOffset);
 
-    obstacleManager.SpawnObstacles(grid, gridHeight, gridWidth, totalGridWidth, furthestTileX_gridWidth, tileSize);
-    enemyManager.SpawnEnemies(grid, gridHeight, gridWidth, totalGridWidth, furthestTileX_gridWidth, tileSize);
+    obstacleManager->SpawnObstacles(grid, gridHeight, gridWidth, totalGridWidth, furthestTileX_gridWidth, tileSize);
+    enemyManager->SpawnEnemies(grid, gridHeight, gridWidth, totalGridWidth, furthestTileX_gridWidth, tileSize);
 }
 
 int Level::AdjustPlatformHeight(const int previousHeight, int currentHeight, const int maxGap, const int minHeight, const int maxHeight) const
@@ -141,9 +141,9 @@ void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared
         GenerateLevel(gridWidth);
     }
 
-    obstacleManager.UpdateObstacles(dt);
-    enemyManager.UpdateEnemies(player, camera, collectibleManager, dt);
-    collectibleManager.UpdateCollectibles(player, dt);
+    obstacleManager->UpdateObstacles(dt);
+    enemyManager->UpdateEnemies(player, camera, collectibleManager, dt);
+    collectibleManager->UpdateCollectibles(player, dt);
 }
 
 void Level::PlacePattern(const int patternIndex, const int height, const int width, const int currentX, const int currentY)
@@ -250,26 +250,15 @@ void Level::ShowGrid() const
     std::cout << "" << std::endl;
 }
 
-std::vector<Tile> &Level::GetAllTiles()
+std::vector<sf::RectangleShape> &Level::GetAllTiles()
 {
     // Keep the vector updated due to new generated tiles
     allTiles.clear();
-    allTiles.reserve(groundTiles.size() + obstacleManager.GetObstacles().size() + enemyManager.GetEnemies().size());
 
     // Combine all tiles to check collision
     for (const auto &groundTile : groundTiles)
     {
-        allTiles.push_back(groundTile);
-    }
-
-    for (const auto &obstacle : obstacleManager.GetObstacles())
-    {
-        allTiles.push_back(Tile(Tile::Obstacle, obstacle->GetBoundingBox()));
-    }
-
-    for (const auto &enemy : enemyManager.GetEnemies())
-    {
-        allTiles.push_back(Tile(Tile::Enemy, enemy->GetBoundingBox()));
+        allTiles.push_back(groundTile.GetShape());
     }
 
     return allTiles;
@@ -287,9 +276,9 @@ void Level::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
         window->draw(groundTile.GetShape());
     }
 
-    obstacleManager.Draw(window);
-    enemyManager.Draw(window);
-    collectibleManager.Draw(window);
+    obstacleManager->Draw(window);
+    enemyManager->Draw(window);
+    collectibleManager->Draw(window);
 }
 
 TextureLoader::TextureType Level::DetermineTextureType(const int x, const int y) const

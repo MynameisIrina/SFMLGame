@@ -10,14 +10,18 @@ void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f positio
 {
     this->sprite = sprite;
     this->position = position;
+    this->startPosition = position;
     this->health = health;
     this->damage = damage;
+    this->maxHealth = health;
 
     const auto &bounds = this->sprite.getLocalBounds();
     this->sprite.setOrigin(bounds.width * 0.5f, bounds.height * 0.5f);
     this->sprite.setScale(-1.f * scale, scale);
 
     boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
+    initialBoundingBox = boundingBox;
+    
 }
 
 void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
@@ -36,6 +40,8 @@ void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared
 
 void EnemyArrow::UpdateAnimation(const float dt)
 {
+    if (state == State::Dead) return;
+
     animationTimer += dt;
     if (animationTimer >= animationInterval)
     {
@@ -53,6 +59,8 @@ void EnemyArrow::UpdateAnimation(const float dt)
 
 void EnemyArrow::UpdateView()
 {
+    if (state == State::Dead) return;
+
     sprite.setTextureRect(sf::IntRect(currentAnim * frameSize, 0, frameSize, frameSize));
     sprite.setPosition(position);
     boundingBox.setPosition(position);
@@ -60,7 +68,9 @@ void EnemyArrow::UpdateView()
 
 void EnemyArrow::HandleShooting(const std::shared_ptr<Camera>& camera)
 {
-    const bool enemyWithinCamera = camera->CalculateRightBound() >= position.x;
+    if (state == State::Dead) return;
+
+    const bool enemyWithinCamera = camera->CalculateRightBound() >= position.x && camera->CalculateLeftBound() <= position.x;
 
     if (enemyWithinCamera && !isShooting && (currentAnim == shootingFrame))
     {
@@ -71,6 +81,8 @@ void EnemyArrow::HandleShooting(const std::shared_ptr<Camera>& camera)
 
 void EnemyArrow::HandleRotation(const std::shared_ptr<Player> &player)
 {
+    if (state == State::Dead) return;
+
     if (player->GetPosition().x > position.x)
     {
         sprite.setScale(1.f * scale, 1.f * scale);
@@ -83,6 +95,8 @@ void EnemyArrow::HandleRotation(const std::shared_ptr<Player> &player)
 
 void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
 {
+    if (state == State::Dead) return;
+
     const auto &activeProjectiles = player->GetActiveProjectiles();
     const auto &enemyBounds = boundingBox.getGlobalBounds();
 
@@ -102,12 +116,15 @@ void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
     }
 }
 
-void EnemyArrow::HandleDeath(CollectibleManager& collectibleManager)
+void EnemyArrow::HandleDeath(const std::shared_ptr<CollectibleManager>& collectibleManager)
 {
-    if(state == Dead)
+    if(state == Dead && !handledDeath)
     {
-        std::unique_ptr<Collectible> collectible = collectibleManager.CreateCoin(position);
-        collectibleManager.AddCollectible(std::move(collectible));
+        handledDeath = true;
+        boundingBox = sf::RectangleShape();
+        std::cout << "Creating" << std::endl;
+        std::unique_ptr<Collectible> collectible = collectibleManager->CreateCoin(position);
+        collectibleManager->AddCollectible(std::move(collectible));
     }
 }
 
@@ -115,6 +132,11 @@ void EnemyArrow::HandleDeath(CollectibleManager& collectibleManager)
 Enemy::State EnemyArrow::GetState()
 {
     return state;
+}
+
+void EnemyArrow::ClearArrowPool()
+{
+    arrowPool.Clear();
 }
 
 void EnemyArrow::ShootArrow()

@@ -20,10 +20,10 @@ class RayCast
     {
         sf::Vector2f position;
         sf::RectangleShape hitRect;
-        Tile::Tile_Type typeTile;
+        //Tile::Tile_Type typeTile;
 
     };
 
-    static std::optional<RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, const std::vector<Tile>& platforms);
-
+    //static std::optional<RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, const std::vector<Tile>& platforms);
+    static std::optional<RayCast::RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, const std::vector<sf::RectangleShape>& otherShape);
 };

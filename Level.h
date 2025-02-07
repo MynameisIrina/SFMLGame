@@ -23,7 +23,7 @@ public:
     };
 
 
-    Level(const std::shared_ptr<TextureLoader>& txLoaderRef);
+    Level(std::shared_ptr<ObstacleManager> obstacleManager, std::shared_ptr<EnemyManager> enemyManager, std::shared_ptr<CollectibleManager> collectibleManager, const std::shared_ptr<TextureLoader> &txLoader);
     void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
     void GenerateLevel(const int startX);
     void PlacePattern(const int patternIndex, const int height, const int width, const int currentX, const int currentY);
@@ -33,7 +33,7 @@ public:
     void UpdateLevel(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, const float dt);
     void ShiftGridLeft();
     int FindRightmostTileX();
-    std::vector<Tile>& GetAllTiles();
+    std::vector<sf::RectangleShape>& GetAllTiles();
     int GenerateDefaultTiles();
     sf::Sprite CreateSprite(TextureLoader::TextureType type, const int coordX, const int coordY, const int x, const int y, const int globalPositionX);
     TextureLoader::TextureType DetermineTextureType(int x, int y) const;
@@ -50,11 +50,11 @@ private:
     const int totalGridWidth = gridWidth + bufferColumns;
     int firstPlatformHeight = 5;
 
-    ObstacleManager obstacleManager;
-    EnemyManager enemyManager;
-    CollectibleManager collectibleManager;
+    std::shared_ptr<ObstacleManager> obstacleManager;
+    std::shared_ptr<EnemyManager> enemyManager;
+    std::shared_ptr<CollectibleManager> collectibleManager;
     
-    std::vector<Tile> allTiles;
+    std::vector<sf::RectangleShape> allTiles;
 
     using Pattern = std::vector<std::vector<int>>;
     std::vector<std::vector<Tile>> grid;

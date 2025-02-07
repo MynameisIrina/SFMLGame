@@ -63,3 +63,8 @@ std::vector<Projectile*> ProjectilePool::GetActiveProjectiles()
    }
    return activeProjectiles;
 }
+
+void ProjectilePool::Clear()
+{
+    projectiles.clear();
+}

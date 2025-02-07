@@ -81,7 +81,16 @@ void ObstacleManager::Draw(const std::shared_ptr<sf::RenderWindow> &window) cons
     }
 }
 
-std::vector<std::unique_ptr<Obstacle>> &ObstacleManager::GetObstacles()
+std::vector<sf::RectangleShape>& ObstacleManager::GetObstaclesBoundingBoxes() const
 {
-    return obstacles;
+    static std::vector<sf::RectangleShape> boxes;
+
+    boxes.clear();
+    
+    for(const auto& obstacle : obstacles)
+    {
+        boxes.push_back(obstacle->GetBoundingBox());
+    }
+
+    return boxes;
 }

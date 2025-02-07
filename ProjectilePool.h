@@ -13,6 +13,7 @@ public:
     void Update(const std::shared_ptr<Camera> &camera, const float dt);
     void Draw(const std::shared_ptr<sf::RenderTarget> &rt) const;
     std::vector<Projectile*> GetActiveProjectiles();
+    void Clear();
 
 private:
     std::vector<std::unique_ptr<Projectile>> projectiles;

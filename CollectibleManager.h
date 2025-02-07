@@ -12,6 +12,7 @@ public:
     void Draw(const std::shared_ptr<sf::RenderWindow> &window) const;
     std::unique_ptr<Collectible> CreateCoin(const sf::Vector2f &position);
     void UpdateCollectibles(const std::shared_ptr<Player>& player ,const float dt);
+    void ClearCollectibles();
 
 private:
     sf::Sprite sprite;

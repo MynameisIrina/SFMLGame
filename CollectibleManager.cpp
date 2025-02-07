@@ -41,3 +41,8 @@ void CollectibleManager::UpdateCollectibles(const std::shared_ptr<Player>& playe
 
     }
 }
+
+void CollectibleManager::ClearCollectibles()
+{
+    collectibles.clear();
+}

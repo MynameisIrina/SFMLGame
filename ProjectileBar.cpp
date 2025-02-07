@@ -31,31 +31,29 @@ void ProjectileBar::Update(const std::shared_ptr<Player> &player, const std::sha
 {
     position = sf::Vector2f(camera->GetView().getCenter().x - offsetX, offsetY);
 
-    // Reduce amount when player shoots
-    bool playerShot = player->GetProjectilesCount() < previousProjectileCount;
-    if (playerShot)
+    int currentProjectileCount = player->GetProjectilesCount();
+
+    if (currentProjectileCount < previousProjectileCount)
     {
         if (projectileBar.getSize().x > 0)
         {
             ReduceAmount(amountToReduce);
         }
-
-        previousProjectileCount = player->GetProjectilesCount();
     }
 
-    // Renew projectile bar over time
-    if (player->GetProjectilesCount() == 0)
+    // Reset bar if the player respawned
+    if(currentProjectileCount > previousProjectileCount)
+    {
+        ResetBar();
+    }
+
+    //std::cout << currentProjectileCount << std::endl;
+
+    // Regenerate projectile bar
+    if (currentProjectileCount == 0)
     {
         AddVisualEffects(dt);
         IncrementAmount(amountToIncrease, dt);
-        previousProjectileCount = 0;
-
-        bool readyToShoot = projectileBar.getSize().x >= maxAmount;
-        if (readyToShoot)
-        {
-            player->ResetProjectilesCount();
-            previousProjectileCount = player->GetProjectilesCount();
-        }
     }
     else
     {
@@ -64,6 +62,8 @@ void ProjectileBar::Update(const std::shared_ptr<Player> &player, const std::sha
     }
 
     UpdateView();
+
+    previousProjectileCount = currentProjectileCount;
 }
 
 void ProjectileBar::UpdateView()
@@ -93,4 +93,9 @@ void ProjectileBar::AddVisualEffects(const float dt)
         isVisible = !isVisible;
         blinkingTimer.restart();
     }
+}
+
+void ProjectileBar::ResetBar()
+{
+    projectileBar.setSize(sf::Vector2f(maxAmount, 10));
 }

@@ -14,6 +14,7 @@ public:
     void Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera);
     void UpdateView();
     void Draw(const std::shared_ptr<sf::RenderTarget>& rt) const;
+    void ExchangeForLife();
 
 private:
     sf::Sprite sprite;

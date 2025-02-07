@@ -29,6 +29,11 @@ Arrow *ArrowPool::GetArrow()
 
 void ArrowPool::Update(const std::shared_ptr<Player> &player,const std::shared_ptr<Camera>& camera, const float dt)
 {
+    if(player->IfStateActive(Player::Respawning))
+    {
+        arrowPool.clear();
+    }
+    
     for (const auto &arrow : arrowPool)
     {
         if (arrow->isActive)
@@ -46,4 +51,9 @@ void ArrowPool::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
             window->draw(arrow->GetBoundingBox());
         }
     }
+}
+
+void ArrowPool::Clear()
+{
+    arrowPool.clear();
 }

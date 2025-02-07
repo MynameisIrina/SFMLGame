@@ -16,6 +16,7 @@ public:
     void IncrementAmount(const float amountToIncrease, const float dt);
     void UpdateAnimation();
     void AddVisualEffects(const float dt);
+    void ResetBar();
 
 private:
     std::shared_ptr<TextureLoader> txLoader;
@@ -27,7 +28,7 @@ private:
     sf::Vector2f position = sf::Vector2f(0.f,0.f);
     int previousProjectileCount = 0;
     float amountToReduce = 0.f;
-    const float amountToIncrease = 15.f;
+    const float amountToIncrease = 12.f;
     const float maxAmount = 60.f;
     sf::Clock blinkingTimer;
     float blinkingInterval = 0.4f;

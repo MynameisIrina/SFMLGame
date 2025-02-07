@@ -2,6 +2,9 @@
 #include <iostream>
 #include "Utilities.h"
 #include "ProjectilePool.h"
+#include "Enemy.h"
+#include "RespawnManager.h"
+
 
 Player::Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool) : txLoader(txLoader), projectilePool(projectilePool) {}
 
@@ -15,11 +18,12 @@ void Player::Initialize(const sf::Vector2f position, const int maxHealth, const 
     maxPosition = position;
     saveLastPos = position;
     respawnPos = position;
-
     health = maxHealth;
     condition = Normal;
+    state = 0;
     projectilesCount = projectilesAmount;
     maxProjectileCount = projectilesAmount;
+    previousPosition = position;
 
     sprite = txLoader->SetSprite(TextureLoader::TextureType::Player);
     sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
@@ -29,41 +33,61 @@ void Player::Initialize(const sf::Vector2f position, const int maxHealth, const 
     boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - 2 * boundingBoxOffsetX, sprite.getGlobalBounds().height));
 }
 
-void Player::Update(const std::shared_ptr<Camera> &camera, const bool moveRight, const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const float dt, const std::vector<Tile> &tiles)
+void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight, const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape> &enemiesShapes, std::vector<sf::RectangleShape> &obstaclesShapes)
 {
-    // std::bitset<4> stateBits(state);
-    // std::cout << "Player States: " << stateBits << std::endl;
-
     InputToState(moveRight, moveLeft, shoot, respawn);
 
-    if (IfStateActive(State::Moving))
+    if (IfStateActive(State::Moving) && !IsInRebirth())
     {
         HandleHorizontalMovement(dt, leftBound);
     }
 
     if (IfStateActive(State::Respawning))
     {
-        HandleRespawn();
+        respawnManager->RespawnAllEntities();
     }
 
-    if (IfStateActive(State::Shooting))
+    if (IfStateActive(State::Shooting) && !IsInRebirth())
     {
         HandleShooting(shoot, dt);
     }
     else
     {
         ClearState(State::Shooting);
+
         // prevent continuous shooting
         isShooting = false;
     }
+    
+    if(exchangeCoins && !coinsExchanged)
+    {
+        if(coinsCollected > 0 && health < maxHealth)
+        {
+            DecreaseCoins();
+            IncreaseHealth();
 
-    HandleVerticalMovement(dt);
+            coinsExchanged = true;
+        }
+    }
+
+    if(!exchangeCoins && coinsExchanged)
+    {
+        coinsExchanged = false;
+    }
+
+    if (!IsInRebirth())
+    {
+        HandleVerticalMovement(dt);
+        CheckCollisionGround(tilesShapes, enemiesShapes, obstaclesShapes);
+        CheckCollisionSide(tilesShapes, enemiesShapes, obstaclesShapes);
+        HandleFalling();
+        HandleBlinking();
+        projectilePool.Update(camera, dt);
+        HandleProjectileReset();
+    }
+
     CalculateCurrentAnimation(dt);
-    CheckCollisionGround(tiles);
-    CheckCollisionSide(tiles);
-    HandleFalling();
-    HandleBlinking();
-    projectilePool.Update(camera, dt);
+    UpdateView(moveRight, moveLeft);
 }
 
 void Player::InputToState(bool moveRight, bool moveLeft, bool shoot, bool respawn)
@@ -84,16 +108,6 @@ void Player::InputToState(bool moveRight, bool moveLeft, bool shoot, bool respaw
     else
     {
         ClearState(State::Shooting);
-    }
-
-    if (respawn)
-    {
-        SetState(State::Respawning);
-    }
-    else
-    {
-        // clear state in the next frame
-        ClearState(State::Respawning);
     }
 }
 
@@ -135,6 +149,7 @@ void Player::HandleHorizontalMovement(float dt, float leftBound)
     {
         velocity.x = horizontalVelocity;
     }
+
 }
 
 void Player::HandleVerticalMovement(float dt)
@@ -157,8 +172,9 @@ void Player::HandleVerticalMovement(float dt)
     position.y += velocity.y * dt;
 }
 
-void Player::CheckCollisionSide(const std::vector<Tile> &tiles)
+void Player::CheckCollisionSide(const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape> &enemiesShapes, std::vector<sf::RectangleShape> &obstaclesShapes)
 {
+
     collisionSide = false;
 
     int direction = CalculateDirection();
@@ -168,30 +184,47 @@ void Player::CheckCollisionSide(const std::vector<Tile> &tiles)
 
     ray = RayCast::Ray(rayMiddle_Start, rayMiddle_End);
 
-    auto hit = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, tiles);
-    //
-    if (hit)
+    auto hitTiles = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, tilesShapes);
+    auto hitEnemies = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, enemiesShapes);
+    auto hitObstacles = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, obstaclesShapes);
+
+    RayCast::RayCastHit hitInfo;
+    bool hasCollision = false;
+
+    if (hitTiles)
     {
-
-        RayCast::RayCastHit hitInfo = hit.value();
-
-        if (!IsPlayerProtected() && hitInfo.typeTile == Tile::Obstacle)
-        {
-            HandleObstacleCollision();
-        }
-
-        if (!IsPlayerProtected() && hitInfo.typeTile == Tile::Enemy)
+        hitInfo = hitTiles.value();
+        hasCollision = true;
+    }
+    else if (hitEnemies)
+    {
+        hitInfo = hitEnemies.value();
+        hasCollision = true;
+        if (!IsPlayerProtected())
         {
             HandleEnemyCollision();
         }
+    }
+    else if (hitObstacles)
+    {
+        hitInfo = hitObstacles.value();
+        hasCollision = true;
 
+        if (!IsPlayerProtected())
+        {
+            HandleObstacleCollision();
+        }
+    }
+
+    if (hasCollision)
+    {
         if (direction > 0)
         {
-            position.x = hitInfo.hitRect.getGlobalBounds().left - (boundingBoxPlayer.getGlobalBounds().width) + epsilon;
+            position.x = hitInfo.hitRect.getGlobalBounds().left - (sprite.getGlobalBounds().getSize().x / 2.f) - 0.5f;
         }
         else
         {
-            position.x = hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width + boundingBoxPlayer.getGlobalBounds().width - (2 * epsilon);
+            position.x = (hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width) + (sprite.getGlobalBounds().getSize().x / 2.f) - 2 * epsilon + 0.5f;
         }
 
         collisionSide = true;
@@ -214,15 +247,6 @@ void Player::HandleEnemyCollision()
     DecreaseHealth();
 }
 
-void Player::Jump(const bool jump, const float dt)
-{
-    if (jump && !IfStateActive(State::Jumping))
-    {
-        SetState(State::Jumping);
-        collisionGround = false;
-        velocity.y = -jumpVelocity;
-    }
-}
 
 void Player::HandleShooting(const bool shoot, const float dt)
 {
@@ -237,6 +261,11 @@ void Player::HandleShooting(const bool shoot, const float dt)
             projectile->velocity = direction > 0 ? projectileVelocity : -projectileVelocity;
             isShooting = true;
             projectilesCount--;
+
+            if (projectilesCount == 0)
+            {
+                projectileResetTimer.restart();
+            }
         }
     }
 
@@ -262,12 +291,11 @@ void Player::ResetAnimation(int animYIndex)
 
 void Player::HandleBlinking()
 {
-
     if (IfStateActive(State::Blinking) && IsPlayerProtected())
     {
         if (blinkingTimer.getElapsedTime().asSeconds() >= blinkingInterval)
         {
-            sprite.setColor(isVisible ? Utilities::GetTransparentColor(sf::Color(255, 255, 255)) : Utilities::GetOpaqueColor(sf::Color(255, 255, 255)));
+            sprite.setColor(isVisible ? Utilities::GetTransparentColor(normalColor) : Utilities::GetOpaqueColor(normalColor));
             isVisible = !isVisible;
             blinkingTimer.restart();
         }
@@ -275,58 +303,108 @@ void Player::HandleBlinking()
     else
     {
         isVisible = true;
-        sprite.setColor(Utilities::GetOpaqueColor(sf::Color(255, 255, 255)));
+        sprite.setColor(Utilities::GetOpaqueColor(normalColor));
     }
 }
 
-void Player::CheckCollisionGround(const std::vector<Tile> &tiles)
+void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape> &enemies, std::vector<sf::RectangleShape> &obstaclesShapes)
 {
     collisionGround = false;
     collisionTop = false;
 
-    for (auto &tile : tiles)
-    {
-        sf::RectangleShape boundBox = tile.GetShape();
-        Tile::Tile_Type type = tile.GetType();
+    sf::FloatRect playerBounds = boundingBoxPlayer.getGlobalBounds();
+    const float playerHeight = playerBounds.getSize().y;
+    const float playerHalfHeight = playerHeight * 0.5f;
 
-        sf::FloatRect playerBounds = boundingBoxPlayer.getGlobalBounds();
+    for (auto &boundBox : tiles)
+    {
         sf::FloatRect tileBounds = boundBox.getGlobalBounds();
 
         if (Math::CheckRectCollision(playerBounds, tileBounds))
         {
-            if (!IsPlayerProtected() && type == Tile::Obstacle)
-            {
-                HandleObstacleCollision();
-            }
-
-            if (!IsPlayerProtected() && type == Tile::Enemy)
-            {
-                HandleEnemyCollision();
-            }
-
-            boundBox.setOutlineColor(sf::Color::Green);
-
             float overlapTop = playerBounds.top - (tileBounds.top + tileBounds.height);
             float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
 
             if (overlapBottom <= 0.f)
             {
                 // snapping
-                position.y = tileBounds.top - playerBounds.getSize().y / 2;
+                position.y = tileBounds.top - playerHalfHeight;
 
                 collisionGround = true;
                 ClearState(State::Jumping);
-                continue;
+                break;
             }
             if (overlapTop <= 0.f)
             {
                 // snapping
-                position.y = (tileBounds.top + tileBounds.height) + playerBounds.getSize().y / 2;
+                position.y = (tileBounds.top + tileBounds.height) + playerHalfHeight;
 
                 collisionTop = true;
-                continue;
+                break;
+            }
+
+        }
+    }
+
+    for (auto &boundBox : enemies)
+    {
+        sf::FloatRect tileBounds = boundBox.getGlobalBounds();
+
+        if (Math::CheckRectCollision(playerBounds, tileBounds))
+        {
+            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
+
+            if (overlapBottom <= 0.f)
+            {
+                // snapping
+                position.y = tileBounds.top - playerHalfHeight;
+
+                if(!IsPlayerProtected())
+                {
+                    HandleEnemyCollision();
+                }
+                collisionGround = true;
+                ClearState(State::Jumping);
+                break;
+            }
+
+        }
+    }
+
+    for (auto &boundBox : obstaclesShapes)
+    {
+        sf::FloatRect tileBounds = boundBox.getGlobalBounds();
+
+        if (Math::CheckRectCollision(playerBounds, tileBounds))
+        {
+
+            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
+
+            if (overlapBottom <= 0.f)
+            {
+                // snapping
+                position.y = tileBounds.top - playerHalfHeight;
+
+                if(!IsPlayerProtected())
+                {
+                    HandleObstacleCollision();
+                }
+
+                collisionGround = true;
+                ClearState(State::Jumping);
+                break;
             }
         }
+    }
+}
+
+void Player::Jump(const bool jump, const float dt)
+{
+    if (jump && !IfStateActive(State::Jumping))
+    {
+        SetState(State::Jumping);
+        collisionGround = false;
+        velocity.y = -jumpVelocity;
     }
 }
 
@@ -350,7 +428,7 @@ void Player::CalculateCurrentAnimation(const float dt)
             isRespawnTimerRestarted = false;
         }
 
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer) , TextureLoader::rectWidthPlayer, 31));
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer), TextureLoader::rectWidthPlayer, 31));
     }
     else
     {
@@ -373,12 +451,12 @@ void Player::CalculateCurrentAnimation(const float dt)
             }
             animationTimer = 0.f;
         }
-
     }
 }
 
 void Player::HandleRespawn()
 {
+
     if (position != respawnPos)
     {
         if (position.x > maxPosition.x)
@@ -389,37 +467,42 @@ void Player::HandleRespawn()
         respawnTimer.restart();
         isRespawnTimerRestarted = true;
         position = respawnPos;
+
         velocity.y = 0;
         sprite.setScale(scale, scale);
 
-        ClearState(State::Blinking);
+        ResetHealth();
+        ResetCoins();
+        ResetProjectiles();
+        ResetBlinking();
+        projectilePool.Clear();
+
+        state = 0;
     }
 }
 
 void Player::UpdateView(bool moveRight, bool moveLeft)
 {
-    if (moveRight)
+    if (!IsInRebirth())
     {
-        sprite.setScale(scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
-    }
-    else if (moveLeft)
-    {
-        sprite.setScale(-scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
-    }
+        if (moveRight)
+        {
+            sprite.setScale(scale, scale);
+            sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        }
+        else if (moveLeft)
+        {
+            sprite.setScale(-scale, scale);
+            sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        }
 
-
-    if(IsInRebirth())
-    {
-        sprite.setPosition(position - sf::Vector2f(0, rebirthVerticaloffset));
-        boundingBoxPlayer.setPosition(sprite.getPosition().x + boundingBoxOffsetX, sprite.getPosition().y + rebirthVerticaloffset);
+        sprite.setPosition(position);
+        boundingBoxPlayer.setPosition(position.x + boundingBoxOffsetX, position.y);
     }
     else
     {
-        sprite.setPosition(position);
-        boundingBoxPlayer.setPosition(sprite.getPosition().x + boundingBoxOffsetX, sprite.getPosition().y);
-
+        sprite.setPosition(position - sf::Vector2f(0, 4 * rebirthVerticaloffset));
+        boundingBoxPlayer.setPosition(position.x + boundingBoxOffsetX, position.y + rebirthVerticaloffset);
     }
 }
 
@@ -476,6 +559,11 @@ void Player::DecreaseHealth()
     if (health > 0)
     {
         health--;
+
+        if (health == 0)
+        {
+            SetState(State::Respawning);
+        }
     }
 }
 
@@ -538,6 +626,46 @@ int Player::GetCoins()
 bool Player::IsInRebirth()
 {
     return isRespawnTimerRestarted && respawnTimer.getElapsedTime().asSeconds() <= rebirth_animation_duration;
+}
+
+void Player::ResetHealth()
+{
+    health = maxHealth;
+}
+
+void Player::ResetCoins()
+{
+    coinsCollected = 0;
+}
+
+void Player::ResetProjectiles()
+{
+    projectilesCount = maxProjectileCount;
+}
+
+void Player::ResetBlinking()
+{
+    isVisible = true;
+    sprite.setColor(Utilities::GetOpaqueColor(sf::Color(255, 255, 255)));
+}
+
+void Player::HandleProjectileReset()
+{
+    if (projectilesCount > 0)
+        return;
+
+    if (projectilesCount <= 0)
+    {
+        if (projectileResetTimer.getElapsedTime().asSeconds() >= projectileResetInterval)
+        {
+            ResetProjectiles();
+        }
+    }
+}
+
+void Player::DecreaseCoins()
+{
+    coinsCollected--;
 }
 
 sf::Vector2f Player::GetPosition() const
