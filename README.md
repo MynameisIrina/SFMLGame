@@ -1,4 +1,4 @@
-# Paws of Perseverance
+# sf::Cat
 2D Platformer Game Developed in C++ using SFML
 
 ## Current State of the Project
