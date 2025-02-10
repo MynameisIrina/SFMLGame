@@ -166,4 +166,6 @@ void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
     Enemy::Draw(window);
     arrowPool.Draw(window);
     window->draw(boundingBox);
+
+    
 }

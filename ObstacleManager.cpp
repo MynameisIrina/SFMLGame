@@ -41,9 +41,11 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &gri
     bool noTileCurrent = currentRow[x].GetType() == Tile::Empty;
     bool threeConsecutiveTilesUnderneath = ((bottomRow[x].GetType() == Tile::Grass) && (bottomRow[x + 1].GetType() == Tile::Grass) && (bottomRow[x - 1].GetType() == Tile::Grass));
     bool noTilesAlongPath = (currentRow[x + 1].GetType() == Tile::Empty && currentRow[x - 1].GetType() == Tile::Empty);
-    bool noObstaaclesNear = (currentRow[x + 1].GetType() != Tile::Obstacle && currentRow[x - 1].GetType() != Tile::Obstacle);
+    bool noObstaclesNear = (currentRow[x + 1].GetType() != Tile::Obstacle && currentRow[x - 1].GetType() != Tile::Obstacle)
+                            && (currentRow[x + 2].GetType() != Tile::Obstacle && currentRow[x - 2].GetType() != Tile::Obstacle);
+    bool noEnemiesNear = (currentRow[x + 1].GetType() != Tile::Enemy && currentRow[x - 1].GetType() != Tile::Enemy);
 
-    if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noObstaaclesNear)
+    if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noObstaclesNear)
     {
         return true;
     }
@@ -67,7 +69,7 @@ void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, const 
     float maxPosX = globalTileX + tileSize;
 
     obstacle->Initialize(sprite, sf::Vector2f(globalTileX, globalTileY), speed, minPosX, maxPosX);
-    const float offsetY = obstacle->GetBoundingBox().getGlobalBounds().height / 2;
+    const float offsetY = obstacle->GetBoundingBox().getGlobalBounds().height * 0.5f;
     obstacle->CreateVisualLine(minPosX, maxPosX, globalTileY + offsetY, globalTileY + offsetY);
 
     obstacles.push_back(std::move(obstacle));

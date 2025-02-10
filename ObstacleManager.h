@@ -14,7 +14,7 @@ private:
     std::shared_ptr<TextureLoader> txLoader;
     const int minSpeed = 45;
     const int maxSpeed = 60;
-    const int obstacleProbability = 8;
+    const int obstacleProbability = 12;
     std::vector<sf::CircleShape> circles;
 
 public:

@@ -28,6 +28,7 @@ public:
     State GetState() const;
     sf::RectangleShape GetBoundingBox() const; 
     virtual void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
+    sf::Vector2f GetPosition();
 
 protected:
     std::shared_ptr<AudioManager> audioManager;

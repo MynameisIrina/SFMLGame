@@ -29,19 +29,23 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
     bool noTileCurrent = currentRow[currX].GetType() == 0;
     bool threeConsecutiveTilesUnderneath = ((bottomRow[currX].GetType() == 2) && (bottomRow[currX + 1].GetType() == 2) && (bottomRow[currX - 1].GetType() == 2));
     bool noTilesAlongPath = (currentRow[currX + 1].GetType() == 0 && currentRow[currX - 1].GetType() == 0);
-    bool noEnemiesNear = (currentRow[currX + 1].GetType() != 4 && currentRow[currX - 1].GetType() != 4);
+    bool noEnemiesNear = (currentRow[currX + 1].GetType() != 4 && currentRow[currX - 1].GetType() != 4)
+                        && (currentRow[currX + 2].GetType() != 4 && currentRow[currX - 2].GetType() != 4);
+    bool noObstaclesNear = (currentRow[currX + 1].GetType() != 3 && currentRow[currX - 1].GetType() != 3)
+                            && (currentRow[currX + 2].GetType() != 3 && currentRow[currX - 2].GetType() != 3);
 
-    if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noEnemiesNear)
+    if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noEnemiesNear && noObstaclesNear)
     {
         return true;
     }
+
     return false;
 }
 
 void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, int startX, int tileSize, int x, int y)
 {
-    float globalTileX = startX + (x - minX) * tileSize;
-    if (rand() % 4 == 0)
+    float globalTileX = startX + (x - minX) * tileSize + (tileSize * 0.5f);
+    if (rand() % 8 == 0)
     {
         grid[y][x] = Tile(Tile::Enemy, sf::RectangleShape());
 
@@ -64,13 +68,12 @@ void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> &player, const st
         else if ((*it)->GetState() == Enemy::State::Dead)
         {
             (*it)->HandleDeath(collectibleManager);
-            //it = enemies.erase(it);
             it++;
         }
     }
 }
 
-void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow> window) const
+void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
     for (const auto &enemy : enemies)
     {

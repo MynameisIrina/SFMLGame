@@ -13,6 +13,7 @@ public:
     Camera(const std::shared_ptr<sf::RenderWindow>& window);
     void Initialize();
     void Update(const std::shared_ptr<Player>& player);
+    void Reset();
     sf::View GetView() const;
     int CalculateLeftBound() const;
     int CalculateRightBound() const;

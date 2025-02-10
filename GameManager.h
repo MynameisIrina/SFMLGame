@@ -15,6 +15,7 @@
 #include "RespawnManager.h"
 #include "GameState.h"
 #include "Menu.h"
+#include "WinScreen.h"
 #include "AudioManager.h"
 
 
@@ -65,11 +66,14 @@ private:
     std::shared_ptr<RespawnManager> respawnManager;
     std::shared_ptr<Level> level;
     std::unique_ptr<Menu> menu;
+    std::unique_ptr<WinScreen> winScreen;
+
 
     ProjectilePool projectilePool;
     std::unique_ptr<Background> background;
 
     GameState state;
+    sf::View savedView;
     sf::Sound coinCollectedSound;
 
     const int windowWidth = 800;

@@ -5,5 +5,7 @@ enum class GameState
     RUNNING,
     MENU,
     GAMEOVER,
-    EXIT
+    EXIT,
+    WIN,
+    RESTART
 };

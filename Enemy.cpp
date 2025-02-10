@@ -43,3 +43,8 @@ void Enemy::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
     if(state == Dead) return;
     window->draw(sprite);
 }
+
+sf::Vector2f Enemy::GetPosition()
+{
+    return position;
+}

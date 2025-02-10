@@ -1,10 +1,12 @@
+#pragma once
 #include <SFML/Graphics.hpp>
+
 
 class Button
 {
 public:
     Button() = default;
-    Button(float x, float y, float width, float height, const std::string &text, sf::Font &font)
+    Button(const float x, const float y, const float width, const float height, const std::string &text, const sf::Font &font)
     {
         button.setSize(sf::Vector2f(width, height));
         button.setPosition(x, y);
@@ -19,7 +21,7 @@ public:
             y);
     }
 
-    void Draw(std::shared_ptr<sf::RenderWindow> &window)
+    void Draw(const std::shared_ptr<sf::RenderWindow> &window)
     {
         window->draw(button);
         window->draw(label);

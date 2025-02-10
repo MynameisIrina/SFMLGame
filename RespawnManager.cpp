@@ -3,8 +3,8 @@
 #include "CollectibleManager.h"
 #include "Player.h"
 
-RespawnManager::RespawnManager(const std::shared_ptr<Player>& player, const std::shared_ptr<EnemyManager>& enemyManager, const std::shared_ptr<CollectibleManager>& collectibleManager):
-    player(player), enemyManager(enemyManager), collectibleManager(collectibleManager)
+RespawnManager::RespawnManager(const std::shared_ptr<Player>& player, const std::shared_ptr<EnemyManager>& enemyManager, const std::shared_ptr<CollectibleManager>& collectibleManager, const std::shared_ptr<Camera>& camera):
+    player(player), enemyManager(enemyManager), collectibleManager(collectibleManager), camera(camera)
 {}
 
 void RespawnManager::RespawnAllEntities()
@@ -23,5 +23,5 @@ void RespawnManager::RespawnAllEntities()
     }
 
     collectibleManager->ClearCollectibles();
-
+    camera->Reset();
 }
