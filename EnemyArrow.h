@@ -7,7 +7,7 @@ class EnemyArrow: public Enemy
 {
 
 public:
-    EnemyArrow(ArrowPool arrowPool);
+    EnemyArrow(ArrowPool arrowPool, const std::shared_ptr<AudioManager>& audioManager);
     void Initialize(const sf::Sprite &sprite, const sf::Vector2f position, const int health, const int damage) override;
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, const float dt) override;
     void UpdateAnimation(const float dt) override;

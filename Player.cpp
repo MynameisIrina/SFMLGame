@@ -5,8 +5,7 @@
 #include "Enemy.h"
 #include "RespawnManager.h"
 
-
-Player::Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool) : txLoader(txLoader), projectilePool(projectilePool) {}
+Player::Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool, std::shared_ptr<AudioManager> &audioManager) : txLoader(txLoader), projectilePool(projectilePool), audioManager(audioManager) {}
 
 void Player::Initialize(const sf::Vector2f position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY)
 {
@@ -58,22 +57,6 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
         // prevent continuous shooting
         isShooting = false;
     }
-    
-    if(exchangeCoins && !coinsExchanged)
-    {
-        if(coinsCollected > 0 && health < maxHealth)
-        {
-            DecreaseCoins();
-            IncreaseHealth();
-
-            coinsExchanged = true;
-        }
-    }
-
-    if(!exchangeCoins && coinsExchanged)
-    {
-        coinsExchanged = false;
-    }
 
     if (!IsInRebirth())
     {
@@ -84,6 +67,7 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
         HandleBlinking();
         projectilePool.Update(camera, dt);
         HandleProjectileReset();
+        HandleCoinLifeExchange(exchangeCoins);
     }
 
     CalculateCurrentAnimation(dt);
@@ -149,7 +133,6 @@ void Player::HandleHorizontalMovement(float dt, float leftBound)
     {
         velocity.x = horizontalVelocity;
     }
-
 }
 
 void Player::HandleVerticalMovement(float dt)
@@ -247,7 +230,6 @@ void Player::HandleEnemyCollision()
     DecreaseHealth();
 }
 
-
 void Player::HandleShooting(const bool shoot, const float dt)
 {
     if (!isShooting && projectilesCount > 0)
@@ -307,6 +289,45 @@ void Player::HandleBlinking()
     }
 }
 
+void Player::HandleRebirthAnimation()
+{
+    if (rebornAnimationTimer >= rebirth_animation_interval)
+    {
+        currentAnim++;
+        rebornAnimationTimer = 0.0f;
+    }
+
+    if (currentAnim >= maxFrames)
+    {
+        currentAnim = 0;
+        isRespawnTimerRestarted = false;
+    }
+
+}
+
+void Player::HandleMovementAnimation()
+{
+    if (animationTimer >= animationInterval)
+        {
+            currentAnim += 1;
+
+            // if the player stopped moving, reset its animation
+            bool stopped = !IfStateActive(State::Moving);
+            if ((currentAnim >= maxFrames || stopped) && !IfStateActive(State::Jumping))
+            {
+                currentAnim = 0;
+                ResetAnimation(AnimationPlayer::STOP_MOVING);
+            }
+            // if the player is jumping, play only one animation unit
+            else if (currentAnim >= maxFrames && IfStateActive(State::Jumping))
+            {
+                currentAnim = 0;
+                ResetAnimation(AnimationPlayer::STOPP_JUMPING);
+            }
+            animationTimer = 0.f;
+        }
+}
+
 void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape> &enemies, std::vector<sf::RectangleShape> &obstaclesShapes)
 {
     collisionGround = false;
@@ -342,7 +363,6 @@ void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, 
                 collisionTop = true;
                 break;
             }
-
         }
     }
 
@@ -359,7 +379,7 @@ void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, 
                 // snapping
                 position.y = tileBounds.top - playerHalfHeight;
 
-                if(!IsPlayerProtected())
+                if (!IsPlayerProtected())
                 {
                     HandleEnemyCollision();
                 }
@@ -367,7 +387,6 @@ void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, 
                 ClearState(State::Jumping);
                 break;
             }
-
         }
     }
 
@@ -385,7 +404,7 @@ void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, 
                 // snapping
                 position.y = tileBounds.top - playerHalfHeight;
 
-                if(!IsPlayerProtected())
+                if (!IsPlayerProtected())
                 {
                     HandleObstacleCollision();
                 }
@@ -403,6 +422,7 @@ void Player::Jump(const bool jump, const float dt)
     if (jump && !IfStateActive(State::Jumping))
     {
         SetState(State::Jumping);
+        // audioManager->PlaySound("jump");
         collisionGround = false;
         velocity.y = -jumpVelocity;
     }
@@ -410,47 +430,16 @@ void Player::Jump(const bool jump, const float dt)
 
 void Player::CalculateCurrentAnimation(const float dt)
 {
-    // calculate current sprite sheet image
     animationTimer += dt;
     rebornAnimationTimer += dt;
 
     if (IsInRebirth())
     {
-        if (rebornAnimationTimer >= rebirth_animation_interval)
-        {
-            currentAnim++;
-            rebornAnimationTimer = 0.0f;
-        }
-
-        if (currentAnim >= maxFrames)
-        {
-            currentAnim = 0;
-            isRespawnTimerRestarted = false;
-        }
-
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer), TextureLoader::rectWidthPlayer, 31));
+        HandleRebirthAnimation();
     }
     else
     {
-        if (animationTimer >= animationInterval)
-        {
-            currentAnim += 1;
-
-            // if the player stopped moving, reset its animation
-            bool stopped = !IfStateActive(State::Moving);
-            if ((currentAnim >= maxFrames || stopped) && !IfStateActive(State::Jumping))
-            {
-                currentAnim = 0;
-                ResetAnimation(AnimationPlayer::STOP_MOVING);
-            }
-            // if the player is jumping, play only one animation unit
-            else if (currentAnim >= maxFrames && IfStateActive(State::Jumping))
-            {
-                currentAnim = 0;
-                ResetAnimation(AnimationPlayer::STOPP_JUMPING);
-            }
-            animationTimer = 0.f;
-        }
+        HandleMovementAnimation();
     }
 }
 
@@ -501,6 +490,7 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     }
     else
     {
+        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer), TextureLoader::rectWidthPlayer, 31));
         sprite.setPosition(position - sf::Vector2f(0, 4 * rebirthVerticaloffset));
         boundingBoxPlayer.setPosition(position.x + boundingBoxOffsetX, position.y + rebirthVerticaloffset);
     }
@@ -616,6 +606,7 @@ void Player::ResetProjectilesCount()
 void Player::PickUpCoin()
 {
     coinsCollected++;
+    audioManager->PlaySound("coinCollected");
 }
 
 int Player::GetCoins()
@@ -666,6 +657,25 @@ void Player::HandleProjectileReset()
 void Player::DecreaseCoins()
 {
     coinsCollected--;
+}
+
+void Player::HandleCoinLifeExchange(bool exchangeCoins)
+{
+    if (exchangeCoins && !coinsExchanged)
+    {
+        if (coinsCollected > 0 && health < maxHealth)
+        {
+            DecreaseCoins();
+            IncreaseHealth();
+
+            coinsExchanged = true;
+        }
+    }
+
+    if (!exchangeCoins && coinsExchanged)
+    {
+        coinsExchanged = false;
+    }
 }
 
 sf::Vector2f Player::GetPosition() const

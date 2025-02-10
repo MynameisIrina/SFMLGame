@@ -1,6 +1,6 @@
 #include "Enemy.h"
 
-Enemy::Enemy() { state = Alive; }
+Enemy::Enemy(const std::shared_ptr<AudioManager>& audioManager): audioManager(audioManager) { state = Alive; }
 
 void Enemy::Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt)
 {

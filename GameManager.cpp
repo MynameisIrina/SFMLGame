@@ -14,7 +14,15 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     txLoader = std::make_shared<TextureLoader>();
     txLoader->Initialize();
 
-    player = std::make_shared<Player>(txLoader, projectilePool);
+    audioManager = std::make_shared<AudioManager>();
+    audioManager->LoadSound("coinCollected", "SFMLGame/Assets/Audio/sounds/coin.wav");
+    audioManager->LoadSound("jump", "SFMLGame/Assets/Audio/sounds/jump.wav");
+    audioManager->LoadSound("kill enemy", "SFMLGame/Assets/Audio/sounds/explosion.wav");
+
+
+    audioManager->PlayMusic("/Users/chernova/Desktop/SFMLGameRoot/SFMLGame/Assets/Audio/sounds/time_for_adventure.mp3", 100);
+
+    player = std::make_shared<Player>(txLoader, projectilePool, audioManager);
 
     camera = std::make_shared<Camera>(window);
 
@@ -27,7 +35,7 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     background = std::make_unique<Background>(txLoader);
 
     collectibleManager = std::make_shared<CollectibleManager>(txLoader);
-    enemyManager = std::make_shared<EnemyManager>(txLoader);
+    enemyManager = std::make_shared<EnemyManager>(txLoader, audioManager);
     obstacleManager = std::make_shared<ObstacleManager>(txLoader);
 
     respawnManager = std::make_shared<RespawnManager>(player, enemyManager, collectibleManager);
@@ -35,6 +43,7 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     level = std::make_shared<Level>(obstacleManager, enemyManager, collectibleManager, txLoader);
 
     menu = std::make_unique<Menu>(window, txLoader);
+
 
     camera->Initialize();
     player->Initialize(sf::Vector2f(playerStartX, playerStartY), playerLives, playerProjectiles, playerSpeed, window->getSize().y);
@@ -147,3 +156,4 @@ GameManager::PlayerInput GameManager::HandleInput()
             sf::Keyboard::isKeyPressed(sf::Keyboard::P),
             sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)};
 }
+

@@ -14,7 +14,7 @@ public:
         Dead
     };
 
-    Enemy();
+    Enemy(const std::shared_ptr<AudioManager>& audioManager);
     virtual ~Enemy() = default;
 
     virtual void Initialize(const sf::Sprite &sprite, const sf::Vector2f startPosition, const int health, const int damage) = 0;
@@ -30,6 +30,7 @@ public:
     virtual void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
 
 protected:
+    std::shared_ptr<AudioManager> audioManager;
     State state;
     sf::Sprite sprite;
     sf::Vector2f startPosition;

@@ -4,7 +4,7 @@
 #include "Coin.h"
 #include "Collectible.h"
 
-EnemyArrow::EnemyArrow(ArrowPool arrowPool) : arrowPool(std::move(arrowPool)) {}
+EnemyArrow::EnemyArrow(ArrowPool arrowPool, const std::shared_ptr<AudioManager>& audioManager) : arrowPool(std::move(arrowPool)), Enemy(audioManager){}
 
 void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f position, const int health, const int damage)
 {
@@ -118,14 +118,17 @@ void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
 
 void EnemyArrow::HandleDeath(const std::shared_ptr<CollectibleManager>& collectibleManager)
 {
-    if(state == Dead && !handledDeath)
-    {
-        handledDeath = true;
-        boundingBox = sf::RectangleShape();
-        std::cout << "Creating" << std::endl;
-        std::unique_ptr<Collectible> collectible = collectibleManager->CreateCoin(position);
-        collectibleManager->AddCollectible(std::move(collectible));
+    if (state != State::Dead || handledDeath) {
+        return;
     }
+
+    handledDeath = true;
+    boundingBox = sf::RectangleShape();
+    
+    auto collectible = collectibleManager->CreateCoin(position);
+    collectibleManager->AddCollectible(std::move(collectible));
+    
+    audioManager->PlaySound("kill enemy");
 }
 
 

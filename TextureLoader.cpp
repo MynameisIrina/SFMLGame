@@ -44,7 +44,7 @@ void TextureLoader::Initialize()
     textureCoordinates[Obstacle] = sf::IntRect(SpriteCoordinates::obstacleX * rectWidthDefault, SpriteCoordinates::obstacleY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture healthBarTex;
-    if (!healthBarTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/hearts.png"))
+    if (!healthBarTex.loadFromFile("SFMLGame/Assets/UI/hearts.png"))
     {
         throw std::runtime_error("Failed to load lifebar texture");
     }
@@ -52,7 +52,7 @@ void TextureLoader::Initialize()
     textureCoordinates[HealthBar] = sf::IntRect(SpriteCoordinates::HealthBarX * rectWidthHealthBar, SpriteCoordinates::HealthBarY * rectHeightHealthBar, rectWidthHealthBar, rectHeightHealthBar);
 
     sf::Texture enemyTex;
-    if (!enemyTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Enemy.png"))
+    if (!enemyTex.loadFromFile("SFMLGame/Assets/Player/Textures/Enemy.png"))
     {
         throw std::runtime_error("Failed to load enemy texture");
     }

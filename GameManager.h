@@ -15,6 +15,7 @@
 #include "RespawnManager.h"
 #include "GameState.h"
 #include "Menu.h"
+#include "AudioManager.h"
 
 
 class GameManager
@@ -42,6 +43,8 @@ public:
     void Update(const float dt);
     void Render();
     PlayerInput HandleInput();
+    void HandleAudio(GameManager::PlayerInput input);
+
 
 private:
     sf::ContextSettings settings;
@@ -50,6 +53,7 @@ private:
     float deltaTime;
 
     std::shared_ptr<TextureLoader> txLoader;
+    std::shared_ptr<AudioManager> audioManager;
     std::shared_ptr<Player> player;
     std::shared_ptr<Camera> camera;
     std::shared_ptr<HealthBar> healthBar;
@@ -66,6 +70,7 @@ private:
     std::unique_ptr<Background> background;
 
     GameState state;
+    sf::Sound coinCollectedSound;
 
     const int windowWidth = 800;
     const int windowHeight = 600;

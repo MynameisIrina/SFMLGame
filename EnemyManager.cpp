@@ -1,8 +1,8 @@
 #include "EnemyManager.h"
 #include "Level.h"
 
-EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader> &txLoader)
-    : txLoader(txLoader)
+EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader> &txLoader, const std::shared_ptr<AudioManager> &audioManager)
+    : txLoader(txLoader), audioManager(audioManager)
 {
     enemySprite = txLoader->SetSprite(TextureLoader::TextureType::Enemy);
 }
@@ -45,7 +45,7 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, in
     {
         grid[y][x] = Tile(Tile::Enemy, sf::RectangleShape());
 
-        std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>((ArrowPool(txLoader, 10)));
+        std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>((ArrowPool(txLoader, 10)), audioManager);
         sf::Vector2f position{globalTileX, static_cast<float>(y * tileSize)};
         enemyArrow->Initialize(enemySprite, position, 50, 10);
         enemies.push_back(std::move(enemyArrow));

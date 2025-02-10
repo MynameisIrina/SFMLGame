@@ -7,6 +7,7 @@
 #include "Tile.h"
 #include "RayCast.h"
 #include "ProjectilePool.h"
+#include "AudioManager.h"
 
 class Enemy;
 class RespawnManager;
@@ -37,6 +38,7 @@ private:
 
     // Private data
     std::shared_ptr<TextureLoader> txLoader;
+    std::shared_ptr<AudioManager> audioManager;
     sf::Sprite sprite;
     std::shared_ptr<HealthBar> healthBar;
     int currentAnim = 0;
@@ -103,7 +105,7 @@ private:
 
 public:
     // Constructor
-    Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool);
+    Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool, std::shared_ptr<AudioManager>& audioManager);
 
     // Initialization
     void Initialize(const sf::Vector2f position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
@@ -131,6 +133,8 @@ public:
     void CalculateCurrentAnimation(const float dt);
     void ResetAnimation(const int animYIndex);
     void HandleBlinking();
+    void HandleRebirthAnimation();
+    void HandleMovementAnimation();
 
     // Respawn
     void HandleRespawn();
@@ -161,6 +165,7 @@ public:
     void ResetBlinking();
     void HandleProjectileReset();
     void DecreaseCoins();
+    void HandleCoinLifeExchange(bool exchangeCoins);
 
     // Utilities
     static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color = sf::Color::Red);
