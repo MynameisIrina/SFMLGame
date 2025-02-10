@@ -47,7 +47,7 @@ void AudioManager::StopSound(const std::string &name)
 
 void AudioManager::PlayMusic(const std::string &filename, float volume, bool loop)
 {
-    if (!backgroundMusic.openFromFile("SFMLGame/Assets/Audio/sounds/time_for_adventure.mp3"))
+    if (!backgroundMusic.openFromFile(filename))
     {
         std::cerr << "Error loading music: " << filename << std::endl;
         return;

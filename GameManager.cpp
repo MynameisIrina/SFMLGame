@@ -15,12 +15,12 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     txLoader->Initialize();
 
     audioManager = std::make_shared<AudioManager>();
-    audioManager->LoadSound("coinCollected", "SFMLGame/Assets/Audio/sounds/coin.wav");
-    audioManager->LoadSound("jump", "SFMLGame/Assets/Audio/sounds/jump.wav");
-    audioManager->LoadSound("kill enemy", "SFMLGame/Assets/Audio/sounds/explosion.wav");
+    audioManager->LoadSound("coinCollected", "Assets/Audio/sounds/coin.wav");
+    audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
+    audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
 
 
-    audioManager->PlayMusic("/Users/chernova/Desktop/SFMLGameRoot/SFMLGame/Assets/Audio/sounds/time_for_adventure.mp3", 100);
+    audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
     player = std::make_shared<Player>(txLoader, projectilePool, audioManager);
 

@@ -12,7 +12,7 @@ void CoinBar::Initialize(const std::shared_ptr<Player> &player, const std::share
 
     sprite.setPosition(position);
 
-    if (!font.loadFromFile("SFMLGame/Assets/Fonts/Pixel.ttf")) {
+    if (!font.loadFromFile("Assets/Fonts/Pixel.ttf")) {
         throw std::runtime_error("Failed to load pixel font");
     }
 

@@ -5,7 +5,7 @@
 void TextureLoader::Initialize()
 {
     sf::Texture groundTex;
-    if (!groundTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Ground.png"))
+    if (!groundTex.loadFromFile("Assets/Background/PixelArtPlatformer/Texture/Ground.png"))
     {
         throw std::runtime_error("Failed to load ground texture");
     }
@@ -13,7 +13,7 @@ void TextureLoader::Initialize()
     textureCoordinates[TileDirt] = sf::IntRect(SpriteCoordinates::groundX * rectWidthDefault, SpriteCoordinates::groundY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture grassTex;
-    if (!grassTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/Ground.png"))
+    if (!grassTex.loadFromFile("Assets/Background/PixelArtPlatformer/Texture/Ground.png"))
     {
         throw std::runtime_error("Failed to load grass texture");
     }
@@ -21,7 +21,7 @@ void TextureLoader::Initialize()
     textureCoordinates[TileGrass] = sf::IntRect(SpriteCoordinates::grassX * rectWidthDefault, SpriteCoordinates::grassY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture playerTex;
-    if (!playerTex.loadFromFile("SFMLGame/Assets/Player/Textures/Cat-Sheet.png"))
+    if (!playerTex.loadFromFile("Assets/Player/Textures/Cat-Sheet.png"))
     {
         throw std::runtime_error("Failed to load player texture");
     }
@@ -29,14 +29,14 @@ void TextureLoader::Initialize()
     textureCoordinates[Player] = sf::IntRect(playerX + playerOffsetX, playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer);
 
     sf::Texture backgroundTex;
-    if (!backgroundTex.loadFromFile("SFMLGame/Assets/Background/Background.png"))
+    if (!backgroundTex.loadFromFile("Assets/Background/Background.png"))
     {
         throw std::runtime_error("Failed to load background texture");
     }
     textures[Background] = backgroundTex;
 
     sf::Texture obstacleTex;
-    if (!obstacleTex.loadFromFile("SFMLGame/Assets/Background/PixelArtPlatformer/Texture/VillageDetails.png"))
+    if (!obstacleTex.loadFromFile("Assets/Background/PixelArtPlatformer/Texture/VillageDetails.png"))
     {
         throw std::runtime_error("Failed to load obstacle texture");
     }
@@ -44,7 +44,7 @@ void TextureLoader::Initialize()
     textureCoordinates[Obstacle] = sf::IntRect(SpriteCoordinates::obstacleX * rectWidthDefault, SpriteCoordinates::obstacleY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture healthBarTex;
-    if (!healthBarTex.loadFromFile("SFMLGame/Assets/UI/hearts.png"))
+    if (!healthBarTex.loadFromFile("Assets/UI/hearts.png"))
     {
         throw std::runtime_error("Failed to load lifebar texture");
     }
@@ -52,7 +52,7 @@ void TextureLoader::Initialize()
     textureCoordinates[HealthBar] = sf::IntRect(SpriteCoordinates::HealthBarX * rectWidthHealthBar, SpriteCoordinates::HealthBarY * rectHeightHealthBar, rectWidthHealthBar, rectHeightHealthBar);
 
     sf::Texture enemyTex;
-    if (!enemyTex.loadFromFile("SFMLGame/Assets/Player/Textures/Enemy.png"))
+    if (!enemyTex.loadFromFile("Assets/Player/Textures/Enemy.png"))
     {
         throw std::runtime_error("Failed to load enemy texture");
     }
@@ -60,7 +60,7 @@ void TextureLoader::Initialize()
     textureCoordinates[Enemy] = sf::IntRect(SpriteCoordinates::EnemyX, SpriteCoordinates::EnemyY, rectWidthEnemy, rectHeightEnemy);
 
     sf::Texture arrowTex;
-    if (!arrowTex.loadFromFile("SFMLGame/Assets/Player/Textures/Arrow.png"))
+    if (!arrowTex.loadFromFile("Assets/Player/Textures/Arrow.png"))
     {
         throw std::runtime_error("Failed to load arrow texture");
     }
@@ -68,7 +68,7 @@ void TextureLoader::Initialize()
     textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * rectWidthArrow , SpriteCoordinates::arrowY * rectHeightArrow , rectWidthArrow , rectHeightArrow);
 
     sf::Texture coinTex;
-    if (!coinTex.loadFromFile("SFMLGame/Assets/UI/coin_rotate.png"))
+    if (!coinTex.loadFromFile("Assets/UI/coin_rotate.png"))
     {
         throw std::runtime_error("Failed to load coin texture");
     }
