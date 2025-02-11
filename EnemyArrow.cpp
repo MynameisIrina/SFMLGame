@@ -6,7 +6,7 @@
 
 EnemyArrow::EnemyArrow(ArrowPool arrowPool, const std::shared_ptr<AudioManager>& audioManager) : arrowPool(std::move(arrowPool)), Enemy(audioManager){}
 
-void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f position, const int health, const int damage)
+void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f& position, const int health, const int damage)
 {
     this->sprite = sprite;
     this->position = position;

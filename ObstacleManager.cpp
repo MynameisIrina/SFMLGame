@@ -58,7 +58,7 @@ void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, const 
     if (rand() % obstacleProbability != 0)
         return;
 
-    const float globalTileX = startX + (x - minX) * tileSize + (tileSize * 0.5f);
+    const float globalTileX = startX + static_cast<float>((x - minX) * tileSize) + (tileSize * 0.5f);
     const float globalTileY = static_cast<float>(y * tileSize);
 
     grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::RectangleShape());
@@ -91,7 +91,7 @@ std::vector<sf::RectangleShape>& ObstacleManager::GetObstaclesBoundingBoxes() co
     
     for(const auto& obstacle : obstacles)
     {
-        boxes.push_back(obstacle->GetBoundingBox());
+        boxes.emplace_back(obstacle->GetBoundingBox());
     }
 
     return boxes;

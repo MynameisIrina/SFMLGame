@@ -65,7 +65,6 @@ private:
     std::shared_ptr<TextureLoader> txLoader;
 
     const std::shared_ptr<Player> player;
-    float previousPlayerX;
     float furthestTileX_totalGrid = 0;
     float furthestTileX_gridWidth = 0;
 

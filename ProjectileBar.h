@@ -7,7 +7,7 @@ class ProjectileBar
 {
 
 public:
-    ProjectileBar();
+    ProjectileBar() = default;
     void Initialize(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera);
     void Draw(const std::shared_ptr<sf::RenderTarget>& rt) const;
     void Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, const float dt);

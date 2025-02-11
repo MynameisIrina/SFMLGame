@@ -12,6 +12,7 @@ public:
     sf::RectangleShape GetBoundingBox() const;
     void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, const float dt);
     void UpdateView();
+    
     sf::Sprite sprite;
     bool isActive = false;
     sf::Vector2f position;

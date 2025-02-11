@@ -4,7 +4,7 @@
 #include "Utilities.h"
 
 
-void Obstacle::Initialize(const sf::Sprite& sprite, const sf::Vector2f startPosition, const float speed, const float minX, const float maxX)
+void Obstacle::Initialize(const sf::Sprite& sprite, const sf::Vector2f& startPosition, const float speed, const float minX, const float maxX)
 {
     this->sprite = sprite;
     position = startPosition;
@@ -65,7 +65,7 @@ void Obstacle::CreateVisualLine(const float minX, const float maxX, const float 
     line[1] = sf::Vertex(sf::Vector2f(maxX, maxY), sf::Color::Black);
 }
 
-void Obstacle::Draw(const std::shared_ptr<sf::RenderWindow> window) const
+void Obstacle::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
     window->draw(sprite);
     window->draw(boundingBox);

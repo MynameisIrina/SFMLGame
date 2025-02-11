@@ -1,8 +1,10 @@
+
 #include "CoinBar.h"
 
 CoinBar::CoinBar(const std::shared_ptr<TextureLoader> &txLoader)
 {
     this->sprite = txLoader->SetSprite(TextureLoader::Coin);
+    coins = 0;
 }
 
 void CoinBar::Initialize(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera)

@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Camera.h"
 #include "Player.h"
 
@@ -5,8 +8,9 @@ Camera::Camera(const std::shared_ptr<sf::RenderWindow> &windowRef) : window(wind
 
 void Camera::Initialize()
 {
-    view.setSize(window->getSize().x, window->getSize().y);
-    view.setCenter(window->getSize().x * 0.5f, window->getSize().y * 0.5f);
+    auto windowSize = window->getSize();
+    view.setSize(windowSize.x, windowSize.y);
+    view.setCenter(windowSize.x * 0.5f, windowSize.y * 0.5f);
 }
 
 void Camera::Update(const std::shared_ptr<Player> &player)

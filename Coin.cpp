@@ -1,8 +1,9 @@
+
 #include "Coin.h"
 #include "Enemy.h"
 #include "Utilities.h"
 
-void Coin::Initialize(sf::Sprite &sprite, const sf::Vector2f position)
+void Coin::Initialize(sf::Sprite &sprite, const sf::Vector2f& position)
 {
     this->sprite = sprite;
     this->position = position;
@@ -41,7 +42,7 @@ void Coin::UpdateView()
     sprite.setTextureRect(sf::IntRect(currentAnim * frameSize + TextureLoader::coinOffsetX , 0, TextureLoader::rectWidthCoin, TextureLoader::rectHeightCoin));
 }
 
-void Coin::ConvertEnemyToCoin(sf::Sprite &sprite, const sf::Vector2f position)
+void Coin::ConvertEnemyToCoin(sf::Sprite &sprite, const sf::Vector2f& position)
 {
     Initialize(sprite, position);
 }

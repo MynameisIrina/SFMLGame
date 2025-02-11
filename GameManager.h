@@ -33,6 +33,13 @@ class GameManager
         bool paused;
     };
 
+    struct BoundingBoxes
+    {
+        std::vector<sf::RectangleShape> &tiles;
+        std::vector<sf::RectangleShape> &enemies;
+        std::vector<sf::RectangleShape> &obstacles;
+    };
+
 public:
 
 
@@ -45,6 +52,11 @@ public:
     void Render();
     PlayerInput HandleInput();
     void HandleAudio(GameManager::PlayerInput input);
+    bool ShouldEnterMenuState(GameManager::PlayerInput input);
+    bool CheckWinCondition();
+    void UpdatePlayer(const PlayerInput& input, float dt, float leftBound, 
+                             const BoundingBoxes& boxes);
+    GameManager::BoundingBoxes CollectBoundingBoxes();
 
 
 private:

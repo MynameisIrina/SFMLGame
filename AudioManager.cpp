@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "AudioManager.h"
 #include <iostream>
 
@@ -18,7 +21,7 @@ void AudioManager::LoadSound(const std::string &name, const std::string &filenam
         std::cout << "Error loading sound: " << filename << std::endl;
         return;
     }
-    soundBuffers[name] = buffer;
+    soundBuffers[name] = std::move(buffer);
 }
 
 void AudioManager::PlaySound(const std::string &name, float volume)
@@ -32,7 +35,7 @@ void AudioManager::PlaySound(const std::string &name, float volume)
     sf::Sound sound;
     sound.setBuffer(soundBuffers[name]);
     sound.setVolume(volume);
-    sounds[name] = sound;
+    sounds[name] = std::move(sound);
     sounds[name].play();
 }
 

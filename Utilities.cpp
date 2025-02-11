@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-sf::RectangleShape Utilities::CreateBoundingBox(const sf::Sprite& sprite, const sf::Vector2f position)
+sf::RectangleShape Utilities::CreateBoundingBox(const sf::Sprite& sprite, const sf::Vector2f& position)
 {
     const sf::FloatRect spriteBounds = sprite.getGlobalBounds();
     const float halfWidth = spriteBounds.width / 2.0f;
@@ -17,7 +17,7 @@ sf::RectangleShape Utilities::CreateBoundingBox(const sf::Sprite& sprite, const 
     return boundingBox;
 }
 
-sf::CircleShape Utilities::CreateBoundingCircle(const sf::Sprite &sprite, const sf::Vector2f position)
+sf::CircleShape Utilities::CreateBoundingCircle(const sf::Sprite &sprite, const sf::Vector2f& position)
 {
     const sf::FloatRect spriteBounds = sprite.getGlobalBounds();
     const float radius = std::max(spriteBounds.width, spriteBounds.height) / 2.0f;
@@ -33,12 +33,12 @@ sf::CircleShape Utilities::CreateBoundingCircle(const sf::Sprite &sprite, const 
     return boundingCircle;
 }
 
-sf::Color Utilities::GetOpaqueColor(const sf::Color color) 
+sf::Color Utilities::GetOpaqueColor(const sf::Color& color) 
 {
     return sf::Color(color.r, color.g, color.b, color.a);
 }
 
-sf::Color Utilities::GetTransparentColor(const sf::Color color)
+sf::Color Utilities::GetTransparentColor(const sf::Color& color)
 {
     return sf::Color(color.r, color.g, color.b, 0);
 }

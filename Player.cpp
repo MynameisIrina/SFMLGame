@@ -7,7 +7,7 @@
 
 Player::Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool, std::shared_ptr<AudioManager> &audioManager) : txLoader(txLoader), projectilePool(projectilePool), audioManager(audioManager) {}
 
-void Player::Initialize(const sf::Vector2f position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY)
+void Player::Initialize(const sf::Vector2f& position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY)
 {
     this->position = position;
     this->maxHealth = maxHealth;
@@ -261,7 +261,7 @@ void Player::HandleShooting(const bool shoot, const float dt)
 int Player::CalculateDirection()
 {
     bool isMovingRight = sprite.getScale().x > 0;
-    int direction = isMovingRight ? 1.0f : -1.0f;
+    int direction = isMovingRight ? 1 : -1;
 
     return direction;
 }
@@ -302,30 +302,29 @@ void Player::HandleRebirthAnimation()
         currentAnim = 0;
         isRespawnTimerRestarted = false;
     }
-
 }
 
 void Player::HandleMovementAnimation()
 {
     if (animationTimer >= animationInterval)
-        {
-            currentAnim += 1;
+    {
+        currentAnim += 1;
 
-            // if the player stopped moving, reset its animation
-            bool stopped = !IfStateActive(State::Moving);
-            if ((currentAnim >= maxFrames || stopped) && !IfStateActive(State::Jumping))
-            {
-                currentAnim = 0;
-                ResetAnimation(AnimationPlayer::STOP_MOVING);
-            }
-            // if the player is jumping, play only one animation unit
-            else if (currentAnim >= maxFrames && IfStateActive(State::Jumping))
-            {
-                currentAnim = 0;
-                ResetAnimation(AnimationPlayer::STOPP_JUMPING);
-            }
-            animationTimer = 0.f;
+        // if the player stopped moving, reset its animation
+        bool stopped = !IfStateActive(State::Moving);
+        if ((currentAnim >= maxFrames || stopped) && !IfStateActive(State::Jumping))
+        {
+            currentAnim = 0;
+            ResetAnimation(AnimationPlayer::STOP_MOVING);
         }
+        // if the player is jumping, play only one animation unit
+        else if (currentAnim >= maxFrames && IfStateActive(State::Jumping))
+        {
+            currentAnim = 0;
+            ResetAnimation(AnimationPlayer::STOPP_JUMPING);
+        }
+        animationTimer = 0.f;
+    }
 }
 
 void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape> &enemies, std::vector<sf::RectangleShape> &obstaclesShapes)
@@ -496,7 +495,7 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     }
 }
 
-void Player::Draw(const std::shared_ptr<sf::RenderTarget> rt) const
+void Player::Draw(const std::shared_ptr<sf::RenderTarget> &rt) const
 {
     rt->draw(sprite);
     rt->draw(boundingBoxPlayer);
@@ -504,7 +503,7 @@ void Player::Draw(const std::shared_ptr<sf::RenderTarget> rt) const
     projectilePool.Draw(rt);
 }
 
-void Player::DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color)
+void Player::DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f& start, const sf::Vector2f& end, sf::Color color)
 {
     sf::VertexArray ray(sf::Lines, 2);
 
@@ -645,12 +644,9 @@ void Player::HandleProjectileReset()
     if (projectilesCount > 0)
         return;
 
-    if (projectilesCount <= 0)
+    if (projectileResetTimer.getElapsedTime().asSeconds() >= projectileResetInterval)
     {
-        if (projectileResetTimer.getElapsedTime().asSeconds() >= projectileResetInterval)
-        {
-            ResetProjectiles();
-        }
+        ResetProjectiles();
     }
 }
 

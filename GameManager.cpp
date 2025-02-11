@@ -9,7 +9,7 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
 
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     sf::Clock timer;
-    float deltaTime = 0.0f;
+    deltaTime = 0.0f;
 
     txLoader = std::make_shared<TextureLoader>();
     txLoader->Initialize();
@@ -18,7 +18,6 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     audioManager->LoadSound("coinCollected", "Assets/Audio/sounds/coin.wav");
     audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
     audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
-
 
     audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
@@ -44,7 +43,6 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
 
     menu = std::make_unique<Menu>(window, txLoader);
     winScreen = std::make_unique<WinScreen>(window, txLoader);
-
 
     camera->Initialize();
     player->Initialize(sf::Vector2f(playerStartX, playerStartY), playerLives, playerProjectiles, playerSpeed, window->getSize().y);
@@ -79,12 +77,12 @@ void GameManager::Run()
         {
             window->close();
         }
-        else if(state == GameState::WIN)
+        else if (state == GameState::WIN)
         {
             window->setView(window->getDefaultView());
             winScreen->Show(state, deltaTime);
         }
-        else if(state == GameState::RESTART)
+        else if (state == GameState::RESTART)
         {
             respawnManager->RespawnAllEntities();
             state = GameState::RUNNING;
@@ -108,36 +106,21 @@ void GameManager::Update(const float dt)
 {
     const PlayerInput &input = HandleInput();
 
-    if (input.paused)
-    {
-        state = GameState::MENU;
+    if (ShouldEnterMenuState(input))
         return;
-    }
-
-    if(input.shoot)
-    {
-        state = GameState::WIN;
-        return;
-    }
 
     const float leftBound = camera->CalculateLeftBound();
 
-    std::vector<sf::RectangleShape> &tilesBoundBoxes = level->GetAllTiles();
-    std::vector<sf::RectangleShape> &enemiesBoundBoxes = enemyManager->GetEnemiesBoundingBoxes();
-    std::vector<sf::RectangleShape> &obstaclesBoundBoxes = obstacleManager->GetObstaclesBoundingBoxes();
+    auto boundingBoxes = CollectBoundingBoxes();
 
     background->GenerateNewSprite(player);
 
     player->Jump(input.jumped, deltaTime);
-    player->Update(respawnManager, camera, input.moveRight, input.moveLeft, input.shoot, leftBound, input.respawn, input.exchangeCoins, 
-                    deltaTime, tilesBoundBoxes, enemiesBoundBoxes, obstaclesBoundBoxes);
+    player->Update(respawnManager, camera, input.moveRight, input.moveLeft, input.shoot, leftBound, input.respawn, input.exchangeCoins,
+                   deltaTime, boundingBoxes.tiles, boundingBoxes.enemies, boundingBoxes.obstacles);
 
-    if(player->GetCoins() == 2)
-    {
-        // TODO: RESTART
-        state = GameState::WIN;
+    if (CheckWinCondition())
         return;
-    }
 
     level->UpdateLevel(player, camera, deltaTime);
 
@@ -147,13 +130,30 @@ void GameManager::Update(const float dt)
     projectileBar->Update(player, camera, deltaTime);
 }
 
+void GameManager::UpdatePlayer(const PlayerInput &input, float dt, float leftBound,
+                               const BoundingBoxes &boxes)
+{
+    player->Jump(input.jumped, dt);
+    player->Update(respawnManager, camera, input.moveRight, input.moveLeft,
+                   input.shoot, leftBound, input.respawn, input.exchangeCoins,
+                   dt, boxes.tiles, boxes.enemies, boxes.obstacles);
+}
+
+GameManager::BoundingBoxes GameManager::CollectBoundingBoxes()
+{
+    return {
+        level->GetAllTiles(),
+        enemyManager->GetEnemiesBoundingBoxes(),
+        obstacleManager->GetObstaclesBoundingBoxes()};
+}
+
 void GameManager::Render()
 {
     if (state == GameState::MENU)
     {
         menu->Draw();
     }
-    else if(state == GameState::WIN)
+    else if (state == GameState::WIN)
     {
         winScreen->Draw();
     }
@@ -164,18 +164,15 @@ void GameManager::Render()
 
         background->Draw(window);
 
-
         level->Draw(window);
         player->Draw(window);
-
 
         healthBar->Draw(window);
         coinBar->Draw(window);
         projectileBar->Draw(window);
-
     }
 
-     window->display();
+    window->display();
 }
 
 GameManager::PlayerInput GameManager::HandleInput()
@@ -189,3 +186,24 @@ GameManager::PlayerInput GameManager::HandleInput()
             sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)};
 }
 
+bool GameManager::ShouldEnterMenuState(GameManager::PlayerInput input)
+{
+    if (input.paused)
+    {
+        state = GameState::MENU;
+        return true;
+    }
+
+    return false;
+}
+
+bool GameManager::CheckWinCondition()
+{
+    if (player->GetCoins() == 10)
+    {
+        state = GameState::WIN;
+        return true;
+    }
+
+    return false;
+}

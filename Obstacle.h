@@ -7,7 +7,7 @@ class Obstacle
 {
 public:
 
-    void Initialize(const sf::Sprite& sprite, const sf::Vector2f startPosition, const float speed, const float minX, const float maxX);
+    void Initialize(const sf::Sprite& sprite, const sf::Vector2f& startPosition, const float speed, const float minX, const float maxX);
     void Draw(const std::shared_ptr<sf::RenderTarget>& rt) const;
     void MoveObstacles(float dt);
     void MoveObstacle(float dt);
@@ -16,7 +16,7 @@ public:
     sf::Sprite GetSprite() const;
     sf::RectangleShape GetBoundingBox() const;
     void CreateVisualLine(const float minX, const float maxX, const float minY, const float maxY);
-    void Draw(const std::shared_ptr<sf::RenderWindow> window) const;
+    void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
 
 private:
     std::shared_ptr<TextureLoader> txLoader;

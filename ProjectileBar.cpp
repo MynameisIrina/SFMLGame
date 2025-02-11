@@ -1,8 +1,6 @@
 #include "ProjectileBar.h"
 #include "Utilities.h"
 
-ProjectileBar::ProjectileBar() {}
-
 void ProjectileBar::Initialize(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera)
 {
 
@@ -72,15 +70,15 @@ void ProjectileBar::UpdateView()
     backgroundBar.setPosition(position);
 }
 
-void ProjectileBar::ReduceAmount(const float amountToReduce)
+void ProjectileBar::ReduceAmount(const float amount)
 {
-    const float newAmount = projectileBar.getSize().x - amountToReduce;
+    const float newAmount = projectileBar.getSize().x - amount;
     projectileBar.setSize(sf::Vector2f(newAmount, projectileBar.getSize().y));
 }
 
-void ProjectileBar::IncrementAmount(const float amountToIncrease, const float dt)
+void ProjectileBar::IncrementAmount(const float amount, const float dt)
 {
-    const float delta = amountToIncrease * dt;
+    const float delta = amount * dt;
     const float newAmount = projectileBar.getSize().x + delta;
     projectileBar.setSize(sf::Vector2f(newAmount, 10));
 }

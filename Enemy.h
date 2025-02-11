@@ -17,7 +17,7 @@ public:
     Enemy(const std::shared_ptr<AudioManager>& audioManager);
     virtual ~Enemy() = default;
 
-    virtual void Initialize(const sf::Sprite &sprite, const sf::Vector2f startPosition, const int health, const int damage) = 0;
+    virtual void Initialize(const sf::Sprite &sprite, const sf::Vector2f& position, const int health, const int damage) = 0;
     virtual void Update(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera>& camera, float dt);
     virtual void UpdateView() = 0;
     virtual void UpdateAnimation(const float dt) = 0;

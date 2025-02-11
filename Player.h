@@ -108,7 +108,7 @@ public:
     Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool, std::shared_ptr<AudioManager>& audioManager);
 
     // Initialization
-    void Initialize(const sf::Vector2f position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
+    void Initialize(const sf::Vector2f& position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
 
     // Update
     void Update(const std::shared_ptr<RespawnManager>& respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape>& enemiesShapes, std::vector<sf::RectangleShape>& obstaclesShapes);
@@ -149,7 +149,7 @@ public:
     void GainLife();
 
     // Other
-    void Draw(const std::shared_ptr<sf::RenderTarget> rt) const;
+    void Draw(const std::shared_ptr<sf::RenderTarget>& rt) const;
     sf::Vector2f GetPosition() const;
     sf::Vector2f GetMaxPosition() const;
     int GetProjectilesCount();
@@ -168,7 +168,7 @@ public:
     void HandleCoinLifeExchange(bool exchangeCoins);
 
     // Utilities
-    static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f start, const sf::Vector2f end, sf::Color color = sf::Color::Red);
+    static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f& start, const sf::Vector2f& end, sf::Color color = sf::Color::Red);
 
     // States
     void SetState(State stateToSet);

@@ -12,7 +12,7 @@ void Collectible::Pickup(const std::shared_ptr<Player> &player)
     }
 }
 
-void Collectible::Draw(const std::shared_ptr<sf::RenderWindow> window) const
+void Collectible::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
     window->draw(sprite);
     window->draw(boundingBox);

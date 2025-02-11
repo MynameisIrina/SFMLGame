@@ -37,7 +37,7 @@ void CollectibleManager::UpdateCollectibles(const std::shared_ptr<Player>& playe
         }
         
         (*it)->Update(player,dt);
-        it++;
+        ++it;
 
     }
 }

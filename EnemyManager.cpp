@@ -29,10 +29,8 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
     bool noTileCurrent = currentRow[currX].GetType() == 0;
     bool threeConsecutiveTilesUnderneath = ((bottomRow[currX].GetType() == 2) && (bottomRow[currX + 1].GetType() == 2) && (bottomRow[currX - 1].GetType() == 2));
     bool noTilesAlongPath = (currentRow[currX + 1].GetType() == 0 && currentRow[currX - 1].GetType() == 0);
-    bool noEnemiesNear = (currentRow[currX + 1].GetType() != 4 && currentRow[currX - 1].GetType() != 4)
-                        && (currentRow[currX + 2].GetType() != 4 && currentRow[currX - 2].GetType() != 4);
-    bool noObstaclesNear = (currentRow[currX + 1].GetType() != 3 && currentRow[currX - 1].GetType() != 3)
-                            && (currentRow[currX + 2].GetType() != 3 && currentRow[currX - 2].GetType() != 3);
+    bool noEnemiesNear = (currentRow[currX + 1].GetType() != 4 && currentRow[currX - 1].GetType() != 4) && (currentRow[currX + 2].GetType() != 4 && currentRow[currX - 2].GetType() != 4);
+    bool noObstaclesNear = (currentRow[currX + 1].GetType() != 3 && currentRow[currX - 1].GetType() != 3) && (currentRow[currX + 2].GetType() != 3 && currentRow[currX - 2].GetType() != 3);
 
     if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noEnemiesNear && noObstaclesNear)
     {
@@ -44,7 +42,8 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
 
 void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, int startX, int tileSize, int x, int y)
 {
-    float globalTileX = startX + (x - minX) * tileSize + (tileSize * 0.5f);
+    float globalTileX = startX + static_cast<float>((x - minX) * tileSize) + (tileSize * 0.5f);
+
     if (rand() % 8 == 0)
     {
         grid[y][x] = Tile(Tile::Enemy, sf::RectangleShape());
@@ -56,24 +55,24 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, in
     }
 }
 
-void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const std::shared_ptr<CollectibleManager>& collectibleManager, float dt)
+void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const std::shared_ptr<CollectibleManager> &collectibleManager, float dt)
 {
     for (auto it = enemies.begin(); it != enemies.end();)
     {
         if ((*it)->GetState() == Enemy::State::Alive)
         {
             (*it)->Update(player, camera, dt);
-            it++;
+            ++it;
         }
         else if ((*it)->GetState() == Enemy::State::Dead)
         {
             (*it)->HandleDeath(collectibleManager);
-            it++;
+            ++it;
         }
     }
 }
 
-void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
+void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
 {
     for (const auto &enemy : enemies)
     {
@@ -81,12 +80,12 @@ void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
     }
 }
 
-std::vector<std::reference_wrapper<Enemy>>& EnemyManager::GetAliveEnemies()
+std::vector<std::reference_wrapper<Enemy>> &EnemyManager::GetAliveEnemies()
 {
     static std::vector<std::reference_wrapper<Enemy>> aliveEnemies;
-    for(const auto &enemy: enemies)
+    for (const auto &enemy : enemies)
     {
-        if(enemy->GetState() == Enemy::State::Alive)
+        if (enemy->GetState() == Enemy::State::Alive)
         {
             aliveEnemies.push_back(*enemy);
         }
@@ -95,17 +94,17 @@ std::vector<std::reference_wrapper<Enemy>>& EnemyManager::GetAliveEnemies()
     return aliveEnemies;
 }
 
-std::vector<sf::RectangleShape>& EnemyManager::GetEnemiesBoundingBoxes()
+std::vector<sf::RectangleShape> &EnemyManager::GetEnemiesBoundingBoxes()
 {
     static std::vector<sf::RectangleShape> enemyBoundingBoxes;
 
     enemyBoundingBoxes.clear();
 
-    for(const auto &enemy: enemies)
+    for (const auto &enemy : enemies)
     {
-        if(enemy->GetState() == Enemy::State::Alive)
+        if (enemy->GetState() == Enemy::State::Alive)
         {
-            enemyBoundingBoxes.push_back(enemy->GetBoundingBox());
+            enemyBoundingBoxes.emplace_back(enemy->GetBoundingBox());
         }
     }
 

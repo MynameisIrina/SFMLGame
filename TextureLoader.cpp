@@ -9,7 +9,7 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load ground texture");
     }
-    textures[TileDirt] = groundTex;
+    textures[TileDirt] = std::move(groundTex);
     textureCoordinates[TileDirt] = sf::IntRect(SpriteCoordinates::groundX * rectWidthDefault, SpriteCoordinates::groundY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture grassTex;
@@ -17,7 +17,7 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load grass texture");
     }
-    textures[TileGrass] = grassTex;
+    textures[TileGrass] = std::move(grassTex);
     textureCoordinates[TileGrass] = sf::IntRect(SpriteCoordinates::grassX * rectWidthDefault, SpriteCoordinates::grassY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture playerTex;
@@ -25,7 +25,7 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load player texture");
     }
-    textures[Player] = playerTex;
+    textures[Player] = std::move(playerTex);
     textureCoordinates[Player] = sf::IntRect(playerX + playerOffsetX, playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer);
 
     sf::Texture backgroundTex;
@@ -33,14 +33,14 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load background texture");
     }
-    textures[Background] = backgroundTex;
+    textures[Background] = std::move(backgroundTex);
 
     sf::Texture obstacleTex;
     if (!obstacleTex.loadFromFile("Assets/Background/PixelArtPlatformer/Texture/VillageDetails.png"))
     {
         throw std::runtime_error("Failed to load obstacle texture");
     }
-    textures[Obstacle] = obstacleTex;
+    textures[Obstacle] = std::move(obstacleTex);
     textureCoordinates[Obstacle] = sf::IntRect(SpriteCoordinates::obstacleX * rectWidthDefault, SpriteCoordinates::obstacleY * rectHeightDefault, rectWidthDefault, rectHeightDefault);
 
     sf::Texture healthBarTex;
@@ -48,7 +48,7 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load lifebar texture");
     }
-    textures[HealthBar] = healthBarTex;
+    textures[HealthBar] = std::move(healthBarTex);
     textureCoordinates[HealthBar] = sf::IntRect(SpriteCoordinates::HealthBarX * rectWidthHealthBar, SpriteCoordinates::HealthBarY * rectHeightHealthBar, rectWidthHealthBar, rectHeightHealthBar);
 
     sf::Texture enemyTex;
@@ -56,7 +56,7 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load enemy texture");
     }
-    textures[Enemy] = enemyTex;
+    textures[Enemy] = std::move(enemyTex);
     textureCoordinates[Enemy] = sf::IntRect(SpriteCoordinates::EnemyX, SpriteCoordinates::EnemyY, rectWidthEnemy, rectHeightEnemy);
 
     sf::Texture arrowTex;
@@ -64,7 +64,7 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load arrow texture");
     }
-    textures[Arrow] = arrowTex;
+    textures[Arrow] = std::move(arrowTex);    
     textureCoordinates[Arrow] = sf::IntRect(SpriteCoordinates::arrowX * rectWidthArrow , SpriteCoordinates::arrowY * rectHeightArrow , rectWidthArrow , rectHeightArrow);
 
     sf::Texture coinTex;
@@ -72,7 +72,7 @@ void TextureLoader::Initialize()
     {
         throw std::runtime_error("Failed to load coin texture");
     }
-    textures[Coin] = coinTex;
+    textures[Coin] = std::move(coinTex);
     textureCoordinates[Coin] = sf::IntRect(SpriteCoordinates::coinX * rectWidthCoin + coinOffsetX , SpriteCoordinates::coinY * rectHeightCoin , rectWidthCoin , rectHeightCoin);
 }
 
