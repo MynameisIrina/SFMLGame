@@ -25,7 +25,7 @@ void Player::Initialize(const sf::Vector2f& position, const int maxHealth, const
     previousPosition = position;
 
     sprite = txLoader->SetSprite(TextureLoader::TextureType::Player);
-    sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
+    sprite.setOrigin(sprite.getLocalBounds().width * 0.5f, sprite.getLocalBounds().height * 0.5f);
     sprite.setScale(scale, scale);
 
     boundingBoxPlayer = Utilities::CreateBoundingBox(sprite, position);
@@ -358,7 +358,6 @@ void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, 
             {
                 // snapping
                 position.y = (tileBounds.top + tileBounds.height) + playerHalfHeight;
-
                 collisionTop = true;
                 break;
             }

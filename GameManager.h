@@ -42,7 +42,6 @@ class GameManager
 
 public:
 
-
     GameManager();
     ~GameManager() = default;
 
@@ -79,6 +78,7 @@ private:
     std::shared_ptr<Level> level;
     std::unique_ptr<Menu> menu;
     std::unique_ptr<WinScreen> winScreen;
+    sf::Sprite tree;
 
 
     ProjectilePool projectilePool;

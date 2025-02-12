@@ -12,8 +12,8 @@ public:
     void SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int startX, const int tileSize);
     void UpdateEnemies(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, const std::shared_ptr<CollectibleManager>& collectibleManager, const float dt);
     void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
-    bool CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, const int currX, const int currY);
-     void PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int minX, const int startX, const int tileSize, const int x, const int y);
+    bool CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, const int x, const int y, const int maxX, const int maxY);
+     void PlaceEnemy(std::vector<std::vector<Tile>> &grid,const int minX,const int startX,const int tileSize,const int x,const int y);
     std::vector<std::reference_wrapper<Enemy>>& GetAliveEnemies();
     std::vector<sf::RectangleShape>& GetEnemiesBoundingBoxes();
     void RespawnEnemies();

@@ -74,6 +74,14 @@ void TextureLoader::Initialize()
     }
     textures[Coin] = std::move(coinTex);
     textureCoordinates[Coin] = sf::IntRect(SpriteCoordinates::coinX * rectWidthCoin + coinOffsetX , SpriteCoordinates::coinY * rectHeightCoin , rectWidthCoin , rectHeightCoin);
+
+    sf::Texture treeTex;
+    if (!treeTex.loadFromFile("Assets/Background/PixelArtPlatformer/Texture/VillageDetails.png"))
+    {
+        throw std::runtime_error("Failed to load tree texture");
+    }
+    textures[Tree] = std::move(treeTex);
+    textureCoordinates[Tree] = sf::IntRect(SpriteCoordinates::treeX * rectWidthTree , SpriteCoordinates::treeY * rectHeightTree , rectWidthTree , rectHeightTree);
 }
 
 sf::Texture TextureLoader::GetTexture(TextureType type) const

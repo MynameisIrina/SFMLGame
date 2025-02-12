@@ -44,6 +44,10 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     menu = std::make_unique<Menu>(window, txLoader);
     winScreen = std::make_unique<WinScreen>(window, txLoader);
 
+    // tree = txLoader->SetSprite(TextureLoader::Tree);
+    // tree.setPosition(50,50);
+    // tree.setScale(0.8f,0.8f);
+
     camera->Initialize();
     player->Initialize(sf::Vector2f(playerStartX, playerStartY), playerLives, playerProjectiles, playerSpeed, window->getSize().y);
     healthBar->Initialize(player, camera);
@@ -92,6 +96,7 @@ void GameManager::Run()
     }
 }
 
+
 void GameManager::ProcessEvents()
 {
     sf::Event event;
@@ -106,8 +111,7 @@ void GameManager::Update(const float dt)
 {
     const PlayerInput &input = HandleInput();
 
-    if (ShouldEnterMenuState(input))
-        return;
+    if (ShouldEnterMenuState(input)) return;
 
     const float leftBound = camera->CalculateLeftBound();
 
@@ -119,8 +123,7 @@ void GameManager::Update(const float dt)
     player->Update(respawnManager, camera, input.moveRight, input.moveLeft, input.shoot, leftBound, input.respawn, input.exchangeCoins,
                    deltaTime, boundingBoxes.tiles, boundingBoxes.enemies, boundingBoxes.obstacles);
 
-    if (CheckWinCondition())
-        return;
+    if (CheckWinCondition()) return;
 
     level->UpdateLevel(player, camera, deltaTime);
 
@@ -164,6 +167,7 @@ void GameManager::Render()
 
         background->Draw(window);
 
+        //window->draw(tree);
         level->Draw(window);
         player->Draw(window);
 

@@ -16,7 +16,8 @@ public:
         Enemy,
         Arrow,
         ProjectileBar,
-        Coin
+        Coin,
+        Tree
     };
 
     enum SpriteCoordinates
@@ -38,7 +39,9 @@ public:
         projectileBarX = 1,
         projectileBarY = 0,
         coinX = 0,
-        coinY = 0
+        coinY = 0,
+        treeX = 6,
+        treeY = 3
     };
 
     
@@ -66,6 +69,8 @@ public:
     static const int rectWidthCoin = 25;
     static const int rectHeightCoin = 30;
     static const int coinOffsetX = 4;
+    static const int rectWidthTree = 116;
+    static const int rectHeightTree = 150;
 
 private:
 

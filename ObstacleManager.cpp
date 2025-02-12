@@ -30,10 +30,7 @@ void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, const
 
 bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &grid, int x, int y, int maxX, int maxY)
 {
-    if (y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0)
-    {
-        return false;
-    }
+    if (y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0 || x + 2 >= maxX || x - 2 < 0) return false;
 
     const auto &currentRow = grid[y];
     const auto &bottomRow = grid[y + 1];

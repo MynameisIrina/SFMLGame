@@ -13,7 +13,7 @@ void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int 
     {
         for (int x = minX; x < maxX - 1; ++x)
         {
-            if (CanPlaceEnemy(grid, x, y))
+            if (CanPlaceEnemy(grid, x, y, maxX, maxY))
             {
                 PlaceEnemy(grid, minX, startX, tileSize, x, y);
             }
@@ -21,16 +21,21 @@ void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int 
     }
 }
 
-bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, const int currX, const int currY)
+bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, const int x, const int y, const int maxX, const int maxY)
 {
-    const auto &currentRow = grid[currY];
-    const auto &bottomRow = grid[currY + 1];
+    if (y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0 || x + 2 >= maxX || x - 2 < 0)
+    {
+        return false;
+    }
 
-    bool noTileCurrent = currentRow[currX].GetType() == 0;
-    bool threeConsecutiveTilesUnderneath = ((bottomRow[currX].GetType() == 2) && (bottomRow[currX + 1].GetType() == 2) && (bottomRow[currX - 1].GetType() == 2));
-    bool noTilesAlongPath = (currentRow[currX + 1].GetType() == 0 && currentRow[currX - 1].GetType() == 0);
-    bool noEnemiesNear = (currentRow[currX + 1].GetType() != 4 && currentRow[currX - 1].GetType() != 4) && (currentRow[currX + 2].GetType() != 4 && currentRow[currX - 2].GetType() != 4);
-    bool noObstaclesNear = (currentRow[currX + 1].GetType() != 3 && currentRow[currX - 1].GetType() != 3) && (currentRow[currX + 2].GetType() != 3 && currentRow[currX - 2].GetType() != 3);
+    const auto &currentRow = grid[y];
+    const auto &bottomRow = grid[y + 1];
+
+    bool noTileCurrent = currentRow[x].GetType() == 0;
+    bool threeConsecutiveTilesUnderneath = ((bottomRow[x].GetType() == 2) && (bottomRow[x + 1].GetType() == 2) && (bottomRow[x - 1].GetType() == 2));
+    bool noTilesAlongPath = (currentRow[x + 1].GetType() == 0 && currentRow[x - 1].GetType() == 0);
+    bool noEnemiesNear = (currentRow[x + 1].GetType() != 4 && currentRow[x - 1].GetType() != 4) && (currentRow[x + 2].GetType() != 4 && currentRow[x - 2].GetType() != 4);
+    bool noObstaclesNear = (currentRow[x + 1].GetType() != 3 && currentRow[x - 1].GetType() != 3) && (currentRow[x + 2].GetType() != 3 && currentRow[x - 2].GetType() != 3);
 
     if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noEnemiesNear && noObstaclesNear)
     {
@@ -40,7 +45,7 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
     return false;
 }
 
-void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, int minX, int startX, int tileSize, int x, int y)
+void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int minX, const int startX, const int tileSize, const int x, const int y)
 {
     float globalTileX = startX + static_cast<float>((x - minX) * tileSize) + (tileSize * 0.5f);
 

@@ -8,7 +8,8 @@ public:
         Dirt = 1,
         Grass = 2,
         Obstacle = 3,
-        Enemy = 4
+        Enemy = 4,
+        Tree = 5
     };
 
     Tile(Tile_Type type, const sf::RectangleShape& shape)
