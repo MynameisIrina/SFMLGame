@@ -7,11 +7,12 @@ if(WIN32)
 
     message(STATUS "Windows detected")
 
-    set(SFML_DIR "${CMAKE_SOURCE_DIR}/SFML/lib/cmake/SFML")
-    set(SFML_DLL_DIR "${CMAKE_SOURCE_DIR}/SFML/bin")
+    set(SFML_DIR "${CMAKE_PREFIX_PATH}/lib/cmake/SFML")
+    set(SFML_DLL_DIR "${CMAKE_PREFIX_PATH}/bin")
     set(ASSET_DIR "${CMAKE_SOURCE_DIR}/Assets")
 
     find_package(SFML 2.6 REQUIRED graphics window system audio)
+
 
     file(GLOB SOURCES *.cpp)
 
@@ -19,16 +20,19 @@ if(WIN32)
     target_link_libraries(cat sfml-graphics sfml-window sfml-system sfml-audio)
 
     add_custom_command(TARGET cat POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${SFML_DLL_DIR}
-            $<TARGET_FILE_DIR:cat>
-    )
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${SFML_DLL_DIR}
+        $<TARGET_FILE_DIR:cat>
+    COMMENT "Copying SFML DLLs to the build directory"
+)
 
-    add_custom_command(TARGET cat POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${ASSET_DIR}
-            $<TARGET_FILE_DIR:cat>/Assets
-    )
+add_custom_command(TARGET cat POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${ASSET_DIR}
+        $<TARGET_FILE_DIR:cat>/Assets
+    COMMENT "Copying assets to the build directory"
+)
+
 
 else(APPLE)
 
