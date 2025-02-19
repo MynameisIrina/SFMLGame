@@ -35,12 +35,12 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &gri
     const auto &currentRow = grid[y];
     const auto &bottomRow = grid[y + 1];
 
-    bool noTileCurrent = currentRow[x].GetType() == Tile::Empty;
-    bool threeConsecutiveTilesUnderneath = ((bottomRow[x].GetType() == Tile::Grass) && (bottomRow[x + 1].GetType() == Tile::Grass) && (bottomRow[x - 1].GetType() == Tile::Grass));
-    bool noTilesAlongPath = (currentRow[x + 1].GetType() == Tile::Empty && currentRow[x - 1].GetType() == Tile::Empty);
-    bool noObstaclesNear = (currentRow[x + 1].GetType() != Tile::Obstacle && currentRow[x - 1].GetType() != Tile::Obstacle)
+    const bool noTileCurrent = currentRow[x].GetType() == Tile::Empty;
+    const bool threeConsecutiveTilesUnderneath = ((bottomRow[x].GetType() == Tile::Grass) && (bottomRow[x + 1].GetType() == Tile::Grass) && (bottomRow[x - 1].GetType() == Tile::Grass));
+    const bool noTilesAlongPath = (currentRow[x + 1].GetType() == Tile::Empty && currentRow[x - 1].GetType() == Tile::Empty);
+    const bool noObstaclesNear = (currentRow[x + 1].GetType() != Tile::Obstacle && currentRow[x - 1].GetType() != Tile::Obstacle)
                             && (currentRow[x + 2].GetType() != Tile::Obstacle && currentRow[x - 2].GetType() != Tile::Obstacle);
-    bool noEnemiesNear = (currentRow[x + 1].GetType() != Tile::Enemy && currentRow[x - 1].GetType() != Tile::Enemy);
+    const bool noEnemiesNear = (currentRow[x + 1].GetType() != Tile::Enemy && currentRow[x - 1].GetType() != Tile::Enemy);
 
     if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noObstaclesNear)
     {
@@ -57,18 +57,13 @@ void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, const 
 
     const float globalTileX = startX + static_cast<float>((x - minX) * tileSize) + (tileSize * 0.5f);
     const float globalTileY = static_cast<float>(y * tileSize);
+    const float minPosX = globalTileX - tileSize;
+    const float maxPosX = globalTileX + tileSize;
+    const float speed = std::clamp(rand() % maxSpeed, minSpeed, maxSpeed);
 
     grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::RectangleShape());
-
     std::unique_ptr<Obstacle> obstacle = std::make_unique<Obstacle>();
-    const float speed = std::clamp(rand() % maxSpeed, minSpeed, maxSpeed);
-    float minPosX = globalTileX - tileSize;
-    float maxPosX = globalTileX + tileSize;
-
     obstacle->Initialize(sprite, sf::Vector2f(globalTileX, globalTileY), speed, minPosX, maxPosX);
-    const float offsetY = obstacle->GetBoundingBox().getGlobalBounds().height * 0.5f;
-    obstacle->CreateVisualLine(minPosX, maxPosX, globalTileY + offsetY, globalTileY + offsetY);
-
     obstacles.push_back(std::move(obstacle));
 }
 

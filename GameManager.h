@@ -78,7 +78,6 @@ private:
     std::shared_ptr<Level> level;
     std::unique_ptr<Menu> menu;
     std::unique_ptr<WinScreen> winScreen;
-    sf::Sprite tree;
 
 
     ProjectilePool projectilePool;
@@ -96,6 +95,6 @@ private:
     const float playerStartY = 236.f;
     const int playerLives = 6;
     const int playerProjectiles = 5;
-    const float playerSpeed = 2.5f;
+    const float playerScale = 2.5f;
     const int firstPlatformheight = 8;
 };

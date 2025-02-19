@@ -19,7 +19,7 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
     audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
 
-    audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
+    //audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
     player = std::make_shared<Player>(txLoader, projectilePool, audioManager);
 
@@ -37,19 +37,15 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     enemyManager = std::make_shared<EnemyManager>(txLoader, audioManager);
     obstacleManager = std::make_shared<ObstacleManager>(txLoader);
 
-    respawnManager = std::make_shared<RespawnManager>(player, enemyManager, collectibleManager, camera);
+    respawnManager = std::make_shared<RespawnManager>(player, enemyManager, collectibleManager, camera, projectileBar);
 
     level = std::make_shared<Level>(obstacleManager, enemyManager, collectibleManager, txLoader);
 
     menu = std::make_unique<Menu>(window, txLoader);
     winScreen = std::make_unique<WinScreen>(window, txLoader);
 
-    // tree = txLoader->SetSprite(TextureLoader::Tree);
-    // tree.setPosition(50,50);
-    // tree.setScale(0.8f,0.8f);
-
     camera->Initialize();
-    player->Initialize(sf::Vector2f(playerStartX, playerStartY), playerLives, playerProjectiles, playerSpeed, window->getSize().y);
+    player->Initialize(sf::Vector2f(playerStartX, playerStartY), playerLives, playerProjectiles, playerScale, window->getSize().y);
     healthBar->Initialize(player, camera);
     projectileBar->Initialize(player, camera);
     coinBar->Initialize(player, camera);
@@ -167,7 +163,6 @@ void GameManager::Render()
 
         background->Draw(window);
 
-        //window->draw(tree);
         level->Draw(window);
         player->Draw(window);
 

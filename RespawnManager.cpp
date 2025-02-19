@@ -1,16 +1,14 @@
 #include "RespawnManager.h"
-#include "EnemyManager.h"
-#include "CollectibleManager.h"
-#include "Player.h"
 
-RespawnManager::RespawnManager(const std::shared_ptr<Player>& player, const std::shared_ptr<EnemyManager>& enemyManager, const std::shared_ptr<CollectibleManager>& collectibleManager, const std::shared_ptr<Camera>& camera):
-    player(player), enemyManager(enemyManager), collectibleManager(collectibleManager), camera(camera)
+RespawnManager::RespawnManager(const std::shared_ptr<Player>& player, const std::shared_ptr<EnemyManager>& enemyManager, const std::shared_ptr<CollectibleManager>& collectibleManager, const std::shared_ptr<Camera>& camera, const std::shared_ptr<ProjectileBar>& projectileBar):
+    player(player), enemyManager(enemyManager), collectibleManager(collectibleManager), camera(camera), projectileBar(projectileBar)
 {}
 
 void RespawnManager::RespawnAllEntities()
 {
     player->HandleRespawn();
     enemyManager->RespawnEnemies();
+    projectileBar->ResetBar();
 
     auto enemyList = enemyManager->GetAliveEnemies();
     for(const auto& enemy: enemyList)

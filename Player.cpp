@@ -7,7 +7,7 @@
 
 Player::Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool, std::shared_ptr<AudioManager> &audioManager) : txLoader(txLoader), projectilePool(projectilePool), audioManager(audioManager) {}
 
-void Player::Initialize(const sf::Vector2f& position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY)
+void Player::Initialize(const sf::Vector2f &position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY)
 {
     this->position = position;
     this->maxHealth = maxHealth;
@@ -29,7 +29,7 @@ void Player::Initialize(const sf::Vector2f& position, const int maxHealth, const
     sprite.setScale(scale, scale);
 
     boundingBoxPlayer = Utilities::CreateBoundingBox(sprite, position);
-    boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - 2 * boundingBoxOffsetX, sprite.getGlobalBounds().height));
+    boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - 2.f * boundingBoxOffsetX, sprite.getGlobalBounds().height));
 }
 
 void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight, const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape> &enemiesShapes, std::vector<sf::RectangleShape> &obstaclesShapes)
@@ -66,7 +66,7 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
         HandleFalling();
         HandleBlinking();
         projectilePool.Update(camera, dt);
-        HandleProjectileReset();
+        HandleProjectileReset(dt);
         HandleCoinLifeExchange(exchangeCoins);
     }
 
@@ -179,24 +179,17 @@ void Player::CheckCollisionSide(const std::vector<sf::RectangleShape> &tilesShap
         hitInfo = hitTiles.value();
         hasCollision = true;
     }
-    else if (hitEnemies)
+    else if (hitEnemies && !IsPlayerProtected())
     {
         hitInfo = hitEnemies.value();
         hasCollision = true;
-        if (!IsPlayerProtected())
-        {
-            HandleEnemyCollision();
-        }
+        HandleEnemyCollision();
     }
-    else if (hitObstacles)
+    else if (hitObstacles && !IsPlayerProtected())
     {
         hitInfo = hitObstacles.value();
         hasCollision = true;
-
-        if (!IsPlayerProtected())
-        {
-            HandleObstacleCollision();
-        }
+        HandleObstacleCollision();
     }
 
     if (hasCollision)
@@ -244,10 +237,7 @@ void Player::HandleShooting(const bool shoot, const float dt)
             isShooting = true;
             projectilesCount--;
 
-            if (projectilesCount == 0)
-            {
-                projectileResetTimer.restart();
-            }
+            projectileResetTimer.restart();
         }
     }
 
@@ -327,100 +317,135 @@ void Player::HandleMovementAnimation()
     }
 }
 
-void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape> &enemies, std::vector<sf::RectangleShape> &obstaclesShapes)
+void Player::HandleGroundCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight)
+{
+    position.y = otherBounds.top - playerHalfHeight - boundingBoxOffsetY;
+    collisionGround = true;
+    ClearState(Player::State::Jumping);
+}
+
+void Player::HandleTopCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight)
+{
+    position.y = (otherBounds.top + otherBounds.height) + playerHalfHeight;
+    collisionTop = true;
+}
+
+Player::CollisionInfo Player::CalculateCollision(const sf::FloatRect &playerBounds, const sf::FloatRect &otherBounds)
+{
+    if (!Math::CheckRectCollision(playerBounds, otherBounds))
+        return Player::CollisionInfo();
+
+    float overlapTop = playerBounds.top - (otherBounds.top + otherBounds.height);
+    float overlapBottom = otherBounds.top - (playerBounds.top + playerBounds.height);
+
+    return Player::CollisionInfo(overlapBottom, overlapTop, true);
+}
+
+bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &tiles, const float playerHalfHeight)
+{
+    for (auto &boundBox : tiles)
+    {
+        sf::FloatRect tileBounds = boundBox.getGlobalBounds();
+        CollisionInfo collisionInfo = CalculateCollision(playerBounds, tileBounds);
+
+        if (!collisionInfo.hasCollision)
+            continue;
+
+        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
+        { 
+            HandleGroundCollision(tileBounds, playerHalfHeight);
+            return true;
+        }
+
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
+        {
+            HandleTopCollision(tileBounds, playerHalfHeight);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Player::CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &enemies, const float playerHalfHeight)
+{
+    if(IsPlayerProtected()) return false;
+
+    for (auto &boundBox : enemies)
+    {
+        sf::FloatRect enemyBounds = boundBox.getGlobalBounds();
+        CollisionInfo collisionInfo = CalculateCollision(playerBounds, enemyBounds);
+
+        if (!collisionInfo.hasCollision)
+            continue;
+
+        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
+        {
+            HandleGroundCollision(enemyBounds, playerHalfHeight);
+            if (!IsPlayerProtected())
+            {
+                HandleEnemyCollision();
+            }
+            return true;
+        }
+
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
+        {
+            HandleTopCollision(enemyBounds, playerHalfHeight);
+            if (!IsPlayerProtected())
+            {
+                HandleEnemyCollision();
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &obstacles, const float playerHalfHeight)
+{
+    for (const auto &obstacle : obstacles)
+    {
+        const sf::FloatRect &obstacleBounds = obstacle.getGlobalBounds();
+        CollisionInfo collision = CalculateCollision(playerBounds, obstacleBounds);
+
+        if (!collision.hasCollision)
+            continue;
+
+        if (collision.overlapBottom <= 0.f && collision.overlapBottom >= -4.f)
+        {
+            HandleGroundCollision(obstacleBounds, playerHalfHeight);
+            if (!IsPlayerProtected())
+            {
+                HandleObstacleCollision();
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, const std::vector<sf::RectangleShape> &enemies, const std::vector<sf::RectangleShape> &obstacles)
 {
     collisionGround = false;
     collisionTop = false;
 
-    sf::FloatRect playerBounds = boundingBoxPlayer.getGlobalBounds();
+    const sf::FloatRect &playerBounds = boundingBoxPlayer.getGlobalBounds();
     const float playerHeight = playerBounds.getSize().y;
     const float playerHalfHeight = playerHeight * 0.5f;
 
-    for (auto &boundBox : tiles)
-    {
-        sf::FloatRect tileBounds = boundBox.getGlobalBounds();
-
-        if (Math::CheckRectCollision(playerBounds, tileBounds))
-        {
-            float overlapTop = playerBounds.top - (tileBounds.top + tileBounds.height);
-            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
-
-            if (overlapBottom <= 0.f)
-            {
-                // snapping
-                position.y = tileBounds.top - playerHalfHeight;
-
-                collisionGround = true;
-                ClearState(State::Jumping);
-                break;
-            }
-            if (overlapTop <= 0.f)
-            {
-                // snapping
-                position.y = (tileBounds.top + tileBounds.height) + playerHalfHeight;
-                collisionTop = true;
-                break;
-            }
-        }
-    }
-
-    for (auto &boundBox : enemies)
-    {
-        sf::FloatRect tileBounds = boundBox.getGlobalBounds();
-
-        if (Math::CheckRectCollision(playerBounds, tileBounds))
-        {
-            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
-
-            if (overlapBottom <= 0.f)
-            {
-                // snapping
-                position.y = tileBounds.top - playerHalfHeight;
-
-                if (!IsPlayerProtected())
-                {
-                    HandleEnemyCollision();
-                }
-                collisionGround = true;
-                ClearState(State::Jumping);
-                break;
-            }
-        }
-    }
-
-    for (auto &boundBox : obstaclesShapes)
-    {
-        sf::FloatRect tileBounds = boundBox.getGlobalBounds();
-
-        if (Math::CheckRectCollision(playerBounds, tileBounds))
-        {
-
-            float overlapBottom = tileBounds.top - (playerBounds.top + playerBounds.height);
-
-            if (overlapBottom <= 0.f)
-            {
-                // snapping
-                position.y = tileBounds.top - playerHalfHeight;
-
-                if (!IsPlayerProtected())
-                {
-                    HandleObstacleCollision();
-                }
-
-                collisionGround = true;
-                ClearState(State::Jumping);
-                break;
-            }
-        }
-    }
+    if(CheckPlatformsCollision(playerBounds, tiles, playerHalfHeight)) return;
+    if(CheckEnemiesCollision(playerBounds, enemies, playerHalfHeight)) return;
+    if(CheckObstaclesCollisions(playerBounds, obstacles, playerHalfHeight)) return;
 }
+
 
 void Player::Jump(const bool jump, const float dt)
 {
     if (jump && !IfStateActive(State::Jumping))
     {
         SetState(State::Jumping);
-        // audioManager->PlaySound("jump");
         collisionGround = false;
         velocity.y = -jumpVelocity;
     }
@@ -484,7 +509,7 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
         }
 
         sprite.setPosition(position);
-        boundingBoxPlayer.setPosition(position.x + boundingBoxOffsetX, position.y);
+        boundingBoxPlayer.setPosition(position.x + boundingBoxOffsetX, position.y + boundingBoxOffsetY);
     }
     else
     {
@@ -502,7 +527,7 @@ void Player::Draw(const std::shared_ptr<sf::RenderTarget> &rt) const
     projectilePool.Draw(rt);
 }
 
-void Player::DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f& start, const sf::Vector2f& end, sf::Color color)
+void Player::DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f &start, const sf::Vector2f &end, sf::Color color)
 {
     sf::VertexArray ray(sf::Lines, 2);
 
@@ -581,7 +606,7 @@ sf::Vector2f Player::GetMaxPosition() const
     return maxPosition;
 }
 
-int Player::GetProjectilesCount()
+int Player::GetProjectilesCount() const
 {
     return projectilesCount;
 }
@@ -596,10 +621,10 @@ sf::RectangleShape Player::GetBoundingBox() const
     return boundingBoxPlayer;
 }
 
-void Player::ResetProjectilesCount()
-{
-    projectilesCount = maxProjectileCount;
-}
+// void Player::ResetProjectilesCount()
+// {
+//     projectilesCount = maxProjectileCount;
+// }
 
 void Player::PickUpCoin()
 {
@@ -638,14 +663,25 @@ void Player::ResetBlinking()
     sprite.setColor(Utilities::GetOpaqueColor(sf::Color(255, 255, 255)));
 }
 
-void Player::HandleProjectileReset()
+void Player::IncreaseProjectiles()
 {
-    if (projectilesCount > 0)
+    if (projectilesCount >= maxProjectileCount)
         return;
 
-    if (projectileResetTimer.getElapsedTime().asSeconds() >= projectileResetInterval)
+    projectilesCount++;
+}
+
+void Player::HandleProjectileReset(const float dt)
+{
+    if (projectilesCount >= maxProjectileCount)
+        return;
+
+    projectileAccumulatedTime += dt;
+
+    if (projectileAccumulatedTime >= projectileResetDelay)
     {
-        ResetProjectiles();
+        projectilesCount++;
+        projectileAccumulatedTime = 0.f;
     }
 }
 

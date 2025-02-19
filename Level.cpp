@@ -115,6 +115,18 @@ int Level::AdjustPlatformHeight(const int previousHeight, int currentHeight, con
     return currentHeight;
 }
 
+void Level::SpawnTree(const int startX, const float renderOffset, const int x, const int y)
+{
+    sf::Sprite tree = txLoader->SetSprite(TextureLoader::Tree);
+    tree.setOrigin(tree.getLocalBounds().width * 0.5f, tree.getLocalBounds().height);
+    const float globalTileX = renderOffset + static_cast<float>((x - startX) * tileSize) + (tileSize * 0.5f);
+    const float globalTileY = static_cast<float>(y * tileSize);
+    tree.setPosition(globalTileX, globalTileY);
+    treeSprites.emplace_back(std::move(tree));
+
+    grid[y][x] = Tile(Tile::Tile_Type::Tree, sf::RectangleShape());
+}
+
 void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
 {
     // Track when the player has moved a full tile
@@ -206,18 +218,9 @@ void Level::UpdateGround(const int startX, const float renderOffset)
                 tileSprites.emplace_back(sprite);
                 TrackLastGeneratedPositions(worldPositionX, x);
 
-                if (tileType == Tile::Grass && rand() % 9 == 0)
+                if (tileType == Tile::Grass && rand() % treeGenerationProbability == 0)
                 {
-                    sf::Sprite tree = txLoader->SetSprite(TextureLoader::Tree);
-                    tree.setOrigin(tree.getLocalBounds().width * 0.5f, tree.getLocalBounds().height);
-                    //tree.setScale(0.8f, 0.8f);
-                    const float globalTileX = renderOffset + static_cast<float>((x - startX) * tileSize) + (tileSize * 0.5f);
-                    const float globalTileY = static_cast<float>(y * tileSize);
-                    std::cout << "tree at: " << globalTileX << std::endl;
-                    tree.setPosition(globalTileX, globalTileY);
-                    treeSprites.emplace_back(std::move(tree));
-
-                    grid[y][x] = Tile(Tile::Tile_Type::Tree, sf::RectangleShape());
+                    SpawnTree(startX, renderOffset, x, y);
                 }
             }
         }

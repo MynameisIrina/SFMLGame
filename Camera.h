@@ -8,6 +8,9 @@ class Camera
 private:
     sf::View view;
     std::shared_ptr<sf::RenderWindow> window;
+    float topBound = 0;
+    float bottomBound = 0;
+
 
 public:
     Camera(const std::shared_ptr<sf::RenderWindow>& window);
@@ -17,4 +20,7 @@ public:
     sf::View GetView() const;
     int CalculateLeftBound() const;
     int CalculateRightBound() const;
+    int CalculateTopBound() const;
+    int CalculateBottomBound() const;
+
 };

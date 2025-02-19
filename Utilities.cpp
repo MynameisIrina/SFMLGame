@@ -5,8 +5,8 @@
 sf::RectangleShape Utilities::CreateBoundingBox(const sf::Sprite& sprite, const sf::Vector2f& position)
 {
     const sf::FloatRect spriteBounds = sprite.getGlobalBounds();
-    const float halfWidth = spriteBounds.width / 2.0f;
-    const float halfHeight = spriteBounds.height / 2.0f;
+    const float halfWidth = spriteBounds.width * 0.5f;
+    const float halfHeight = spriteBounds.height * 0.5f;
 
     sf::RectangleShape boundingBox(sf::Vector2f(spriteBounds.width, spriteBounds.height));;
     boundingBox.setFillColor(sf::Color::Transparent);
@@ -20,9 +20,9 @@ sf::RectangleShape Utilities::CreateBoundingBox(const sf::Sprite& sprite, const 
 sf::CircleShape Utilities::CreateBoundingCircle(const sf::Sprite &sprite, const sf::Vector2f& position)
 {
     const sf::FloatRect spriteBounds = sprite.getGlobalBounds();
-    const float radius = std::max(spriteBounds.width, spriteBounds.height) / 2.0f;
-    const float halfWidth = spriteBounds.width / 2.0f;
-    const float halfHeight = spriteBounds.height / 2.0f;
+    const float radius = std::max(spriteBounds.width, spriteBounds.height) * 0.5f;
+    const float halfWidth = spriteBounds.width * 0.5f;
+    const float halfHeight = spriteBounds.height * 0.5f;
 
     sf::CircleShape boundingCircle(radius);;
     boundingCircle.setFillColor(sf::Color::Transparent);

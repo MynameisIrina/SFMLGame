@@ -41,6 +41,7 @@ public:
     void UpdateGrid(const Tile &tile, const int x, const int y);
     int AdjustPlatformHeight(const int previousHeight, const int currentHeight, const int maxGap, const int maxHeight, const int minHeight) const;
     void UpdateGenerationBounds(const sf::Vector2f& cameraCenter);
+    void SpawnTree(const int startX, const float renderOffset, const int x, const int y);
 
 private:
 
@@ -53,6 +54,7 @@ private:
     int firstPlatformHeight = 5;
     int maxPlatformHeight = 12;
     int nextGridColumn = gridWidth + 1;
+    const int treeGenerationProbability = 9;
 
 
     std::shared_ptr<ObstacleManager> obstacleManager;

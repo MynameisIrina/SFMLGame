@@ -11,6 +11,8 @@ void Camera::Initialize()
     auto windowSize = window->getSize();
     view.setSize(windowSize.x, windowSize.y);
     view.setCenter(windowSize.x * 0.5f, windowSize.y * 0.5f);
+    topBound = 40.f;
+    bottomBound = windowSize.y - 40.f;
 }
 
 void Camera::Update(const std::shared_ptr<Player> &player)
@@ -45,4 +47,14 @@ int Camera::CalculateLeftBound() const
 int Camera::CalculateRightBound() const
 {
     return view.getCenter().x + view.getSize().x * 0.5f;
+}
+
+int Camera::CalculateTopBound() const
+{
+    return topBound;
+}
+
+int Camera::CalculateBottomBound() const
+{
+    return bottomBound;
 }

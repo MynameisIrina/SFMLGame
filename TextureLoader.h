@@ -17,7 +17,8 @@ public:
         Arrow,
         ProjectileBar,
         Coin,
-        Tree
+        Tree,
+        Eagel
     };
 
     enum SpriteCoordinates
@@ -41,7 +42,9 @@ public:
         coinX = 0,
         coinY = 0,
         treeX = 6,
-        treeY = 3
+        treeY = 3,
+        eagelX = 0,
+        eagelY = 0
     };
 
     
@@ -71,6 +74,9 @@ public:
     static const int coinOffsetX = 4;
     static const int rectWidthTree = 116;
     static const int rectHeightTree = 150;
+    static const int rectWidthEagel = 36;
+    static const int rectHeightEagel = 40;
+    static const int eageloffsetX = 10;
 
 private:
 

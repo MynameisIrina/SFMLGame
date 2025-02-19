@@ -17,14 +17,17 @@ public:
     std::vector<std::reference_wrapper<Enemy>>& GetAliveEnemies();
     std::vector<sf::RectangleShape>& GetEnemiesBoundingBoxes();
     void RespawnEnemies();
+    void SpawnFlyingEnemy(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera> &camera, const float dt);
 
 private:
     std::vector<std::unique_ptr<Enemy>> enemies;
     std::shared_ptr<TextureLoader> txLoader;
     std::shared_ptr<AudioManager> audioManager;
 
-
     sf::Sprite enemySprite;
+    sf::Sprite eagleSprite;
     const float offsetY = 12;
+    float flyingEnemySpawnTimer = 0.0f;
+    float flyingEnemySpawnCooldown = 10.0f; 
 
 };

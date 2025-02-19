@@ -25,6 +25,7 @@ public:
     virtual void Respawn();
 
     void TakeDamage(const int amount);
+    void ShowDamageAnimation();
     State GetState() const;
     sf::RectangleShape GetBoundingBox() const; 
     virtual void Draw(const std::shared_ptr<sf::RenderWindow>& window) const;
@@ -38,8 +39,12 @@ protected:
     sf::Vector2f position;
     sf::RectangleShape boundingBox;
     sf::RectangleShape initialBoundingBox;
-    int health;
-    int maxHealth;
-    int damage;
+    int health = 0;
+    int maxHealth = 0;
+    int damage = 0;
+    bool shouldBeRespawned = false;
     bool handledDeath = false;
+    bool takingDamage = false;
+    sf::Clock damageTimer;
+    float takingDamageAnimationDuration = 0.15f;
 };

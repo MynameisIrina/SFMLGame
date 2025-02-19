@@ -1,10 +1,12 @@
 #include "EnemyManager.h"
 #include "Level.h"
+#include "Eagle.h"
 
 EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader> &txLoader, const std::shared_ptr<AudioManager> &audioManager)
     : txLoader(txLoader), audioManager(audioManager)
 {
     enemySprite = txLoader->SetSprite(TextureLoader::TextureType::Enemy);
+    eagleSprite = txLoader->SetSprite(TextureLoader::TextureType::Eagel);
 }
 
 void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int startX, const int tileSize)
@@ -55,7 +57,7 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int mi
 
         std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>((ArrowPool(txLoader, 10)), audioManager);
         sf::Vector2f position{globalTileX, static_cast<float>(y * tileSize)};
-        enemyArrow->Initialize(enemySprite, position, 50, 10);
+        enemyArrow->Initialize(enemySprite, position, 40, 10);
         enemies.push_back(std::move(enemyArrow));
     }
 }
@@ -66,6 +68,18 @@ void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> &player, const st
     {
         if ((*it)->GetState() == Enemy::State::Alive)
         {
+            // erase enemies that are out of camera bounds
+            if (auto eagle = dynamic_cast<Eagle *>((*it).get()))
+            {
+                sf::Vector2f position = eagle->GetPosition();
+                bool withinBounds = eagle->GetDirection() == -1 ? position.x > camera->CalculateLeftBound() : position.x < camera->CalculateRightBound();
+                if (!withinBounds)
+                {
+                    it = enemies.erase(it);
+                    continue;
+                }
+            }
+
             (*it)->Update(player, camera, dt);
             ++it;
         }
@@ -75,6 +89,8 @@ void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> &player, const st
             ++it;
         }
     }
+
+    SpawnFlyingEnemy(player, camera, dt);
 }
 
 void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
@@ -121,5 +137,33 @@ void EnemyManager::RespawnEnemies()
     for (auto &enemy : enemies)
     {
         enemy->Respawn();
+    }
+}
+
+void EnemyManager::SpawnFlyingEnemy(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
+{
+    const float spawnY = player->GetPosition().y;
+
+    flyingEnemySpawnTimer += dt;
+
+    if (flyingEnemySpawnTimer >= flyingEnemySpawnCooldown)
+    {
+        flyingEnemySpawnTimer = 0.f;
+
+        const int spawnSide = rand() % 2;
+        const float spawnX = spawnSide == 0 ? camera->CalculateLeftBound() : camera->CalculateRightBound();
+        const float spawnY = player->GetPosition().y;
+
+        sf::Vector2f spawnPosition{spawnX, spawnY};
+
+        std::unique_ptr<Enemy> eagle = std::make_unique<Eagle>(audioManager);
+        eagle->Initialize(eagleSprite, spawnPosition, 10, 5);
+
+        if (auto *eaglePtr = dynamic_cast<Eagle *>(eagle.get()))
+        {
+            eaglePtr->SetMovementDirection(spawnSide == 0 ? 1 : -1);
+        }
+
+        enemies.push_back(std::move(eagle));
     }
 }

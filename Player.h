@@ -16,6 +16,16 @@ class Player
 {
 public:
 
+    struct CollisionInfo
+    {
+        float overlapBottom;
+        float overlapTop;
+        bool hasCollision;
+
+        CollisionInfo(float bottom = 0.f, float top = 0.f, bool collision = false)
+        : overlapBottom(bottom), overlapTop(top), hasCollision(collision) {}
+    };
+
     enum PlayerCondition
     {
         Normal,
@@ -49,7 +59,7 @@ private:
     sf::Vector2f respawnPos;
     sf::Vector2f maxPosition;
     sf::Vector2f position;
-    float scale;
+    float scale = 0.f;
     PlayerCondition condition;
     sf::Clock loseLifeCooldown;
     sf::Clock respawnTimer;
@@ -63,6 +73,8 @@ private:
     int maxProjectileCount = 0;
     int coinsCollected = 0;
     sf::Vector2f previousPosition;
+    float projectileAccumulatedTime = 0.f;
+    float projectileResetDelay = 3.f;
 
 
     // const variables
@@ -76,9 +88,10 @@ private:
     const float animationInterval = 0.1f;
     const float loseLifeDelay = 2.0f;
     const float blinkingInterval = 0.1f;
-    const float projectileResetInterval = 5.0f;
+    const float projectileResetInterval = 3.0f;
     const int tileSize = 32;
     const int boundingBoxOffsetX = 15;
+    const int boundingBoxOffsetY = 5;
     const float projectileOffsetX = 10.f;
     const float projectileVelocity = 500.f;
     const float jumpVelocity = 280.f;
@@ -123,11 +136,20 @@ public:
     int CalculateDirection();
 
     // Collisions
-    void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies, std::vector<sf::RectangleShape>& obstaclesShapes);
+    //void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies, std::vector<sf::RectangleShape>& obstaclesShapes);
     void CheckCollisionSide(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies, std::vector<sf::RectangleShape>& obstaclesShapes);
     void HandleObstacleCollision();
     void HandleEnemyCollision();
     sf::RectangleShape CreateBoundingBox();
+    void HandleGroundCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight);
+    void HandleTopCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight);
+    CollisionInfo CalculateCollision(const sf::FloatRect &playerBounds, const sf::FloatRect &otherBounds);
+    bool CheckPlatformsCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &tiles, const float playerHalfHeight);
+    bool CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &enemies, const float playerHalfHeight);
+    bool CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &obstacles, const float playerHalfHeight);
+    void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, const std::vector<sf::RectangleShape> &enemies, const std::vector<sf::RectangleShape> &obstaclesShapes);
+
+
 
     // Animation
     void CalculateCurrentAnimation(const float dt);
@@ -152,7 +174,7 @@ public:
     void Draw(const std::shared_ptr<sf::RenderTarget>& rt) const;
     sf::Vector2f GetPosition() const;
     sf::Vector2f GetMaxPosition() const;
-    int GetProjectilesCount();
+    int GetProjectilesCount() const;
     std::vector<Projectile*> GetActiveProjectiles() const;
     sf::RectangleShape GetBoundingBox() const;
     void ResetProjectilesCount();
@@ -163,7 +185,8 @@ public:
     void ResetCoins();
     void ResetProjectiles();
     void ResetBlinking();
-    void HandleProjectileReset();
+    void HandleProjectileReset(const float dt);
+    void IncreaseProjectiles();
     void DecreaseCoins();
     void HandleCoinLifeExchange(bool exchangeCoins);
 

@@ -14,6 +14,7 @@ void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f& positi
     this->health = health;
     this->damage = damage;
     this->maxHealth = health;
+    shouldBeRespawned = true;
 
     const auto &bounds = this->sprite.getLocalBounds();
     this->sprite.setOrigin(bounds.width * 0.5f, bounds.height * 0.5f);

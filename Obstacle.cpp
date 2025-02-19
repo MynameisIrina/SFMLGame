@@ -17,9 +17,14 @@ void Obstacle::Initialize(const sf::Sprite& sprite, const sf::Vector2f& startPos
     this->sprite.setOrigin(localBounds.width * 0.5f, localBounds.height * 0.5f);
 
     boundingBox = Utilities::CreateBoundingBox(this->sprite, position);
-    
+
+    boundingBox.setSize(sf::Vector2f(boundingBox.getSize().x * 0.7f, boundingBox.getSize().y * 0.7f));
+
     // Adjust vertical position to account for bounding box height
-    this->position.y += boundingBox.getGlobalBounds().height * 0.5f;
+    this->position.y += boundingBox.getGlobalBounds().height * 0.8f;
+
+    CreateVisualLine(minX, maxX, position.y , position.y);
+    
 }
 
 void Obstacle::MoveObstacle(float dt)
@@ -40,7 +45,7 @@ void Obstacle::MoveObstacle(float dt)
 void Obstacle::UpdateTexture()
 {
     sprite.setPosition(position);
-    boundingBox.setPosition(position);
+    boundingBox.setPosition(position.x + boundingBox.getSize().x * 0.25f, position.y + boundingBox.getSize().y * 0.25f);
     sprite.setRotation(rotation);
 }
 
