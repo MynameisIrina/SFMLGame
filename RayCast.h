@@ -5,25 +5,21 @@
 
 class RayCast
 {
-    public:
+public:
 
     struct Ray
     {
         sf::Vector2f start;
         sf::Vector2f end;
 
-        Ray(sf::Vector2f startRay, sf::Vector2f endRay):  start(startRay), end(endRay){}
+        Ray(sf::Vector2f startRay, sf::Vector2f endRay) : start(startRay), end(endRay) {}
     };
-
 
     struct RayCastHit
     {
         sf::Vector2f position;
         sf::RectangleShape hitRect;
-        //Tile::Tile_Type typeTile;
-
     };
 
-    //static std::optional<RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, const std::vector<Tile>& platforms);
-    static std::optional<RayCast::RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, const std::vector<sf::RectangleShape>& otherShape);
+    static std::optional<RayCast::RayCastHit> DoRaycast(sf::Vector2f start, sf::Vector2f end, const std::vector<sf::RectangleShape> &otherShape);
 };

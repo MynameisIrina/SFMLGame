@@ -6,67 +6,54 @@ std::optional<RayCast::RayCastHit> RayCast::DoRaycast(sf::Vector2f start, sf::Ve
     for (const auto &platform : platforms)
     {
         sf::FloatRect bounds = platform.getGlobalBounds();
+
+        /*
+            check right direction && collision left
+        */
+        if (start.x <= bounds.left + bounds.width && end.x >= bounds.left + bounds.width)
+        {
+            if (start.y < bounds.top + bounds.height && end.y > bounds.top)
+            {
+                return RayCastHit{sf::Vector2f(bounds.left + bounds.width, bounds.top), platform};
+            }
+        }
+
+
+        /*
+            check left direction && collision left
+        */
+        if (start.x >= bounds.left + bounds.width && end.x <= bounds.left + bounds.width)
+        {
+            if (start.y < bounds.top + bounds.height && end.y > bounds.top)
+            {
+                return RayCastHit{sf::Vector2f(bounds.left + bounds.width, bounds.top), platform};
+            }
+        }
+
         
-        // Check intersection with the left side of the rectangle
-        if ((start.x < bounds.left && end.x > bounds.left))
+        /*
+            check right direction && collision right
+        */
+        if (start.x >= bounds.left && end.x <= bounds.left)
         {
-            // intersection along the ray
-            float t = (bounds.left - start.x) / (end.x - start.x);
-            if (t >= 0 && t <= 1)
+            if (start.y < bounds.top + bounds.height && end.y > bounds.top)
             {
-                float y_intersection = start.y + t * (end.y - start.y);
-                if (y_intersection >= bounds.top && y_intersection <= bounds.top + bounds.height)
-                {
-                    return RayCastHit{sf::Vector2f(bounds.left, y_intersection), platform};
-                }
+                return RayCastHit{sf::Vector2f(bounds.left, bounds.top), platform};
             }
         }
 
-        // Check intersection with the right side of the rectangle
-        if ((start.x > bounds.left + bounds.width && end.x < bounds.left + bounds.width))
+        /*
+            check right direction && collision right
+        */
+        if (start.x <= bounds.left && end.x >= bounds.left)
         {
-            // intersection along the ray
-            float t = (bounds.left + bounds.width - start.x) / (end.x - start.x);
-            if (t >= 0 && t <= 1)
+            if (start.y < bounds.top + bounds.height && end.y > bounds.top)
             {
-                float y_intersection = start.y + t * (end.y - start.y);
-                if (y_intersection >= bounds.top && y_intersection <= bounds.top + bounds.height)
-                {
-                    return RayCastHit{sf::Vector2f(bounds.left + bounds.width, y_intersection), platform};
-                }
+                //std::cout << "right direction && collision right" << std::endl;
+                return RayCastHit{sf::Vector2f(bounds.left, bounds.top), platform};
             }
         }
 
-        // Check intersection with the top side of the rectangle
-        if ((start.y < bounds.top && end.y > bounds.top))
-        {
-            // intersection along the ray
-            float t = (bounds.top - start.y) / (end.y - start.y);
-            if (t >= 0 && t <= 1)
-            {
-                float x_intersection = start.x + t * (end.x - start.x);
-                if (x_intersection >= bounds.left && x_intersection <= bounds.left + bounds.width)
-                {
-                    return RayCastHit{sf::Vector2f(x_intersection, bounds.top), platform};
-                }
-            }
-        }
-
-        // Check intersection with the bottom side of the rectangle
-        if ((start.y > bounds.top + bounds.height && end.y < bounds.top + bounds.height))
-        {
-            // intersection along the ray
-            float t = (bounds.top + bounds.height - start.y) / (end.y - start.y);
-            if (t >= 0 && t <= 1)
-            {
-                float x_intersection = start.x + t * (end.x - start.x);
-                if (x_intersection >= bounds.left && x_intersection <= bounds.left + bounds.width)
-                {
-                    return RayCastHit{sf::Vector2f(x_intersection, bounds.top + bounds.height), platform};
-                }
-            }
-        }
-    }
 
     return std::nullopt;
 }

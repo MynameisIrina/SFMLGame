@@ -32,8 +32,11 @@ void Player::Initialize(const sf::Vector2f &position, const int maxHealth, const
     boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - 2.f * boundingBoxOffsetX, sprite.getGlobalBounds().height));
 }
 
-void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight, const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape> &enemiesShapes, std::vector<sf::RectangleShape> &obstaclesShapes)
+void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight, const bool moveLeft, const bool shoot, const float leftBound, const bool respawn,
+                    const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape> &enemiesShapes, std::vector<sf::RectangleShape> &flyingEnemiesShapes,
+                    std::vector<sf::RectangleShape> &obstaclesShapes)
 {
+
     InputToState(moveRight, moveLeft, shoot, respawn);
 
     if (IfStateActive(State::Moving) && !IsInRebirth())
@@ -61,8 +64,8 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
     if (!IsInRebirth())
     {
         HandleVerticalMovement(dt);
-        CheckCollisionGround(tilesShapes, enemiesShapes, obstaclesShapes);
-        CheckCollisionSide(tilesShapes, enemiesShapes, obstaclesShapes);
+        CheckCollisionGround(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
+        CheckCollisionSide(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
         HandleFalling();
         HandleBlinking();
         projectilePool.Update(camera, dt);
@@ -155,21 +158,26 @@ void Player::HandleVerticalMovement(float dt)
     position.y += velocity.y * dt;
 }
 
-void Player::CheckCollisionSide(const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape> &enemiesShapes, std::vector<sf::RectangleShape> &obstaclesShapes)
+void Player::CheckCollisionSide(const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape> &enemiesShapes, std::vector<sf::RectangleShape> &flyingEnemiesShapes, std::vector<sf::RectangleShape> &obstaclesShapes)
 {
-
     collisionSide = false;
 
     int direction = CalculateDirection();
+    sf::Vector2f rayMiddle_Start;
+    sf::Vector2f rayMiddle_End;
 
-    sf::Vector2f rayMiddle_Start = sprite.getPosition();
-    sf::Vector2f rayMiddle_End = rayMiddle_Start + sf::Vector2f(direction * boundingBoxPlayer.getSize().x + epsilon, 0);
+    rayMiddle_Start = direction > 0 ? sf::Vector2f(boundingBoxPlayer.getGlobalBounds().left, boundingBoxPlayer.getGlobalBounds().top + boundingBoxPlayer.getGlobalBounds().height * 0.5f)
+                                    : sf::Vector2f(boundingBoxPlayer.getGlobalBounds().left + boundingBoxPlayer.getSize().x, boundingBoxPlayer.getGlobalBounds().top + boundingBoxPlayer.getGlobalBounds().height * 0.5f);
+
+    rayMiddle_End = direction > 0 ? rayMiddle_Start + sf::Vector2f(direction * boundingBoxPlayer.getSize().x + 3 * epsilon, 0)
+                                  : rayMiddle_Start + sf::Vector2f(direction * boundingBoxPlayer.getSize().x - 3 * epsilon, 0);
 
     ray = RayCast::Ray(rayMiddle_Start, rayMiddle_End);
 
     auto hitTiles = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, tilesShapes);
     auto hitEnemies = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, enemiesShapes);
     auto hitObstacles = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, obstaclesShapes);
+    auto hitFlyingEnemies = RayCast::DoRaycast(rayMiddle_Start, rayMiddle_End, flyingEnemiesShapes);
 
     RayCast::RayCastHit hitInfo;
     bool hasCollision = false;
@@ -179,43 +187,84 @@ void Player::CheckCollisionSide(const std::vector<sf::RectangleShape> &tilesShap
         hitInfo = hitTiles.value();
         hasCollision = true;
     }
-    else if (hitEnemies && !IsPlayerProtected())
+
+    if (hitEnemies)
     {
         hitInfo = hitEnemies.value();
         hasCollision = true;
         HandleEnemyCollision();
     }
-    else if (hitObstacles && !IsPlayerProtected())
+
+    if (hitObstacles)
     {
         hitInfo = hitObstacles.value();
         hasCollision = true;
         HandleObstacleCollision();
     }
 
+    if (hitFlyingEnemies && !IsPlayerProtected())
+    {
+        hitInfo = hitFlyingEnemies.value();
+        hasCollision = false;
+        HandleFlyingEnemyCollision();
+    }
+
     if (hasCollision)
     {
         if (direction > 0)
         {
-            position.x = hitInfo.hitRect.getGlobalBounds().left - (sprite.getGlobalBounds().getSize().x / 2.f) - 0.5f;
+            position.x = hitInfo.hitRect.getGlobalBounds().left - (sprite.getGlobalBounds().getSize().x / 2.f) + 2 * epsilon + 1.f;
         }
         else
         {
-            position.x = (hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width) + (sprite.getGlobalBounds().getSize().x / 2.f) - 2 * epsilon + 0.5f;
+            position.x = (hitInfo.hitRect.getGlobalBounds().left + hitInfo.hitRect.getGlobalBounds().width) + (sprite.getGlobalBounds().getSize().x / 2.f) - 2 * epsilon + 1.f;
         }
 
         collisionSide = true;
     }
 }
 
+void Player::HandleBlinking()
+{
+    if (IfStateActive(State::Blinking))
+    {
+        if (blinkingTimer.getElapsedTime().asSeconds() >= blinkingInterval)
+        {
+            sprite.setColor(isVisible ? Utilities::GetTransparentColor(normalColor) : Utilities::GetOpaqueColor(normalColor));
+            isVisible = !isVisible;
+            blinkingTimer.restart();
+        }
+    }
+    else
+    {
+        isVisible = true;
+        sprite.setColor(Utilities::GetOpaqueColor(normalColor));
+    }
+}
+
 void Player::HandleObstacleCollision()
 {
+    if (IsPlayerProtected())
+        return;
+
     SetState(State::Blinking);
+    DecreaseHealth();
     blinkingTimer.restart();
     loseLifeCooldown.restart();
-    DecreaseHealth();
 }
 
 void Player::HandleEnemyCollision()
+{
+    if (IsPlayerProtected())
+        return;
+
+    SetState(State::Blinking);
+    DecreaseHealth();
+    blinkingTimer.restart();
+    loseLifeCooldown.restart();
+}
+
+void Player::HandleFlyingEnemyCollision()
 {
     SetState(State::Blinking);
     blinkingTimer.restart();
@@ -259,24 +308,6 @@ int Player::CalculateDirection()
 void Player::ResetAnimation(int animYIndex)
 {
     sprite.setTextureRect(sf::IntRect(TextureLoader::playerX + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
-}
-
-void Player::HandleBlinking()
-{
-    if (IfStateActive(State::Blinking) && IsPlayerProtected())
-    {
-        if (blinkingTimer.getElapsedTime().asSeconds() >= blinkingInterval)
-        {
-            sprite.setColor(isVisible ? Utilities::GetTransparentColor(normalColor) : Utilities::GetOpaqueColor(normalColor));
-            isVisible = !isVisible;
-            blinkingTimer.restart();
-        }
-    }
-    else
-    {
-        isVisible = true;
-        sprite.setColor(Utilities::GetOpaqueColor(normalColor));
-    }
 }
 
 void Player::HandleRebirthAnimation()
@@ -337,11 +368,13 @@ Player::CollisionInfo Player::CalculateCollision(const sf::FloatRect &playerBoun
 
     float overlapTop = playerBounds.top - (otherBounds.top + otherBounds.height);
     float overlapBottom = otherBounds.top - (playerBounds.top + playerBounds.height);
+    float overlapLeftSide = playerBounds.left - (otherBounds.left + otherBounds.width);
+    float overlapRightSide = otherBounds.left - (playerBounds.left + playerBounds.width);
 
-    return Player::CollisionInfo(overlapBottom, overlapTop, true);
+    return Player::CollisionInfo(overlapBottom, overlapTop, overlapLeftSide, overlapRightSide, true);
 }
 
-bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &tiles, const float playerHalfHeight)
+bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &tiles, const float playerHalfHeight, const float playerHalfWidth)
 {
     for (auto &boundBox : tiles)
     {
@@ -352,7 +385,7 @@ bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const st
             continue;
 
         if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
-        { 
+        {
             HandleGroundCollision(tileBounds, playerHalfHeight);
             return true;
         }
@@ -367,10 +400,8 @@ bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const st
     return false;
 }
 
-bool Player::CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &enemies, const float playerHalfHeight)
+bool Player::CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &enemies, const float playerHalfHeight, const float playerHalfWidth)
 {
-    if(IsPlayerProtected()) return false;
-
     for (auto &boundBox : enemies)
     {
         sf::FloatRect enemyBounds = boundBox.getGlobalBounds();
@@ -403,7 +434,39 @@ bool Player::CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std:
     return false;
 }
 
-bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &obstacles, const float playerHalfHeight)
+bool Player::CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std::vector<sf::RectangleShape> &flyingEnemiesShapes, const float playerHalfHeight, const float playerHalfWidth)
+{
+    if (IsPlayerProtected())
+        return false;
+
+    for (auto &boundBox : flyingEnemiesShapes)
+    {
+        sf::FloatRect enemyBounds = boundBox.getGlobalBounds();
+        CollisionInfo collisionInfo = CalculateCollision(playerBounds, enemyBounds);
+
+        if (!collisionInfo.hasCollision)
+            continue;
+
+        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
+        {
+            HandleGroundCollision(enemyBounds, playerHalfHeight);
+            HandleEnemyCollision();
+            return true;
+        }
+
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
+        {
+            std::cout << "top collision" << std::endl;
+            HandleTopCollision(enemyBounds, playerHalfHeight);
+            HandleFlyingEnemyCollision();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &obstacles, const float playerHalfHeight, const float playerHalfWidth)
 {
     for (const auto &obstacle : obstacles)
     {
@@ -426,7 +489,7 @@ bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const s
     return false;
 }
 
-void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, const std::vector<sf::RectangleShape> &enemies, const std::vector<sf::RectangleShape> &obstacles)
+void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, const std::vector<sf::RectangleShape> &enemies, std::vector<sf::RectangleShape> &flyingEnemies, const std::vector<sf::RectangleShape> &obstacles)
 {
     collisionGround = false;
     collisionTop = false;
@@ -434,12 +497,18 @@ void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, 
     const sf::FloatRect &playerBounds = boundingBoxPlayer.getGlobalBounds();
     const float playerHeight = playerBounds.getSize().y;
     const float playerHalfHeight = playerHeight * 0.5f;
+    const float playerWidth = playerBounds.getSize().x;
+    const float playerHalfWidth = playerBounds.getSize().x * 0.5f;
 
-    if(CheckPlatformsCollision(playerBounds, tiles, playerHalfHeight)) return;
-    if(CheckEnemiesCollision(playerBounds, enemies, playerHalfHeight)) return;
-    if(CheckObstaclesCollisions(playerBounds, obstacles, playerHalfHeight)) return;
+    if (CheckPlatformsCollision(playerBounds, tiles, playerHalfHeight, playerHalfWidth))
+        return;
+    if (CheckEnemiesCollision(playerBounds, enemies, playerHalfHeight, playerHalfWidth))
+        return;
+    if (CheckObstaclesCollisions(playerBounds, obstacles, playerHalfHeight, playerHalfWidth))
+        return;
+    if (CheckFlyingEnemiesCollision(playerBounds, flyingEnemies, playerHalfHeight, playerHalfWidth))
+        return;
 }
-
 
 void Player::Jump(const bool jump, const float dt)
 {
@@ -541,16 +610,11 @@ void Player::DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vect
 
 void Player::SetState(State stateToSet)
 {
-    // bitwise OR operator
     state |= stateToSet;
 }
 
 void Player::ClearState(State stateToClear)
 {
-    // example: state to clear = 0001, current state = 0111
-    // ~ negates state to clear (~0001 returns 1110)
-    // & returns state without state that needs to be cleareed (0111 & 1110 = 0110)
-
     state &= ~stateToClear;
 }
 
@@ -620,11 +684,6 @@ sf::RectangleShape Player::GetBoundingBox() const
 {
     return boundingBoxPlayer;
 }
-
-// void Player::ResetProjectilesCount()
-// {
-//     projectilesCount = maxProjectileCount;
-// }
 
 void Player::PickUpCoin()
 {

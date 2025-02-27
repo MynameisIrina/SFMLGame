@@ -12,7 +12,7 @@ void Level::Initialize(const int firstPlatformHeight)
 {
     this->firstPlatformHeight = firstPlatformHeight;
 
-    grid.resize(gridHeight, std::vector<Tile>(totalGridWidth, Tile(Tile::Tile_Type::Empty, sf::RectangleShape())));
+    grid.resize(gridHeight, std::vector<Tile>(totalGridWidth, Tile(Tile::Tile_Type::Empty, sf::Vector2f(), sf::RectangleShape())));
     patterns = {defaultPattern, pattern2, pattern3, pattern5, pattern6, pattern7};
 
     const int initialWidthPattern = GenerateDefaultTiles();
@@ -70,7 +70,9 @@ void Level::GenerateLevel(const int startX)
         bool widthExceedsGridBounds = x + patternWidth > gridWidth + bufferColumns;
         if (widthExceedsGridBounds)
         {
-            patternWidth = gridWidth + bufferColumns - x;
+            std::cout << "exceeds" << std::endl;
+            continue;
+            //patternWidth = gridWidth + bufferColumns - x;
         }
 
         previousY = currentY;
@@ -88,9 +90,8 @@ void Level::GenerateLevel(const int startX)
 
     // Check generated grid to differentiate between different tile types
     UpdateGround(startX, renderOffset);
-
-    obstacleManager->SpawnObstacles(grid, gridHeight, nextGridColumn, totalGridWidth, furthestTileX_gridWidth, tileSize);
-    enemyManager->SpawnEnemies(grid, gridHeight, nextGridColumn, totalGridWidth, furthestTileX_gridWidth, tileSize);
+    obstacleManager->SpawnObstacles(grid, gridHeight, nextGridColumn, totalGridWidth, tileSize);
+    //enemyManager->SpawnEnemies(grid, gridHeight, nextGridColumn, totalGridWidth, furthestTileX_gridWidth, tileSize);
 }
 
 int Level::AdjustPlatformHeight(const int previousHeight, int currentHeight, const int maxGap, const int minHeight, const int maxHeight) const
@@ -124,7 +125,7 @@ void Level::SpawnTree(const int startX, const float renderOffset, const int x, c
     tree.setPosition(globalTileX, globalTileY);
     treeSprites.emplace_back(std::move(tree));
 
-    grid[y][x] = Tile(Tile::Tile_Type::Tree, sf::RectangleShape());
+    grid[y][x] = Tile(Tile::Tile_Type::Tree, sf::Vector2f(), sf::RectangleShape());
 }
 
 void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
@@ -168,22 +169,17 @@ void Level::PlacePattern(const int patternIndex, const int height, const int wid
         {
             if (pattern[y][x] == 1)
             {
-                grid[currentY + y][currentX + x] = Tile(Tile::Tile_Type::Dirt, sf::RectangleShape());
+                grid[currentY + y][currentX + x] = Tile(Tile::Tile_Type::Dirt, sf::Vector2f(), sf::RectangleShape());
             }
         }
     }
 }
 
-void Level::TrackLastGeneratedPositions(const int worldPositionX, const int x)
+void Level::TrackLastGeneratedPosition(const int worldPositionX, const int x)
 {
     if (worldPositionX > furthestTileX_totalGrid)
     {
         furthestTileX_totalGrid = worldPositionX;
-    }
-
-    if (x <= nextGridColumn && worldPositionX > furthestTileX_gridWidth)
-    {
-        furthestTileX_gridWidth = worldPositionX;
     }
 }
 
@@ -201,7 +197,6 @@ void Level::UpdateGround(const int startX, const float renderOffset)
         {
             if (grid[y][x].GetType() == 1)
             {
-
                 // Calculate the global X position for the tile to render it in the correct screen location
                 worldPositionX = renderOffset + (x - startX) * tileSize;
 
@@ -211,12 +206,12 @@ void Level::UpdateGround(const int startX, const float renderOffset)
                 sf::Sprite sprite = CreateSprite(textureType, spriteCoordinates.x, spriteCoordinates.y, x, y, worldPositionX);
                 sf::RectangleShape bb = Utilities::CreateBoundingBox(sprite, sf::Vector2f(worldPositionX, y * tileSize));
                 bb.setOrigin(sprite.getOrigin().x, sprite.getOrigin().y);
-                Tile tile = Tile(tileType, bb);
+                Tile tile = Tile(tileType, sf::Vector2f(worldPositionX, y * tileSize), bb);
 
                 UpdateGrid(tile, x, y);
                 groundTiles.emplace_back(tile);
                 tileSprites.emplace_back(sprite);
-                TrackLastGeneratedPositions(worldPositionX, x);
+                TrackLastGeneratedPosition(worldPositionX, x);
 
                 if (tileType == Tile::Grass && rand() % treeGenerationProbability == 0)
                 {
@@ -224,6 +219,7 @@ void Level::UpdateGround(const int startX, const float renderOffset)
                 }
             }
         }
+
     }
 }
 
@@ -245,7 +241,7 @@ void Level::ShiftGridLeft()
             {
                 grid[y][x] = grid[y][x + 1];
             }
-            grid[y][totalGridWidth - 1] = Tile(Tile::Tile_Type::Empty, sf::RectangleShape());
+            grid[y][totalGridWidth - 1] = Tile(Tile::Tile_Type::Empty, sf::Vector2f(), sf::RectangleShape());
         }
 
         shiftCounter++;

@@ -4,7 +4,7 @@
 #include "Coin.h"
 #include "Collectible.h"
 
-EnemyArrow::EnemyArrow(ArrowPool arrowPool, const std::shared_ptr<AudioManager>& audioManager) : arrowPool(std::move(arrowPool)), Enemy(audioManager){}
+EnemyArrow::EnemyArrow(const std::shared_ptr<ArrowPool>& arrowPool, const std::shared_ptr<AudioManager>& audioManager) : arrowPool(arrowPool), Enemy(audioManager){}
 
 void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f& position, const int health, const int damage)
 {
@@ -36,7 +36,6 @@ void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared
     HandleRotation(player);
     UpdateAnimation(dt);
     UpdateView();
-    arrowPool.Update(player, camera, dt);
 }
 
 void EnemyArrow::UpdateAnimation(const float dt)
@@ -71,7 +70,7 @@ void EnemyArrow::HandleShooting(const std::shared_ptr<Camera>& camera)
 {
     if (state == State::Dead) return;
 
-    const bool enemyWithinCamera = camera->CalculateRightBound() >= position.x && camera->CalculateLeftBound() <= position.x;
+    const bool enemyWithinCamera = camera->CalculateRightBound() >= (position.x - boundingBox.getSize().x * 0.5f) && camera->CalculateLeftBound() <= (position.x + boundingBox.getSize().x * 0.5f);
 
     if (enemyWithinCamera && !isShooting && (currentAnim == shootingFrame))
     {
@@ -140,12 +139,17 @@ Enemy::State EnemyArrow::GetState()
 
 void EnemyArrow::ClearArrowPool()
 {
-    arrowPool.Clear();
+    arrowPool->Clear();
+}
+
+void EnemyArrow::HandleFlyingArrows(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
+{
+    arrowPool->Update(player, camera, dt);
 }
 
 void EnemyArrow::ShootArrow()
 {
-    Arrow *arrow = arrowPool.GetArrow();
+    Arrow *arrow = arrowPool->GetArrow();
 
     if (arrow != nullptr)
     {
@@ -155,18 +159,19 @@ void EnemyArrow::ShootArrow()
         arrow->sprite.setScale(facingLeft ? arrow->sprite.getScale().x
                                           : -arrow->sprite.getScale().x,
                                arrow->sprite.getScale().y);
-        arrow->velocity = facingLeft ? velocity : -velocity;
+        arrow->velocity = velocity;
+        arrow->direction = facingLeft ? 1.0f : -1.0f;
     }
 }
 
 void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
+    arrowPool->Draw(window);
+
     if (state == State::Dead)
         return;
 
     Enemy::Draw(window);
-    arrowPool.Draw(window);
     window->draw(boundingBox);
 
-    
 }

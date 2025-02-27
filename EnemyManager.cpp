@@ -7,6 +7,7 @@ EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader> &txLoader, const
 {
     enemySprite = txLoader->SetSprite(TextureLoader::TextureType::Enemy);
     eagleSprite = txLoader->SetSprite(TextureLoader::TextureType::Eagel);
+    arrowPool = std::make_unique<ArrowPool>(txLoader, 10);
 }
 
 void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int startX, const int tileSize)
@@ -17,7 +18,7 @@ void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int 
         {
             if (CanPlaceEnemy(grid, x, y, maxX, maxY))
             {
-                PlaceEnemy(grid, minX, startX, tileSize, x, y);
+                PlaceEnemy(grid, tileSize, x, y);
             }
         }
     }
@@ -26,9 +27,10 @@ void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int 
 bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, const int x, const int y, const int maxX, const int maxY)
 {
     if (y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0 || x + 2 >= maxX || x - 2 < 0)
-    {
         return false;
-    }
+    
+    if (rand() % 4 != 0)
+        return false;
 
     const auto &currentRow = grid[y];
     const auto &bottomRow = grid[y + 1];
@@ -47,24 +49,47 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
     return false;
 }
 
-void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int minX, const int startX, const int tileSize, const int x, const int y)
+void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int tileSize, const int x, const int y)
 {
-    float globalTileX = startX + static_cast<float>((x - minX) * tileSize) + (tileSize * 0.5f);
+    const float globalTileX = grid[y+1][x].GetGlobalPosition().x + (tileSize * 0.5f);
+    const float globalTileY = grid[y+1][x].GetGlobalPosition().y - 30.f;
 
-    if (rand() % 8 == 0)
-    {
-        grid[y][x] = Tile(Tile::Enemy, sf::RectangleShape());
+    spawnMarker.setRadius(2);
+    spawnMarker.setFillColor(sf::Color::Red);
+    spawnMarker.setPosition(globalTileX, static_cast<float>(y * tileSize));
 
-        std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>((ArrowPool(txLoader, 10)), audioManager);
-        sf::Vector2f position{globalTileX, static_cast<float>(y * tileSize)};
-        enemyArrow->Initialize(enemySprite, position, 40, 10);
-        enemies.push_back(std::move(enemyArrow));
-    }
+    grid[y][x] = Tile(Tile::Enemy, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
+
+    std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>(arrowPool, audioManager);
+    sf::Vector2f position{globalTileX, globalTileY};
+    enemyArrow->Initialize(enemySprite, position, 40, 10);
+    enemies.push_back(std::move(enemyArrow));
 }
 
 void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const std::shared_ptr<CollectibleManager> &collectibleManager, float dt)
 {
     for (auto it = enemies.begin(); it != enemies.end();)
+    {
+        // Let the arrows fly when arrow enemy dies
+        if (auto enemyArrow = dynamic_cast<EnemyArrow *>(((*it).get())))
+        {
+            enemyArrow->HandleFlyingArrows(player, camera, dt);
+        }
+
+        if ((*it)->GetState() == Enemy::State::Alive)
+        {
+            (*it)->Update(player, camera, dt);
+            ++it;
+        }
+
+        else if ((*it)->GetState() == Enemy::State::Dead)
+        {
+            (*it)->HandleDeath(collectibleManager);
+            ++it;
+        }
+    }
+
+    for (auto it = flyingEnemies.begin(); it != flyingEnemies.end();)
     {
         if ((*it)->GetState() == Enemy::State::Alive)
         {
@@ -75,7 +100,7 @@ void EnemyManager::UpdateEnemies(const std::shared_ptr<Player> &player, const st
                 bool withinBounds = eagle->GetDirection() == -1 ? position.x > camera->CalculateLeftBound() : position.x < camera->CalculateRightBound();
                 if (!withinBounds)
                 {
-                    it = enemies.erase(it);
+                    it = flyingEnemies.erase(it);
                     continue;
                 }
             }
@@ -99,11 +124,19 @@ void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
     {
         enemy->Draw(window);
     }
+
+    for (const auto &flyingEnemy : flyingEnemies)
+    {
+        flyingEnemy->Draw(window);
+    }
+
+    window->draw(spawnMarker);
 }
 
-std::vector<std::reference_wrapper<Enemy>> &EnemyManager::GetAliveEnemies()
+std::vector<std::reference_wrapper<Enemy>> EnemyManager::GetAliveEnemies() const
 {
-    static std::vector<std::reference_wrapper<Enemy>> aliveEnemies;
+    std::vector<std::reference_wrapper<Enemy>> aliveEnemies;
+
     for (const auto &enemy : enemies)
     {
         if (enemy->GetState() == Enemy::State::Alive)
@@ -115,11 +148,17 @@ std::vector<std::reference_wrapper<Enemy>> &EnemyManager::GetAliveEnemies()
     return aliveEnemies;
 }
 
-std::vector<sf::RectangleShape> &EnemyManager::GetEnemiesBoundingBoxes()
+/*
+    GetEnemiesBoundingBoxes() gets called frequently.
+    Therefore cache a static object and return a reference
+    to it instead of creating a new one every time.
+*/
+
+std::vector<sf::RectangleShape> &EnemyManager::GetEnemiesBoundingBoxes() const
 {
     static std::vector<sf::RectangleShape> enemyBoundingBoxes;
-
     enemyBoundingBoxes.clear();
+    enemyBoundingBoxes.reserve(enemies.size());
 
     for (const auto &enemy : enemies)
     {
@@ -130,6 +169,23 @@ std::vector<sf::RectangleShape> &EnemyManager::GetEnemiesBoundingBoxes()
     }
 
     return enemyBoundingBoxes;
+}
+
+std::vector<sf::RectangleShape> &EnemyManager::GetFlyingEnemiesBoundingBoxes() const
+{
+    static std::vector<sf::RectangleShape> flyingEnemyBoundingBoxes;
+    flyingEnemyBoundingBoxes.clear();
+    flyingEnemyBoundingBoxes.reserve(flyingEnemies.size());
+
+    for (const auto &flyingEnemy : flyingEnemies)
+    {
+        if (flyingEnemy->GetState() == Enemy::State::Alive)
+        {
+            flyingEnemyBoundingBoxes.emplace_back(flyingEnemy->GetBoundingBox());
+        }
+    }
+
+    return flyingEnemyBoundingBoxes;
 }
 
 void EnemyManager::RespawnEnemies()
@@ -164,6 +220,7 @@ void EnemyManager::SpawnFlyingEnemy(const std::shared_ptr<Player> &player, const
             eaglePtr->SetMovementDirection(spawnSide == 0 ? 1 : -1);
         }
 
-        enemies.push_back(std::move(eagle));
+        // enemies.push_back(std::move(eagle));
+        flyingEnemies.push_back(std::move(eagle));
     }
 }

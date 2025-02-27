@@ -12,12 +12,14 @@ public:
         Tree = 5
     };
 
-    Tile(Tile_Type type, const sf::RectangleShape& shape)
-        : type(type), shape(shape) {}
+    Tile(Tile_Type type, sf::Vector2f globalPosition, const sf::RectangleShape& shape)
+        : type(type), globalPosition(globalPosition), shape(shape) {}
 
     Tile_Type GetType() const { return type; }
     const sf::RectangleShape& GetShape() const { return shape; }
+    const sf::Vector2f& GetGlobalPosition() const { return globalPosition; }
 
 Tile_Type type;
+sf::Vector2f globalPosition;
 sf::RectangleShape shape;
 };

@@ -14,7 +14,7 @@ void ObstacleManager::UpdateObstacles(float dt)
     }
 }
 
-void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int startX, const int tileSize)
+ void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int tileSize)
 {
     for (int y = 0; y < maxY; ++y)
     {
@@ -22,7 +22,7 @@ void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, const
         {
             if (CanPlaceObstacle(grid, x, y, maxX, maxY))
             {
-                PlaceObstacle(grid, minX, startX, tileSize, x, y);
+                PlaceObstacle(grid, tileSize, x, y);
             }
         }
     }
@@ -30,7 +30,11 @@ void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, const
 
 bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &grid, int x, int y, int maxX, int maxY)
 {
-    if (y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0 || x + 2 >= maxX || x - 2 < 0) return false;
+    if (y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0 || x + 2 >= maxX || x - 2 < 0)
+        return false;
+
+    if (rand() % obstacleProbability != 0)
+        return false;
 
     const auto &currentRow = grid[y];
     const auto &bottomRow = grid[y + 1];
@@ -38,8 +42,7 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &gri
     const bool noTileCurrent = currentRow[x].GetType() == Tile::Empty;
     const bool threeConsecutiveTilesUnderneath = ((bottomRow[x].GetType() == Tile::Grass) && (bottomRow[x + 1].GetType() == Tile::Grass) && (bottomRow[x - 1].GetType() == Tile::Grass));
     const bool noTilesAlongPath = (currentRow[x + 1].GetType() == Tile::Empty && currentRow[x - 1].GetType() == Tile::Empty);
-    const bool noObstaclesNear = (currentRow[x + 1].GetType() != Tile::Obstacle && currentRow[x - 1].GetType() != Tile::Obstacle)
-                            && (currentRow[x + 2].GetType() != Tile::Obstacle && currentRow[x - 2].GetType() != Tile::Obstacle);
+    const bool noObstaclesNear = (currentRow[x + 1].GetType() != Tile::Obstacle && currentRow[x - 1].GetType() != Tile::Obstacle) && (currentRow[x + 2].GetType() != Tile::Obstacle && currentRow[x - 2].GetType() != Tile::Obstacle);
     const bool noEnemiesNear = (currentRow[x + 1].GetType() != Tile::Enemy && currentRow[x - 1].GetType() != Tile::Enemy);
 
     if (noTileCurrent && threeConsecutiveTilesUnderneath && noTilesAlongPath && noObstaclesNear)
@@ -50,18 +53,22 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &gri
     return false;
 }
 
-void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, const int minX, const int startX, const int tileSize, const int x, const int y)
+void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, const int tileSize, const int x, const int y)
 {
-    if (rand() % obstacleProbability != 0)
-        return;
 
-    const float globalTileX = startX + static_cast<float>((x - minX) * tileSize) + (tileSize * 0.5f);
-    const float globalTileY = static_cast<float>(y * tileSize);
+    // spawn obstacle right above the platform
+    const float globalTileX = grid[y+1][x].GetGlobalPosition().x + (tileSize * 0.5f);
+    const float globalTileY = grid[y+1][x].GetGlobalPosition().y - 30.f;
+
     const float minPosX = globalTileX - tileSize;
     const float maxPosX = globalTileX + tileSize;
-    const float speed = std::clamp(rand() % maxSpeed, minSpeed, maxSpeed);
+    // const float speed = std::clamp(rand() % maxSpeed, minSpeed, maxSpeed);
 
-    grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::RectangleShape());
+    spawnMarker.setRadius(2);
+    spawnMarker.setFillColor(sf::Color::Red);
+    spawnMarker.setPosition(globalTileX, static_cast<float>(y * tileSize));
+
+    grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
     std::unique_ptr<Obstacle> obstacle = std::make_unique<Obstacle>();
     obstacle->Initialize(sprite, sf::Vector2f(globalTileX, globalTileY), speed, minPosX, maxPosX);
     obstacles.push_back(std::move(obstacle));
@@ -73,15 +80,17 @@ void ObstacleManager::Draw(const std::shared_ptr<sf::RenderWindow> &window) cons
     {
         obstacle->Draw(window);
     }
+
+    window->draw(spawnMarker);
 }
 
-std::vector<sf::RectangleShape>& ObstacleManager::GetObstaclesBoundingBoxes() const
+std::vector<sf::RectangleShape> &ObstacleManager::GetObstaclesBoundingBoxes() const
 {
     static std::vector<sf::RectangleShape> boxes;
 
     boxes.clear();
-    
-    for(const auto& obstacle : obstacles)
+
+    for (const auto &obstacle : obstacles)
     {
         boxes.emplace_back(obstacle->GetBoundingBox());
     }

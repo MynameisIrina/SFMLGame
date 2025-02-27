@@ -12,12 +12,14 @@ public:
     sf::RectangleShape GetBoundingBox() const;
     void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, const float dt);
     void UpdateView();
+    bool IsArrowActive();
     
     sf::Sprite sprite;
     bool isActive = false;
-    sf::Vector2f position;
-    float velocity;
-    bool recentlyDeactivated;
+    sf::Vector2f position{0.f,0.f};
+    float velocity = 0;
+    float direction = 0;
+    bool recentlyDeactivated = false;
 
 private:
     sf::RectangleShape boundingBox;

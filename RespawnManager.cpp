@@ -13,7 +13,7 @@ void RespawnManager::RespawnAllEntities()
     auto enemyList = enemyManager->GetAliveEnemies();
     for(const auto& enemy: enemyList)
     {
-        EnemyArrow* enemyArrow = dynamic_cast<EnemyArrow*>(&enemy.get());
+        auto enemyArrow = dynamic_cast<EnemyArrow*>(&enemy.get());
         if(enemyArrow)
         {
             enemyArrow->ClearArrowPool();

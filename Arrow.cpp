@@ -1,6 +1,3 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
 #include "Arrow.h"
 #include "Utilities.h"
 
@@ -14,20 +11,11 @@ Arrow::Arrow(sf::Sprite &sprite) : sprite(sprite)
 }
 
 void Arrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
-{
-    // Allow reuse in the next frame
-    // Otherwise the deactived arrow will be picked up again and will detect collision with player twice
-    
-    if (!isActive)
-    {
-        if (recentlyDeactivated)
-        {
-            recentlyDeactivated = false;
-        }
-        return;
-    }
+{   
+    if(!IsArrowActive()) return;
 
-    position.x -= velocity * dt;
+    const float fixedTimeStep = 1.f / 60.f;
+    position.x -= velocity * direction * fixedTimeStep;
 
     const bool outOfCameraBounds = sprite.getScale().x < 0 ? position.x < camera->CalculateLeftBound() : position.x > camera->CalculateRightBound();
     const bool collisionWithPlayer = Math::CheckRectCollision(player->GetBoundingBox().getGlobalBounds(), boundingBox.getGlobalBounds());
@@ -57,3 +45,18 @@ void Arrow::UpdateView()
     sprite.setPosition(position);
     boundingBox.setPosition(position);
 }
+
+bool Arrow::IsArrowActive()
+{
+    if (!isActive)
+    {
+        if (recentlyDeactivated)
+        {
+            recentlyDeactivated = false;
+        }
+        return false;
+    }
+
+    return true;
+}
+

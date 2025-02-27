@@ -37,7 +37,7 @@ public:
     sf::Sprite CreateSprite(TextureLoader::TextureType type, const int coordX, const int coordY, const int x, const int y, const int globalPositionX);
     TextureLoader::TextureType DetermineTextureType(int x, int y) const;
     Tile::Tile_Type DetermineTileType(int x, int y) const;
-    void TrackLastGeneratedPositions(int worldPositionX, int x);
+    void TrackLastGeneratedPosition(int worldPositionX, int x);
     void UpdateGrid(const Tile &tile, const int x, const int y);
     int AdjustPlatformHeight(const int previousHeight, const int currentHeight, const int maxGap, const int maxHeight, const int minHeight) const;
     void UpdateGenerationBounds(const sf::Vector2f& cameraCenter);

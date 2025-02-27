@@ -20,10 +20,12 @@ public:
     {
         float overlapBottom;
         float overlapTop;
+        float overlapLeftSide;
+        float overlapRightSide;
         bool hasCollision;
 
-        CollisionInfo(float bottom = 0.f, float top = 0.f, bool collision = false)
-        : overlapBottom(bottom), overlapTop(top), hasCollision(collision) {}
+        CollisionInfo(float bottom = 0.f, float top = 0.f, float left = 0.f, float right = 0.f, bool collision = false)
+        : overlapBottom(bottom), overlapTop(top), overlapLeftSide(left), overlapRightSide(right), hasCollision(collision) {}
     };
 
     enum PlayerCondition
@@ -90,8 +92,8 @@ private:
     const float blinkingInterval = 0.1f;
     const float projectileResetInterval = 3.0f;
     const int tileSize = 32;
-    const int boundingBoxOffsetX = 15;
-    const int boundingBoxOffsetY = 5;
+    const float boundingBoxOffsetX = 15;
+    const float boundingBoxOffsetY = 5;
     const float projectileOffsetX = 10.f;
     const float projectileVelocity = 500.f;
     const float jumpVelocity = 280.f;
@@ -124,7 +126,7 @@ public:
     void Initialize(const sf::Vector2f& position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
 
     // Update
-    void Update(const std::shared_ptr<RespawnManager>& respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape>& enemiesShapes, std::vector<sf::RectangleShape>& obstaclesShapes);
+    void Update(const std::shared_ptr<RespawnManager>& respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight,const bool moveLeft, const bool shoot, const float leftBound, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape>& enemiesShapes, std::vector<sf::RectangleShape>& flyingEnemiesShapes, std::vector<sf::RectangleShape>& obstaclesShapes);
     void UpdateView(const bool moveRight, const bool moveLeft);
 
     // Movement
@@ -136,18 +138,20 @@ public:
     int CalculateDirection();
 
     // Collisions
-    //void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies, std::vector<sf::RectangleShape>& obstaclesShapes);
-    void CheckCollisionSide(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies, std::vector<sf::RectangleShape>& obstaclesShapes);
+    void CheckCollisionSide(const std::vector<sf::RectangleShape> &tiles, std::vector<sf::RectangleShape>& enemies,std::vector<sf::RectangleShape> &flyingEnemiesShapes, std::vector<sf::RectangleShape>& obstaclesShapes);
     void HandleObstacleCollision();
     void HandleEnemyCollision();
     sf::RectangleShape CreateBoundingBox();
     void HandleGroundCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight);
     void HandleTopCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight);
+    void HandleFlyingEnemyCollision();
+
     CollisionInfo CalculateCollision(const sf::FloatRect &playerBounds, const sf::FloatRect &otherBounds);
-    bool CheckPlatformsCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &tiles, const float playerHalfHeight);
-    bool CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &enemies, const float playerHalfHeight);
-    bool CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &obstacles, const float playerHalfHeight);
-    void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, const std::vector<sf::RectangleShape> &enemies, const std::vector<sf::RectangleShape> &obstaclesShapes);
+    bool CheckPlatformsCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &tiles, const float playerHalfHeight, const float playerHalfWidth);
+    bool CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &enemies, const float playerHalfHeight, const float playerHalfWidth);
+    bool CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &obstacles, const float playerHalfHeight, const float playerHalfWidth);
+    void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, const std::vector<sf::RectangleShape> &enemies,std::vector<sf::RectangleShape> &flyingEnemiesShapes, const std::vector<sf::RectangleShape> &obstaclesShapes);
+    bool CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std::vector<sf::RectangleShape> &flyingEnemiesShapes, const float playerHalfHeight, const float playerHalfWidth);
 
 
 

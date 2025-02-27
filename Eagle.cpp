@@ -13,7 +13,7 @@ void Eagle::Initialize(const sf::Sprite &sprite, const sf::Vector2f &position, c
 
     const auto &bounds = this->sprite.getLocalBounds();
     this->sprite.setOrigin(bounds.width * 0.5f, bounds.height * 0.5f);
-    this->sprite.setScale(scale,scale);
+    this->sprite.setScale(scale, scale);
 
     boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
     boundingBox.setSize(boundingBox.getSize() * scalar);
@@ -32,15 +32,14 @@ void Eagle::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<
     UpdateView();
 }
 
-void Eagle::HandleDeath(const std::shared_ptr<CollectibleManager>& collectibleManager)
+void Eagle::HandleDeath(const std::shared_ptr<CollectibleManager> &collectibleManager)
 {
-    if (state != Enemy::State::Dead || handledDeath) {
+    if (state != Enemy::State::Dead || handledDeath)
         return;
-    }
 
     handledDeath = true;
     boundingBox = sf::RectangleShape();
-    
+
     audioManager->PlaySound("kill enemy");
 }
 
@@ -64,7 +63,8 @@ void Eagle::UpdateAnimation(const float dt)
 
 void Eagle::HandleCollision(const std::shared_ptr<Player> &player)
 {
-    if (state == Enemy::State::Dead) return;
+    if (state == Enemy::State::Dead)
+        return;
 
     const auto &activeProjectiles = player->GetActiveProjectiles();
     const auto &enemyBounds = boundingBox.getGlobalBounds();
@@ -107,13 +107,11 @@ void Eagle::UpdateView()
 
 void Eagle::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
 {
-    if (state == Enemy::State::Dead)
-        return;
+    if (state == Enemy::State::Dead) return;
 
     Enemy::Draw(window);
     window->draw(boundingBox);
 }
-
 
 void Eagle::SetMovementDirection(const int direction)
 {
@@ -121,7 +119,7 @@ void Eagle::SetMovementDirection(const int direction)
     sprite.setScale(-1 * (sprite.getScale().x * movementDirection), sprite.getScale().y);
 }
 
-void Eagle::HandleHorizontalMovement(const std::shared_ptr<Camera>& camera, const float dt)
+void Eagle::HandleHorizontalMovement(const std::shared_ptr<Camera> &camera, const float dt)
 {
     if (state == Enemy::State::Dead)
         return;

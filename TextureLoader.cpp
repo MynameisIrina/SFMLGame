@@ -26,7 +26,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load player texture");
     }
     textures[Player] = std::move(playerTex);
-    textureCoordinates[Player] = sf::IntRect(playerX + playerOffsetX, playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer - 3);
+    textureCoordinates[Player] = sf::IntRect(playerX + playerOffsetX, playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer - playerHeightOffset);
 
     sf::Texture backgroundTex;
     if (!backgroundTex.loadFromFile("Assets/Background/Background.png"))
@@ -89,7 +89,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load eagel texture");
     }
     textures[Eagel] = std::move(eagelTex);
-    textureCoordinates[Eagel] = sf::IntRect(SpriteCoordinates::eagelX * rectWidthEagel , SpriteCoordinates::eagelY * rectHeightEagel , rectWidthEagel , rectHeightEagel);
+    textureCoordinates[Eagel] = sf::IntRect(SpriteCoordinates::eagelX * rectWidthEagel , SpriteCoordinates::eagelY * rectHeightEagel , rectWidthEagel - eagelWidthOffset, rectHeightEagel);
 }
 
 sf::Texture TextureLoader::GetTexture(TextureType type) const

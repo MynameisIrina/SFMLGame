@@ -37,6 +37,7 @@ class GameManager
     {
         std::vector<sf::RectangleShape> &tiles;
         std::vector<sf::RectangleShape> &enemies;
+        std::vector<sf::RectangleShape> &flyingeEnemies;
         std::vector<sf::RectangleShape> &obstacles;
     };
 
@@ -53,8 +54,6 @@ public:
     void HandleAudio(GameManager::PlayerInput input);
     bool ShouldEnterMenuState(GameManager::PlayerInput input);
     bool CheckWinCondition();
-    void UpdatePlayer(const PlayerInput& input, float dt, float leftBound, 
-                             const BoundingBoxes& boxes);
     GameManager::BoundingBoxes CollectBoundingBoxes();
 
 
@@ -97,4 +96,5 @@ private:
     const int playerProjectiles = 5;
     const float playerScale = 2.5f;
     const int firstPlatformheight = 8;
+    const int coinWinCondition = 10;
 };

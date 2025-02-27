@@ -59,6 +59,7 @@ public:
     static const int rectHeightDefault = 32;
     static const int tileSizeHealthBar = 16;
     static const int playerOffsetX = 4;
+    static const int playerHeightOffset = 3;
     static const int rectWidthPlayer = 22;
     static const int rectHeightPlayer = 16;
     static const int rectWidthHealthBar = 16;
@@ -77,6 +78,8 @@ public:
     static const int rectWidthEagel = 36;
     static const int rectHeightEagel = 40;
     static const int eageloffsetX = 10;
+    static const int eagelWidthOffset = 2;
+
 
 private:
 

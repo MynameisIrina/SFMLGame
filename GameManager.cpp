@@ -5,7 +5,7 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
 
-    window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "sf::Cat", sf::Style::Default, settings);
+    window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "sf::Cat", sf::Style::Close, settings);
 
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     sf::Clock timer;
@@ -19,7 +19,7 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
     audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
 
-    //audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
+    audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
     player = std::make_shared<Player>(txLoader, projectilePool, audioManager);
 
@@ -117,7 +117,7 @@ void GameManager::Update(const float dt)
 
     player->Jump(input.jumped, deltaTime);
     player->Update(respawnManager, camera, input.moveRight, input.moveLeft, input.shoot, leftBound, input.respawn, input.exchangeCoins,
-                   deltaTime, boundingBoxes.tiles, boundingBoxes.enemies, boundingBoxes.obstacles);
+                   deltaTime, boundingBoxes.tiles, boundingBoxes.enemies, boundingBoxes.flyingeEnemies, boundingBoxes.obstacles);
 
     if (CheckWinCondition()) return;
 
@@ -129,20 +129,12 @@ void GameManager::Update(const float dt)
     projectileBar->Update(player, camera, deltaTime);
 }
 
-void GameManager::UpdatePlayer(const PlayerInput &input, float dt, float leftBound,
-                               const BoundingBoxes &boxes)
-{
-    player->Jump(input.jumped, dt);
-    player->Update(respawnManager, camera, input.moveRight, input.moveLeft,
-                   input.shoot, leftBound, input.respawn, input.exchangeCoins,
-                   dt, boxes.tiles, boxes.enemies, boxes.obstacles);
-}
-
 GameManager::BoundingBoxes GameManager::CollectBoundingBoxes()
 {
     return {
         level->GetAllTiles(),
         enemyManager->GetEnemiesBoundingBoxes(),
+        enemyManager->GetFlyingEnemiesBoundingBoxes(),
         obstacleManager->GetObstaclesBoundingBoxes()};
 }
 
@@ -198,7 +190,7 @@ bool GameManager::ShouldEnterMenuState(GameManager::PlayerInput input)
 
 bool GameManager::CheckWinCondition()
 {
-    if (player->GetCoins() == 10)
+    if (player->GetCoins() == coinWinCondition)
     {
         state = GameState::WIN;
         return true;
