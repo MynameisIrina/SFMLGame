@@ -68,7 +68,7 @@ private:
     sf::Clock blinkingTimer;
     sf::Clock projectileResetTimer;
     PlayerCondition currentState;
-    ProjectilePool &projectilePool;
+    std::unique_ptr<ProjectilePool> projectilePool;
     int state;
     float positionThresholdY;
     int projectilesCount = 0;
@@ -92,9 +92,9 @@ private:
     const float blinkingInterval = 0.1f;
     const float projectileResetInterval = 3.0f;
     const int tileSize = 32;
-    const float boundingBoxOffsetX = 15;
+    const float boundingBoxOffsetX = 18;
     const float boundingBoxOffsetY = 5;
-    const float projectileOffsetX = 10.f;
+    const float projectileOffsetX = 20.f;
     const float projectileVelocity = 500.f;
     const float jumpVelocity = 280.f;
     const float rebirthVerticaloffset = 10.f;
@@ -120,7 +120,7 @@ private:
 
 public:
     // Constructor
-    Player(const std::shared_ptr<TextureLoader> &txLoader, ProjectilePool &projectilePool, std::shared_ptr<AudioManager>& audioManager);
+    Player(const std::shared_ptr<TextureLoader> &txLoader, std::unique_ptr<ProjectilePool> projectilePool, std::shared_ptr<AudioManager>& audioManager);
 
     // Initialization
     void Initialize(const sf::Vector2f& position, const int maxHealth, const int projectilesAmount, const float scale, const float positionThresholdY);
@@ -152,7 +152,8 @@ public:
     bool CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const std::vector<sf::RectangleShape> &obstacles, const float playerHalfHeight, const float playerHalfWidth);
     void CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, const std::vector<sf::RectangleShape> &enemies,std::vector<sf::RectangleShape> &flyingEnemiesShapes, const std::vector<sf::RectangleShape> &obstaclesShapes);
     bool CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std::vector<sf::RectangleShape> &flyingEnemiesShapes, const float playerHalfHeight, const float playerHalfWidth);
-
+    void HandleLeftCollision(const sf::FloatRect &otherBounds, const float playerHalfWidth);
+    void HandleRightCollision(const sf::FloatRect &otherBounds, const float playerHalfWidth);
 
 
     // Animation

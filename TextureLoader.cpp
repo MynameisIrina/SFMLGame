@@ -90,6 +90,14 @@ void TextureLoader::Initialize()
     }
     textures[Eagel] = std::move(eagelTex);
     textureCoordinates[Eagel] = sf::IntRect(SpriteCoordinates::eagelX * rectWidthEagel , SpriteCoordinates::eagelY * rectHeightEagel , rectWidthEagel - eagelWidthOffset, rectHeightEagel);
+
+    sf::Texture hairballTex;
+    if (!hairballTex.loadFromFile("Assets/Player/Textures/Hairball.png"))
+    {
+        throw std::runtime_error("Failed to load hairball texture");
+    }
+    textures[Hairball] = std::move(hairballTex);
+    textureCoordinates[Hairball] = sf::IntRect(SpriteCoordinates::hairballX * rectWidthHairball , SpriteCoordinates::hairballY * rectHeightHairball , rectWidthHairball, rectHeightHairball);
 }
 
 sf::Texture TextureLoader::GetTexture(TextureType type) const

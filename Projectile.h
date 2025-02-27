@@ -1,23 +1,27 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Camera.h"
-
+#include "TextureLoader.h"
 
 class Projectile
 {
 
 public:
-    Projectile();
+    Projectile(const std::shared_ptr<TextureLoader> &txLoader);
     void Update(const std::shared_ptr<Camera> &camera, const float dt);
     void UpdateView();
+    sf::Sprite GetSprite() const;
+    bool IsRecentlyDeactivated() const;
+    sf::CircleShape GetBoundingCircle() const;
 
-    sf::Sprite sprite;
-    sf::CircleShape circle;
-    const float radius = 2.f;
-    bool isActive = false;
     sf::Vector2f position;
     float velocity;
-    bool recentlyDeactivated;
+    bool isActive = false;
+
+
 
 private:
+    sf::Sprite sprite;
+    sf::CircleShape boundingCircle;
+    bool recentlyDeactivated;
 };

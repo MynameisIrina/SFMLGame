@@ -1,6 +1,6 @@
 #include "GameManager.h"
 
-GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
+GameManager::GameManager()
 {
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
@@ -10,6 +10,7 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     sf::Clock timer;
     deltaTime = 0.0f;
+    state = GameState::MENU;
 
     txLoader = std::make_shared<TextureLoader>();
     txLoader->Initialize();
@@ -21,7 +22,9 @@ GameManager::GameManager() : projectilePool(10), state(GameState::MENU)
 
     audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
-    player = std::make_shared<Player>(txLoader, projectilePool, audioManager);
+    projectilePool = std::make_unique<ProjectilePool>(txLoader, 10);
+
+    player = std::make_shared<Player>(txLoader, std::move(projectilePool), audioManager);
 
     camera = std::make_shared<Camera>(window);
 

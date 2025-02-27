@@ -18,7 +18,8 @@ public:
         ProjectileBar,
         Coin,
         Tree,
-        Eagel
+        Eagel,
+        Hairball
     };
 
     enum SpriteCoordinates
@@ -44,7 +45,9 @@ public:
         treeX = 6,
         treeY = 3,
         eagelX = 0,
-        eagelY = 0
+        eagelY = 0,
+        hairballX = 0,
+        hairballY = 0
     };
 
     
@@ -79,6 +82,8 @@ public:
     static const int rectHeightEagel = 40;
     static const int eageloffsetX = 10;
     static const int eagelWidthOffset = 2;
+    static const int rectWidthHairball = 500;
+    static const int rectHeightHairball = 500;
 
 
 private:

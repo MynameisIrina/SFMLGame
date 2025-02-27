@@ -1,11 +1,17 @@
 #include "Projectile.h"
 #include "Utilities.h"
 #include <iostream>
+#include "Utilities.h"
 
-Projectile::Projectile()
+Projectile::Projectile(const std::shared_ptr<TextureLoader>& txLoader)
 {
-    circle.setRadius(radius);
-    circle.setFillColor(sf::Color::Red);
+    sprite = txLoader->SetSprite(TextureLoader::Hairball);
+    sprite.setScale(sf::Vector2f(0.02, 0.02));
+
+    boundingCircle = Utilities::CreateBoundingCircle(sprite, sf::Vector2f());
+
+    // circle.setRadius(radius);
+    // circle.setFillColor(sf::Color::Red);
 }
 
 void Projectile::Update(const std::shared_ptr<Camera> &camera, const float dt)
@@ -25,5 +31,21 @@ void Projectile::Update(const std::shared_ptr<Camera> &camera, const float dt)
 
 void Projectile::UpdateView()
 {
-    circle.setPosition(position);
+    sprite.setPosition(position);
+    boundingCircle.setPosition(position);
+}
+
+sf::Sprite Projectile::GetSprite() const
+{
+    return sprite;
+}
+
+bool Projectile::IsRecentlyDeactivated() const
+{
+    return recentlyDeactivated;
+}
+
+sf::CircleShape Projectile::GetBoundingCircle() const
+{
+    return boundingCircle;
 }

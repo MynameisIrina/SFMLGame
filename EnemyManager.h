@@ -31,7 +31,7 @@ private:
     sf::Sprite eagleSprite;
     const float offsetY = 12;
     float flyingEnemySpawnTimer = 0.0f;
-    float flyingEnemySpawnCooldown = 10.0f; 
+    float flyingEnemySpawnCooldown = 25.0f; 
     sf::CircleShape spawnMarker;
 
 };

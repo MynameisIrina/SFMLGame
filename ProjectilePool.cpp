@@ -1,10 +1,10 @@
 #include "ProjectilePool.h"
 
-ProjectilePool::ProjectilePool(const int size)
+ProjectilePool::ProjectilePool(const std::shared_ptr<TextureLoader>& txLoader, const int size): txLoader(txLoader)
 {
     for(int i = 0; i < size; i++)
     {
-        projectiles.emplace_back(std::make_unique<Projectile>());
+        projectiles.emplace_back(std::make_unique<Projectile>(txLoader));
     }
 }
 
@@ -14,7 +14,7 @@ Projectile *ProjectilePool::GetProjectile()
     {
         if(!projectile->isActive)
         {
-            if(projectile->recentlyDeactivated)
+            if(projectile->IsRecentlyDeactivated())
             {
                 continue;
             }
@@ -24,7 +24,7 @@ Projectile *ProjectilePool::GetProjectile()
         }
     }
 
-    projectiles.emplace_back(std::make_unique<Projectile>());
+    projectiles.emplace_back(std::make_unique<Projectile>(txLoader));
     projectiles.back()->isActive = true;
     return projectiles.back().get();
 }
@@ -46,7 +46,7 @@ void ProjectilePool::Draw(const std::shared_ptr<sf::RenderTarget> &rt) const
     {
         if(projectile->isActive)
         {
-            rt->draw(projectile->circle);
+            rt->draw(projectile->GetSprite());
         }
     }
 }

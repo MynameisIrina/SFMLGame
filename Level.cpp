@@ -91,7 +91,7 @@ void Level::GenerateLevel(const int startX)
     // Check generated grid to differentiate between different tile types
     UpdateGround(startX, renderOffset);
     obstacleManager->SpawnObstacles(grid, gridHeight, nextGridColumn, totalGridWidth, tileSize);
-    //enemyManager->SpawnEnemies(grid, gridHeight, nextGridColumn, totalGridWidth, furthestTileX_gridWidth, tileSize);
+    enemyManager->SpawnEnemies(grid, gridHeight, nextGridColumn, totalGridWidth, furthestTileX_gridWidth, tileSize);
 }
 
 int Level::AdjustPlatformHeight(const int previousHeight, int currentHeight, const int maxGap, const int minHeight, const int maxHeight) const

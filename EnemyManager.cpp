@@ -220,7 +220,6 @@ void EnemyManager::SpawnFlyingEnemy(const std::shared_ptr<Player> &player, const
             eaglePtr->SetMovementDirection(spawnSide == 0 ? 1 : -1);
         }
 
-        // enemies.push_back(std::move(eagle));
         flyingEnemies.push_back(std::move(eagle));
     }
 }

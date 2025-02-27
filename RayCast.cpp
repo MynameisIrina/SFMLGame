@@ -53,7 +53,7 @@ std::optional<RayCast::RayCastHit> RayCast::DoRaycast(sf::Vector2f start, sf::Ve
                 return RayCastHit{sf::Vector2f(bounds.left, bounds.top), platform};
             }
         }
-
+    }
 
     return std::nullopt;
 }

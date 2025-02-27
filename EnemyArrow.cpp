@@ -104,7 +104,7 @@ void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
     {
         if (activeProjectile != nullptr && activeProjectile->isActive)
         {
-            bool collision = Math::CheckRectCollision(activeProjectile->circle.getGlobalBounds(), enemyBounds);
+            bool collision = Math::CheckRectCollision(activeProjectile->GetBoundingCircle().getGlobalBounds(), enemyBounds);
 
             if (collision)
             {

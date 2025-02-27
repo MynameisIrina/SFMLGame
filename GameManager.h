@@ -79,7 +79,7 @@ private:
     std::unique_ptr<WinScreen> winScreen;
 
 
-    ProjectilePool projectilePool;
+    std::unique_ptr<ProjectilePool> projectilePool;
     std::unique_ptr<Background> background;
 
     GameState state;
