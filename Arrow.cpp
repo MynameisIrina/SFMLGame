@@ -14,8 +14,7 @@ void Arrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<
 {   
     if(!IsArrowActive()) return;
 
-    const float fixedTimeStep = 1.f / 60.f;
-    position.x -= velocity * direction * fixedTimeStep;
+    position.x -= velocity * direction * dt;
 
     const bool outOfCameraBounds = sprite.getScale().x < 0 ? position.x < camera->CalculateLeftBound() : position.x > camera->CalculateRightBound();
     const bool collisionWithPlayer = Math::CheckRectCollision(player->GetBoundingBox().getGlobalBounds(), boundingBox.getGlobalBounds());
@@ -54,9 +53,11 @@ bool Arrow::IsArrowActive()
         {
             recentlyDeactivated = false;
         }
+
         return false;
     }
 
     return true;
 }
+
 

@@ -13,6 +13,7 @@ public:
     void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, const float dt);
     void UpdateView();
     bool IsArrowActive();
+    void Reset();
     
     sf::Sprite sprite;
     bool isActive = false;

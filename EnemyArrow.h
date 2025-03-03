@@ -31,7 +31,7 @@ private:
     const int shootingFrame = 5;
     const int frameSize = 128;
     const float shootingOffset = 20.f;
-    const float velocity = 7.f;
+    const float velocity = 70.f;
     float rotation = 0.f;
     const float scale = 0.45f;
     bool isShooting = false;

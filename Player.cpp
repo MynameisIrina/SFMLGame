@@ -66,7 +66,7 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
     {
         HandleVerticalMovement(dt);
         CheckCollisionGround(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
-        //CheckCollisionSide(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
+        // CheckCollisionSide(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
         HandleFalling();
         HandleBlinking();
         projectilePool->Update(camera, dt);
@@ -348,16 +348,14 @@ bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const st
             return true;
         }
 
-                if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
+        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
         {
-            std::cout << "left collision" << std::endl;
             HandleLeftCollision(tileBounds, playerHalfWidth);
             return true;
         }
 
         if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
         {
-            std::cout << "right collision" << std::endl;
             HandleRightCollision(tileBounds, playerHalfWidth);
             return true;
         }
@@ -398,7 +396,7 @@ bool Player::CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std:
 
         if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
         {
-            std::cout << "left collision" << std::endl;
+
             HandleLeftCollision(enemyBounds, playerHalfWidth);
             HandleFlyingEnemyCollision();
             return true;
@@ -406,7 +404,6 @@ bool Player::CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std:
 
         if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
         {
-            std::cout << "right collision" << std::endl;
             HandleRightCollision(enemyBounds, playerHalfWidth);
             HandleFlyingEnemyCollision();
             return true;
@@ -438,7 +435,7 @@ bool Player::CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std:
 
         if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
         {
-            std::cout << "top collision" << std::endl;
+
             HandleTopCollision(enemyBounds, playerHalfHeight);
             HandleFlyingEnemyCollision();
             return true;
@@ -446,16 +443,14 @@ bool Player::CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std:
 
         if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
         {
-            std::cout << "left collision" << std::endl;
-            //HandleLeftCollision(enemyBounds, playerHalfWidth);
+
             HandleFlyingEnemyCollision();
             return true;
         }
 
         if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
         {
-            std::cout << "right collision" << std::endl;
-            //HandleRightCollision(enemyBounds, playerHalfWidth);
+
             HandleFlyingEnemyCollision();
             return true;
         }
@@ -485,7 +480,7 @@ bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const s
         }
         if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
         {
-            std::cout << "left collision" << std::endl;
+
             HandleLeftCollision(obstacleBounds, playerHalfWidth);
             HandleObstacleCollision();
             return true;
@@ -493,7 +488,7 @@ bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const s
 
         if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
         {
-            std::cout << "right collision" << std::endl;
+
             HandleRightCollision(obstacleBounds, playerHalfWidth);
             HandleObstacleCollision();
             return true;

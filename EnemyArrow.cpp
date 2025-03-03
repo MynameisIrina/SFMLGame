@@ -156,9 +156,7 @@ void EnemyArrow::ShootArrow()
         bool facingLeft = this->sprite.getScale().x < 0;
         const float xOffset = facingLeft ? -shootingOffset : shootingOffset;
         arrow->position = sf::Vector2f(position.x + xOffset, position.y);
-        arrow->sprite.setScale(facingLeft ? arrow->sprite.getScale().x
-                                          : -arrow->sprite.getScale().x,
-                               arrow->sprite.getScale().y);
+        arrow->sprite.setScale(facingLeft ? arrow->sprite.getScale().x : -arrow->sprite.getScale().x, arrow->sprite.getScale().y);
         arrow->velocity = velocity;
         arrow->direction = facingLeft ? 1.0f : -1.0f;
     }

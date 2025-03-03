@@ -194,6 +194,8 @@ void EnemyManager::RespawnEnemies()
     {
         enemy->Respawn();
     }
+    
+    flyingEnemySpawnTimer = 0.f;
 }
 
 void EnemyManager::SpawnFlyingEnemy(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)

@@ -18,7 +18,7 @@ public:
     {
         minX = 0,
         maxX = 25,
-        minY = 2,
+        minY = 3,
         maxY = 15
     };
 
@@ -52,7 +52,6 @@ private:
     const int extraBuffer = 10;
     const int totalGridWidth = gridWidth + bufferColumns;
     int firstPlatformHeight = 5;
-    int maxPlatformHeight = 12;
     int nextGridColumn = gridWidth + 1;
     const int treeGenerationProbability = 9;
 

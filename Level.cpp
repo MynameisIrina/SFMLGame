@@ -51,6 +51,7 @@ void Level::GenerateLevel(const int startX)
     {
         maxPlatformHeight = std::min(maxPlatformHeight, static_cast<int>(gridHeight - pattern.size()));
     }
+
     const int maxPlatformGap = 2;
 
     int currentY = prevYFromLevelGen;
@@ -68,17 +69,12 @@ void Level::GenerateLevel(const int startX)
 
         // cut the width if it exceeds agrid bound
         bool widthExceedsGridBounds = x + patternWidth > gridWidth + bufferColumns;
-        if (widthExceedsGridBounds)
-        {
-            std::cout << "exceeds" << std::endl;
-            continue;
-            //patternWidth = gridWidth + bufferColumns - x;
-        }
+        if (widthExceedsGridBounds) continue;
 
         previousY = currentY;
 
         // Generate a random platform height
-        currentY = rand() % (maxPlatformHeight - minPlatformHeight) + minPlatformHeight;
+        currentY = rand() % maxPlatformHeight;
 
         // Prevent excessive height gaps between platforms
         currentY = AdjustPlatformHeight(previousY, currentY, maxPlatformGap, minPlatformHeight, maxPlatformHeight);
@@ -110,7 +106,7 @@ int Level::AdjustPlatformHeight(const int previousHeight, int currentHeight, con
         currentHeight += amountToLower;
     }
 
-    // make sure the platformdoes not exceed grid height
+    // make sure the platform does not exceed grid height
     currentHeight = std::clamp(currentHeight, minHeight, maxHeight);
 
     return currentHeight;
@@ -246,7 +242,7 @@ void Level::ShiftGridLeft()
 
         shiftCounter++;
         hasShifted = true;
-        ShowGrid();
+        //ShowGrid();
     }
 }
 

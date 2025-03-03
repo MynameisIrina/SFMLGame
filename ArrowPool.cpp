@@ -1,14 +1,10 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
 #include "ArrowPool.h"
 
 ArrowPool::ArrowPool(const std::shared_ptr<TextureLoader> &txLoader, int size)
 {
     arrowSprite = txLoader->SetSprite(TextureLoader::Arrow);
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; ++i)
     {
         arrowPool.emplace_back(std::make_unique<Arrow>(arrowSprite));
     }
