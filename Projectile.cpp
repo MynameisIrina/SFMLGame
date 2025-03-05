@@ -9,13 +9,12 @@ Projectile::Projectile(const std::shared_ptr<TextureLoader>& txLoader)
     sprite.setScale(sf::Vector2f(0.02, 0.02));
 
     boundingCircle = Utilities::CreateBoundingCircle(sprite, sf::Vector2f());
-
-    // circle.setRadius(radius);
-    // circle.setFillColor(sf::Color::Red);
 }
 
 void Projectile::Update(const std::shared_ptr<Camera> &camera, const float dt)
 {
+    if(!IsProjectileActive()) return;
+
     const bool outOfCameraBounds = velocity < 0 ? position.x < camera->CalculateLeftBound() : position.x > camera->CalculateRightBound();
 
     if(outOfCameraBounds)
@@ -48,4 +47,11 @@ bool Projectile::IsRecentlyDeactivated() const
 sf::CircleShape Projectile::GetBoundingCircle() const
 {
     return boundingCircle;
+}
+
+bool Projectile::IsProjectileActive() const
+{
+    if(isActive) return true;
+
+    return false;
 }

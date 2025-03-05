@@ -9,11 +9,11 @@ void ProjectileBar::Initialize(const std::shared_ptr<Player> &player, const std:
     amountToReduce = maxAmount / maxProjectileCount;
     currentAmount = maxAmount;
 
-    projectileBar.setSize(sf::Vector2f(maxAmount, 10));
+    projectileBar.setSize(sf::Vector2f(maxAmount, barHeight));
     projectileBar.setFillColor(color);
     projectileBar.setPosition(position);
 
-    backgroundBar.setSize(sf::Vector2f(maxAmount, 10));
+    backgroundBar.setSize(sf::Vector2f(maxAmount, barHeight));
     backgroundBar.setFillColor(sf::Color(255, 0, 0, 0));
     backgroundBar.setOutlineThickness(2);
     backgroundBar.setOutlineColor(sf::Color::Black);
@@ -88,12 +88,12 @@ void ProjectileBar::ResetBar()
 {
     if(currentAmount == maxAmount) return;
     
-    projectileBar.setSize(sf::Vector2f(maxAmount, barHeight));
+    currentAmount = maxAmount;
 }
 
 void ProjectileBar::UpdateView()
 {
-    projectileBar.setSize(sf::Vector2f(currentAmount, 10));
+    projectileBar.setSize(sf::Vector2f(currentAmount, barHeight));
     projectileBar.setPosition(position);
     backgroundBar.setPosition(position);
 

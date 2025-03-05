@@ -13,6 +13,7 @@ public:
     sf::Sprite GetSprite() const;
     bool IsRecentlyDeactivated() const;
     sf::CircleShape GetBoundingCircle() const;
+    bool IsProjectileActive() const;
 
     sf::Vector2f position;
     float velocity;

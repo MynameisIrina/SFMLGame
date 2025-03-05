@@ -15,12 +15,13 @@ private:
 public:
     Camera(const std::shared_ptr<sf::RenderWindow>& window);
     void Initialize();
-    void Update(const std::shared_ptr<Player>& player);
+    void Update(const std::shared_ptr<Player>& player, const float dt);
     void Reset();
     sf::View GetView() const;
     int CalculateLeftBound() const;
     int CalculateRightBound() const;
     int CalculateTopBound() const;
     int CalculateBottomBound() const;
+    float camVelocity = 0.f;
 
 };

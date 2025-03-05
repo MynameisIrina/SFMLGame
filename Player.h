@@ -194,6 +194,7 @@ public:
     void IncreaseProjectiles();
     void DecreaseCoins();
     void HandleCoinLifeExchange(bool exchangeCoins);
+    sf::Vector2f GetVelocity() const;
 
     // Utilities
     static void DrawRay(const std::shared_ptr<sf::RenderTarget> &rt, const sf::Vector2f& start, const sf::Vector2f& end, sf::Color color = sf::Color::Red);

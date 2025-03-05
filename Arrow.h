@@ -21,6 +21,8 @@ public:
     float velocity = 0;
     float direction = 0;
     bool recentlyDeactivated = false;
+    float vel = 0;
+    sf::Vector2f previousPos;
 
 private:
     sf::RectangleShape boundingBox;

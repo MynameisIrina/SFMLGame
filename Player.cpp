@@ -301,6 +301,7 @@ void Player::HandleTopCollision(const sf::FloatRect &otherBounds, const float pl
 
 void Player::HandleLeftCollision(const sf::FloatRect &otherBounds, const float playerHalfWidth)
 {
+
     const int direction = CalculateDirection();
     position.x = (otherBounds.left + otherBounds.width) + playerHalfWidth + 1.f;
     collisionSide = true;
@@ -428,21 +429,16 @@ bool Player::CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std:
 
         if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
         {
+            std::cout << "bottom collision" << std::endl;
+            
             HandleGroundCollision(enemyBounds, playerHalfHeight);
-            HandleFlyingEnemyCollision();
-            return true;
-        }
-
-        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
-        {
-
-            HandleTopCollision(enemyBounds, playerHalfHeight);
             HandleFlyingEnemyCollision();
             return true;
         }
 
         if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
         {
+            std::cout << "left collision" << std::endl;
 
             HandleFlyingEnemyCollision();
             return true;
@@ -450,7 +446,16 @@ bool Player::CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std:
 
         if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
         {
+            std::cout << "right collision" << std::endl;
+            
+            HandleFlyingEnemyCollision();
+            return true;
+        }
 
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
+        {
+            std::cout << "top collision" << std::endl;
+            HandleTopCollision(enemyBounds, playerHalfHeight);
             HandleFlyingEnemyCollision();
             return true;
         }
@@ -775,6 +780,11 @@ void Player::HandleCoinLifeExchange(bool exchangeCoins)
     {
         coinsExchanged = false;
     }
+}
+
+sf::Vector2f Player::GetVelocity() const
+{
+    return velocity;
 }
 
 sf::Vector2f Player::GetPosition() const

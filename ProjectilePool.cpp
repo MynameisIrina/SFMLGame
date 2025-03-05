@@ -1,8 +1,8 @@
 #include "ProjectilePool.h"
 
-ProjectilePool::ProjectilePool(const std::shared_ptr<TextureLoader>& txLoader, const int size): txLoader(txLoader)
+ProjectilePool::ProjectilePool(const std::shared_ptr<TextureLoader> &txLoader, const int size) : txLoader(txLoader)
 {
-    for(int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         projectiles.emplace_back(std::make_unique<Projectile>(txLoader));
     }
@@ -10,11 +10,11 @@ ProjectilePool::ProjectilePool(const std::shared_ptr<TextureLoader>& txLoader, c
 
 Projectile *ProjectilePool::GetProjectile()
 {
-    for(const auto& projectile: projectiles)
+    for (const auto &projectile : projectiles)
     {
-        if(!projectile->isActive)
+        if (!projectile->isActive)
         {
-            if(projectile->IsRecentlyDeactivated())
+            if (projectile->IsRecentlyDeactivated())
             {
                 continue;
             }
@@ -31,37 +31,34 @@ Projectile *ProjectilePool::GetProjectile()
 
 void ProjectilePool::Update(const std::shared_ptr<Camera> &camera, const float dt)
 {
-    for(const auto& projectile: projectiles)
+    for (const auto &projectile : projectiles)
     {
-        if(projectile->isActive)
-        {
-            projectile->Update(camera, dt);
-        }
+        projectile->Update(camera, dt);
     }
 }
 
 void ProjectilePool::Draw(const std::shared_ptr<sf::RenderTarget> &rt) const
 {
-    for(const auto& projectile: projectiles)
+    for (const auto &projectile : projectiles)
     {
-        if(projectile->isActive)
+        if (projectile->isActive)
         {
             rt->draw(projectile->GetSprite());
         }
     }
 }
 
-std::vector<Projectile*> ProjectilePool::GetActiveProjectiles()
+std::vector<Projectile *> ProjectilePool::GetActiveProjectiles()
 {
-    std::vector<Projectile*> activeProjectiles;
-   for(auto& projectile: projectiles)
-   {
-        if(projectile->isActive)
+    std::vector<Projectile *> activeProjectiles;
+    for (auto &projectile : projectiles)
+    {
+        if (projectile->isActive)
         {
             activeProjectiles.push_back(projectile.get());
         }
-   }
-   return activeProjectiles;
+    }
+    return activeProjectiles;
 }
 
 void ProjectilePool::Clear()

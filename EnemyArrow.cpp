@@ -43,6 +43,7 @@ void EnemyArrow::UpdateAnimation(const float dt)
     if (state == State::Dead) return;
 
     animationTimer += dt;
+    
     if (animationTimer >= animationInterval)
     {
         if (currentAnim >= maxFrames)
@@ -75,7 +76,7 @@ void EnemyArrow::HandleShooting(const std::shared_ptr<Camera>& camera)
     if (enemyWithinCamera && !isShooting && (currentAnim == shootingFrame))
     {
         isShooting = true;
-        ShootArrow();
+        ShootArrow(camera);
     }
 }
 
@@ -147,7 +148,7 @@ void EnemyArrow::HandleFlyingArrows(const std::shared_ptr<Player> &player, const
     arrowPool->Update(player, camera, dt);
 }
 
-void EnemyArrow::ShootArrow()
+void EnemyArrow::ShootArrow(const std::shared_ptr<Camera>& camera)
 {
     Arrow *arrow = arrowPool->GetArrow();
 
@@ -156,9 +157,9 @@ void EnemyArrow::ShootArrow()
         bool facingLeft = this->sprite.getScale().x < 0;
         const float xOffset = facingLeft ? -shootingOffset : shootingOffset;
         arrow->position = sf::Vector2f(position.x + xOffset, position.y);
-        arrow->sprite.setScale(facingLeft ? arrow->sprite.getScale().x : -arrow->sprite.getScale().x, arrow->sprite.getScale().y);
-        arrow->velocity = velocity;
-        arrow->direction = facingLeft ? 1.0f : -1.0f;
+        arrow->sprite.setScale(facingLeft ? -std::abs(arrow->sprite.getScale().x) : std::abs(arrow->sprite.getScale().x), arrow->sprite.getScale().y);
+        arrow->velocity = 100.f;
+        arrow->direction = facingLeft ? -1.0f : 1.0f;
     }
 }
 

@@ -11,6 +11,7 @@ public:
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, float dt);
     void Draw(const std::shared_ptr<sf::RenderWindow> &window) const;
     void Clear();
+    void ResetArrow(std::unique_ptr<Arrow> &arrow);
 
 private:
     std::vector<std::unique_ptr<Arrow>> arrowPool;

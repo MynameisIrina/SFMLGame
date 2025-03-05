@@ -12,7 +12,7 @@ public:
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, const float dt) override;
     void UpdateAnimation(const float dt) override;
     void UpdateView() override;
-    void ShootArrow();
+    void ShootArrow(const std::shared_ptr<Camera>& camera);
     void Draw(const std::shared_ptr<sf::RenderWindow>& window) const override;
     void HandleShooting(const std::shared_ptr<Camera>& camera);
     void HandleRotation(const std::shared_ptr<Player>& player);
@@ -31,7 +31,7 @@ private:
     const int shootingFrame = 5;
     const int frameSize = 128;
     const float shootingOffset = 20.f;
-    const float velocity = 70.f;
+    const float velocity = 100.f;
     float rotation = 0.f;
     const float scale = 0.45f;
     bool isShooting = false;

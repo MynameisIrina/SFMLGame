@@ -20,7 +20,7 @@ GameManager::GameManager()
     audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
     audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
 
-    audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
+    // audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
     projectilePool = std::make_unique<ProjectilePool>(txLoader, 10);
 
@@ -61,7 +61,7 @@ void GameManager::Run()
     while (window->isOpen())
     {
         deltaTime = timer.restart().asSeconds();
-
+        
         if (state == GameState::MENU)
         {
             savedView = window->getView();
@@ -95,7 +95,6 @@ void GameManager::Run()
     }
 }
 
-
 void GameManager::ProcessEvents()
 {
     sf::Event event;
@@ -110,23 +109,26 @@ void GameManager::Update(const float dt)
 {
     const PlayerInput &input = HandleInput();
 
-    if (ShouldEnterMenuState(input)) return;
+    if (ShouldEnterMenuState(input))
+        return;
 
     const float leftBound = camera->CalculateLeftBound();
 
     auto boundingBoxes = CollectBoundingBoxes();
+    
 
     background->GenerateNewSprite(player);
+
+    level->UpdateLevel(player, camera, deltaTime);
 
     player->Jump(input.jumped, deltaTime);
     player->Update(respawnManager, camera, input.moveRight, input.moveLeft, input.shoot, leftBound, input.respawn, input.exchangeCoins,
                    deltaTime, boundingBoxes.tiles, boundingBoxes.enemies, boundingBoxes.flyingeEnemies, boundingBoxes.obstacles);
 
-    if (CheckWinCondition()) return;
+    if (CheckWinCondition())
+        return;
 
-    level->UpdateLevel(player, camera, deltaTime);
-
-    camera->Update(player);
+    camera->Update(player, deltaTime);
     healthBar->Update(player, camera);
     coinBar->Update(player, camera);
     projectileBar->Update(player, camera, deltaTime);
