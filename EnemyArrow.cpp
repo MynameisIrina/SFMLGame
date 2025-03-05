@@ -4,7 +4,7 @@
 #include "Coin.h"
 #include "Collectible.h"
 
-EnemyArrow::EnemyArrow(const std::shared_ptr<ArrowPool>& arrowPool, const std::shared_ptr<AudioManager>& audioManager) : arrowPool(arrowPool), Enemy(audioManager){}
+EnemyArrow::EnemyArrow(std::unique_ptr<ArrowPool> arrowPool, const std::shared_ptr<AudioManager>& audioManager) : arrowPool(std::move(arrowPool)), Enemy(audioManager){}
 
 void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f& position, const int health, const int damage)
 {

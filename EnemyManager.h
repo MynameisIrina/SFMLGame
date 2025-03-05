@@ -25,7 +25,6 @@ private:
     std::vector<std::unique_ptr<Enemy>> flyingEnemies;
     std::shared_ptr<TextureLoader> txLoader;
     std::shared_ptr<AudioManager> audioManager;
-    std::shared_ptr<ArrowPool> arrowPool;
 
     sf::Sprite enemySprite;
     sf::Sprite eagleSprite;

@@ -15,20 +15,8 @@ void Arrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<
     if (!IsArrowActive())
         return;
 
-    // Store previous position before updating
-    //previousPos = position;
 
     position.x += velocity * direction * dt;
-    
-    sf::Vector2f curPos = position;
-
-    // // Output velocity every 2 seconds
-    // static float timeSinceLastOutput = 0.0f;
-    // if ((timeSinceLastOutput += dt) >= 2.0f)
-    // {
-    //     std::cout << (position.x - previousPos.x) / dt << std::endl;
-    //     timeSinceLastOutput = 0.0f;
-    // }
 
     const bool outOfCameraBounds = position.x < camera->CalculateLeftBound() || position.x > camera->CalculateRightBound();
     const bool collisionWithPlayer = Math::CheckRectCollision(player->GetBoundingBox().getGlobalBounds(), boundingBox.getGlobalBounds());

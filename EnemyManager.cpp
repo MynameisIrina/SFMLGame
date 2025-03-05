@@ -7,7 +7,6 @@ EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader> &txLoader, const
 {
     enemySprite = txLoader->SetSprite(TextureLoader::TextureType::Enemy);
     eagleSprite = txLoader->SetSprite(TextureLoader::TextureType::Eagel);
-    arrowPool = std::make_unique<ArrowPool>(txLoader, 10);
 }
 
 void EnemyManager::SpawnEnemies(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int startX, const int tileSize)
@@ -60,7 +59,7 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int ti
 
     grid[y][x] = Tile(Tile::Enemy, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
 
-    std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>(arrowPool, audioManager);
+    std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>(std::make_unique<ArrowPool>(txLoader, 10), audioManager);
     sf::Vector2f position{globalTileX, globalTileY};
     enemyArrow->Initialize(enemySprite, position, 40, 10);
     enemies.push_back(std::move(enemyArrow));
