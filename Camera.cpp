@@ -14,13 +14,12 @@ void Camera::Initialize()
 
 void Camera::Update(const std::shared_ptr<Player> &player, const float dt)
 {
-    sf::Vector2f prevPos = view.getCenter();
-
+    const sf::Vector2f prevPos = view.getCenter();
     const sf::Vector2f playerPosition = player->GetPosition();
-    float targetX = view.getCenter().x;
     const float viewThreshold = view.getCenter().x;
+    float targetX = view.getCenter().x;
+    const bool isMovingRight = player->CalculateDirection() == Player::Direction::Right && player->IfStateActive(Player::State::Moving);
 
-    bool isMovingRight = player->CalculateDirection() > 0 && player->IfStateActive(Player::State::Moving);
     if (playerPosition.x >= viewThreshold && isMovingRight) {
         targetX = playerPosition.x;
     }
@@ -31,7 +30,6 @@ void Camera::Update(const std::shared_ptr<Player> &player, const float dt)
     view.setCenter(newX, view.getSize().y * 0.5f);
     window->setView(view);
 
-    camVelocity = (view.getCenter().x - prevPos.x) / dt;
 }
 
 void Camera::Reset()

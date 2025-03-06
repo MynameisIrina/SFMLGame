@@ -1,7 +1,7 @@
 #pragma once
 #include "Enemy.h"
-#include "ArrowPool.h"
-#include <iostream>
+
+class ArrowPool;
 
 class EnemyArrow: public Enemy
 {

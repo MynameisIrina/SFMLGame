@@ -1,6 +1,6 @@
 #pragma once
 #include "Collectible.h"
-#include "Enemy.h"
+
 
 class Coin : public Collectible
 {

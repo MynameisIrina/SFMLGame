@@ -14,7 +14,7 @@ void ObstacleManager::UpdateObstacles(float dt)
     }
 }
 
- void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int tileSize)
+void ObstacleManager::SpawnObstacles(std::vector<std::vector<Tile>> &grid, const int maxY, const int minX, const int maxX, const int tileSize)
 {
     for (int y = 0; y < maxY; ++y)
     {
@@ -55,18 +55,12 @@ bool ObstacleManager::CanPlaceObstacle(const std::vector<std::vector<Tile>> &gri
 
 void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, const int tileSize, const int x, const int y)
 {
-
     // spawn obstacle right above the platform
-    const float globalTileX = grid[y+1][x].GetGlobalPosition().x + (tileSize * 0.5f);
-    const float globalTileY = grid[y+1][x].GetGlobalPosition().y - 30.f;
+    const float globalTileX = grid[y + 1][x].GetGlobalPosition().x + (tileSize * 0.5f);
+    const float globalTileY = grid[y + 1][x].GetGlobalPosition().y - 30.f;
 
     const float minPosX = globalTileX - tileSize;
     const float maxPosX = globalTileX + tileSize;
-    // const float speed = std::clamp(rand() % maxSpeed, minSpeed, maxSpeed);
-
-    spawnMarker.setRadius(2);
-    spawnMarker.setFillColor(sf::Color::Red);
-    spawnMarker.setPosition(globalTileX, static_cast<float>(y * tileSize));
 
     grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
     std::unique_ptr<Obstacle> obstacle = std::make_unique<Obstacle>();
@@ -80,8 +74,11 @@ void ObstacleManager::Draw(const std::shared_ptr<sf::RenderWindow> &window) cons
     {
         obstacle->Draw(window);
     }
+}
 
-    window->draw(spawnMarker);
+void ObstacleManager::Reset()
+{
+    obstacles.clear();
 }
 
 std::vector<sf::RectangleShape> &ObstacleManager::GetObstaclesBoundingBoxes() const

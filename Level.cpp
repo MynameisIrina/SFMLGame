@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Level.h"
 #include "Utilities.h"
 
@@ -67,7 +66,7 @@ void Level::GenerateLevel(const int startX)
         patternWidth = patterns[patternIndex][0].size();
         patternHeight = patterns[patternIndex].size();
 
-        // cut the width if it exceeds agrid bound
+        // // cut the width if it exceeds agrid bound
         bool widthExceedsGridBounds = x + patternWidth > gridWidth + bufferColumns;
         if (widthExceedsGridBounds) continue;
 
@@ -122,6 +121,16 @@ void Level::SpawnTree(const int startX, const float renderOffset, const int x, c
     treeSprites.emplace_back(std::move(tree));
 
     grid[y][x] = Tile(Tile::Tile_Type::Tree, sf::Vector2f(), sf::RectangleShape());
+}
+
+void Level::Reset()
+{
+    grid.clear();
+    groundTiles.clear();
+    allTiles.clear();
+    tileSprites.clear();
+    treeSprites.clear();
+    shiftCounter = 0;
 }
 
 void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
@@ -215,7 +224,6 @@ void Level::UpdateGround(const int startX, const float renderOffset)
                 }
             }
         }
-
     }
 }
 
@@ -242,7 +250,7 @@ void Level::ShiftGridLeft()
 
         shiftCounter++;
         hasShifted = true;
-        //ShowGrid();
+        ShowGrid();
     }
 }
 

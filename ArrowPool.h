@@ -2,6 +2,10 @@
 #include <SFML/Graphics.hpp>
 #include "Arrow.h"
 
+class Player;
+class Camera;
+class TextureLoader;
+
 class ArrowPool
 {
 

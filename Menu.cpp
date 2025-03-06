@@ -4,6 +4,7 @@
 Menu::Menu(std::shared_ptr<sf::RenderWindow> &window, std::shared_ptr<TextureLoader> &txLoader) : window(window)
 {
     font.loadFromFile("Assets/Fonts/Pixel.ttf");
+    font.setSmooth(false);
 
     startButton = Button(300, 230, 180, 50, "Start", font);
     exitButton = Button(300, 330, 180, 50, "Exit", font);

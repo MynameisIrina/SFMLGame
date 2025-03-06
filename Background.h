@@ -1,7 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Player.h"
-#include <list>
+
+class Player;
+class TextureLoader;
 
 class Background
 {
@@ -15,7 +16,7 @@ public:
 private:
     std::shared_ptr<TextureLoader> txLoader;
     const float offsetPlacement = 1600.f;
-    std::list<sf::Sprite> spriteList;
+    std::vector<sf::Sprite> sprites;
     sf::Vector2u windowSize;
     sf::Vector2u textureSize;
 };

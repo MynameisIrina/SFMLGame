@@ -1,8 +1,8 @@
 #include "GameManager.h"
 
-GameManager::GameManager()
+void GameManager::InitializeGame()
 {
-    sf::ContextSettings settings;
+     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
 
     window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "sf::Cat", sf::Style::Close, settings);
@@ -20,7 +20,7 @@ GameManager::GameManager()
     audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
     audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
 
-    // audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
+     audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
     projectilePool = std::make_unique<ProjectilePool>(txLoader, 10);
 
@@ -87,12 +87,17 @@ void GameManager::Run()
         }
         else if (state == GameState::RESTART)
         {
-            respawnManager->RespawnAllEntities();
+            RestartGame();
             state = GameState::RUNNING;
         }
 
         Render();
     }
+}
+
+void GameManager::RestartGame()
+{
+   InitializeGame();
 }
 
 void GameManager::ProcessEvents()
@@ -112,7 +117,6 @@ void GameManager::Update(const float dt)
     if (ShouldEnterMenuState(input))
         return;
 
-    const float leftBound = camera->CalculateLeftBound();
 
     auto boundingBoxes = CollectBoundingBoxes();
     
@@ -122,7 +126,7 @@ void GameManager::Update(const float dt)
     level->UpdateLevel(player, camera, deltaTime);
 
     player->Jump(input.jumped, deltaTime);
-    player->Update(respawnManager, camera, input.moveRight, input.moveLeft, input.shoot, leftBound, input.respawn, input.exchangeCoins,
+    player->Update(respawnManager, camera, input.moveRight, input.moveLeft, input.shoot, input.respawn, input.exchangeCoins,
                    deltaTime, boundingBoxes.tiles, boundingBoxes.enemies, boundingBoxes.flyingeEnemies, boundingBoxes.obstacles);
 
     if (CheckWinCondition())
@@ -186,7 +190,7 @@ bool GameManager::ShouldEnterMenuState(GameManager::PlayerInput input)
 {
     if (input.paused)
     {
-        state = GameState::MENU;
+        state = GameState::WIN;
         return true;
     }
 

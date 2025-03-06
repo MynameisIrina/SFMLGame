@@ -1,12 +1,14 @@
 #include "Arrow.h"
 #include "Utilities.h"
+#include "Math.h"
+#include "Player.h"
+#include "Camera.h"
 
-Arrow::Arrow(sf::Sprite &sprite) : sprite(sprite)
+Arrow::Arrow(const sf::Sprite &sprite) : sprite(sprite)
 {
     this->sprite.setScale(-1 * sprite.getScale().x, 1 * sprite.getScale().y);
     this->sprite.setOrigin(sprite.getGlobalBounds().width / 2, sprite.getGlobalBounds().height / 2);
     boundingBox = Utilities::CreateBoundingBox(sprite, sf::Vector2f{0, 0});
-    velocity = 100.f;
     recentlyDeactivated = false;
 }
 
@@ -28,7 +30,7 @@ void Arrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<
 
         if (collisionWithPlayer)
         {
-            // player->SetState(Player::State::Blinking);
+            player->StartBlinking();
             player->DecreaseHealth();
         }
     }

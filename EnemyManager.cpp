@@ -1,6 +1,7 @@
 #include "EnemyManager.h"
 #include "Level.h"
 #include "Eagle.h"
+#include "ArrowPool.h"
 
 EnemyManager::EnemyManager(const std::shared_ptr<TextureLoader> &txLoader, const std::shared_ptr<AudioManager> &audioManager)
     : txLoader(txLoader), audioManager(audioManager)
@@ -52,10 +53,6 @@ void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int ti
 {
     const float globalTileX = grid[y+1][x].GetGlobalPosition().x + (tileSize * 0.5f);
     const float globalTileY = grid[y+1][x].GetGlobalPosition().y - 30.f;
-
-    spawnMarker.setRadius(2);
-    spawnMarker.setFillColor(sf::Color::Red);
-    spawnMarker.setPosition(globalTileX, static_cast<float>(y * tileSize));
 
     grid[y][x] = Tile(Tile::Enemy, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
 
@@ -129,7 +126,6 @@ void EnemyManager::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
         flyingEnemy->Draw(window);
     }
 
-    window->draw(spawnMarker);
 }
 
 std::vector<std::reference_wrapper<Enemy>> EnemyManager::GetAliveEnemies() const
@@ -223,4 +219,10 @@ void EnemyManager::SpawnFlyingEnemy(const std::shared_ptr<Player> &player, const
 
         flyingEnemies.push_back(std::move(eagle));
     }
+}
+
+void EnemyManager::Reset()
+{
+    enemies.clear();
+    flyingEnemies.clear();
 }

@@ -1,7 +1,5 @@
 #include "Projectile.h"
 #include "Utilities.h"
-#include <iostream>
-#include "Utilities.h"
 
 Projectile::Projectile(const std::shared_ptr<TextureLoader>& txLoader)
 {

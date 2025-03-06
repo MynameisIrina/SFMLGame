@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+
 class Player;
 
 class Camera
@@ -22,6 +23,4 @@ public:
     int CalculateRightBound() const;
     int CalculateTopBound() const;
     int CalculateBottomBound() const;
-    float camVelocity = 0.f;
-
 };

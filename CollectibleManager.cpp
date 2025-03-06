@@ -46,3 +46,8 @@ void CollectibleManager::ClearCollectibles()
 {
     collectibles.clear();
 }
+
+void CollectibleManager::Reset()
+{
+    collectibles.clear();
+}

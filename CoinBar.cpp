@@ -1,4 +1,3 @@
-
 #include "CoinBar.h"
 
 CoinBar::CoinBar(const std::shared_ptr<TextureLoader> &txLoader)
@@ -18,6 +17,7 @@ void CoinBar::Initialize(const std::shared_ptr<Player> &player, const std::share
         throw std::runtime_error("Failed to load pixel font");
     }
 
+    font.setSmooth(false);
     coinText.setFont(font);
     coinText.setCharacterSize(24);
     coinText.setFillColor(sf::Color::Black);

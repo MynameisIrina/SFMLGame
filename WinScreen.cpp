@@ -4,6 +4,7 @@
 WinScreen::WinScreen(const std::shared_ptr<sf::RenderWindow> &window, const std::shared_ptr<TextureLoader> &txLoader) : window(window)
 {
     font.loadFromFile("Assets/Fonts/Pixel.ttf");
+    font.setSmooth(false);
 
     restartButton = Button(300, 230, 180, 50, "Restart", font);
     exitButton = Button(300, 330, 180, 50, "Exit", font);
@@ -51,10 +52,10 @@ void WinScreen::Show(GameState &gameState, const float dt)
 void WinScreen::Draw()
 {
     window->clear(sf::Color::White);
+    window->draw(cat);
     restartButton.Draw(window);
     exitButton.Draw(window);
     window->draw(message);
-    window->draw(cat);
 }
 
 void WinScreen::UpdateCatAnimation(const float dt)

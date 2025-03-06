@@ -13,6 +13,7 @@ public:
     std::unique_ptr<Collectible> CreateCoin(const sf::Vector2f &position);
     void UpdateCollectibles(const std::shared_ptr<Player>& player ,const float dt);
     void ClearCollectibles();
+    void Reset();
 
 private:
     sf::Sprite sprite;

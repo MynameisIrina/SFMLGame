@@ -1,6 +1,4 @@
 #pragma once
-#include <memory>
-#include <vector>
 #include "Enemy.h"
 #include "EnemyArrow.h"
 #include "TextureLoader.h"
@@ -19,6 +17,7 @@ public:
     std::vector<sf::RectangleShape>& GetFlyingEnemiesBoundingBoxes() const;
     void RespawnEnemies();
     void SpawnFlyingEnemy(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera> &camera, const float dt);
+    void Reset();
 
 private:
     std::vector<std::unique_ptr<Enemy>> enemies;
@@ -31,6 +30,5 @@ private:
     const float offsetY = 12;
     float flyingEnemySpawnTimer = 0.0f;
     float flyingEnemySpawnCooldown = 25.0f; 
-    sf::CircleShape spawnMarker;
 
 };

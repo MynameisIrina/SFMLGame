@@ -1,4 +1,5 @@
 #include "ArrowPool.h"
+#include "TextureLoader.h"
 
 ArrowPool::ArrowPool(const std::shared_ptr<TextureLoader> &txLoader, int size)
 {
@@ -44,7 +45,6 @@ void ArrowPool::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
         if (arrow->isActive)
         {
             window->draw(arrow->sprite);
-            window->draw(arrow->GetBoundingBox());
         }
     }
 }

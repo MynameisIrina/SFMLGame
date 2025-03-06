@@ -43,9 +43,11 @@ class GameManager
 
 public:
 
-    GameManager();
+    GameManager() = default;
     ~GameManager() = default;
 
+    void InitializeGame();
+    void RestartGame();
     void Run();
     void ProcessEvents();
     void Update(const float dt);
@@ -55,7 +57,6 @@ public:
     bool ShouldEnterMenuState(GameManager::PlayerInput input);
     bool CheckWinCondition();
     GameManager::BoundingBoxes CollectBoundingBoxes();
-
 
 private:
     sf::ContextSettings settings;
@@ -96,5 +97,5 @@ private:
     const int playerProjectiles = 5;
     const float playerScale = 2.5f;
     const int firstPlatformheight = 8;
-    const int coinWinCondition = 10;
+    const int coinWinCondition = 8;
 };

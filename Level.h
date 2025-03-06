@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <SFML/Graphics.hpp>
 #include "Player.h"
 #include "Camera.h"
@@ -42,6 +41,7 @@ public:
     int AdjustPlatformHeight(const int previousHeight, const int currentHeight, const int maxGap, const int maxHeight, const int minHeight) const;
     void UpdateGenerationBounds(const sf::Vector2f& cameraCenter);
     void SpawnTree(const int startX, const float renderOffset, const int x, const int y);
+    void Reset();
 
 private:
 
@@ -60,7 +60,6 @@ private:
     std::shared_ptr<EnemyManager> enemyManager;
     std::shared_ptr<CollectibleManager> collectibleManager;
 
-    std::vector<sf::RectangleShape> allTiles;
 
     using Pattern = std::vector<std::vector<int>>;
     std::vector<std::vector<Tile>> grid;
@@ -68,6 +67,7 @@ private:
     std::vector<sf::Sprite> tileSprites;
     std::vector<sf::Sprite> treeSprites;
     std::vector<Tile> groundTiles;
+    std::vector<sf::RectangleShape> allTiles;
 
     std::shared_ptr<TextureLoader> txLoader;
 

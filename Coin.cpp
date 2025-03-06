@@ -1,4 +1,3 @@
-
 #include "Coin.h"
 #include "Enemy.h"
 #include "Utilities.h"

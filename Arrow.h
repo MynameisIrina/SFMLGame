@@ -1,13 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "TextureLoader.h"
-#include "Player.h"
+
+class Player;
+class Camera;
 
 class Arrow
 {
 
 public:
-    Arrow(sf::Sprite& sprite);
+    Arrow(const sf::Sprite& sprite);
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, const float dt);
     sf::RectangleShape GetBoundingBox() const;
     void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, const float dt);
@@ -21,8 +22,6 @@ public:
     float velocity = 0;
     float direction = 0;
     bool recentlyDeactivated = false;
-    float vel = 0;
-    sf::Vector2f previousPos;
 
 private:
     sf::RectangleShape boundingBox;

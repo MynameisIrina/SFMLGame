@@ -1,5 +1,8 @@
 #include "Eagle.h"
+#include "AudioManager.h"
+#include "Projectile.h"
 #include "Utilities.h"
+#include "Math.h"
 
 Eagle::Eagle(const std::shared_ptr<AudioManager> &audioManager) : Enemy(audioManager) {}
 
@@ -110,7 +113,6 @@ void Eagle::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
     if (state == Enemy::State::Dead) return;
 
     Enemy::Draw(window);
-    window->draw(boundingBox);
 }
 
 void Eagle::SetMovementDirection(const int direction)

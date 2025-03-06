@@ -1,6 +1,4 @@
 #include "Enemy.h"
-#include <chrono>
-#include <thread>
 
 Enemy::Enemy(const std::shared_ptr<AudioManager> &audioManager) : audioManager(audioManager)
 {

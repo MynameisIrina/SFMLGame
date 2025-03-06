@@ -73,6 +73,6 @@ void Obstacle::CreateVisualLine(const float minX, const float maxX, const float 
 void Obstacle::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
     window->draw(sprite);
-    window->draw(boundingBox);
+    //window->draw(boundingBox);
     window->draw(line, 2, sf::Lines);
 }
