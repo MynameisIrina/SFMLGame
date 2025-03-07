@@ -57,14 +57,17 @@ void ObstacleManager::PlaceObstacle(std::vector<std::vector<Tile>> &grid, const 
 {
     // spawn obstacle right above the platform
     const float globalTileX = grid[y + 1][x].GetGlobalPosition().x + (tileSize * 0.5f);
-    const float globalTileY = grid[y + 1][x].GetGlobalPosition().y - 30.f;
+    const float globalTileY = grid[y + 1][x].GetGlobalPosition().y - offsetY;
 
     const float minPosX = globalTileX - tileSize;
     const float maxPosX = globalTileX + tileSize;
 
     grid[y][x] = Tile(Tile::Tile_Type::Obstacle, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
     std::unique_ptr<Obstacle> obstacle = std::make_unique<Obstacle>();
-    obstacle->Initialize(sprite, sf::Vector2f(globalTileX, globalTileY), speed, minPosX, maxPosX);
+    
+    const int range = (maxSpeed - minSpeed) / speedStep + 1;
+    const int randomSpeed = minSpeed + (std::rand() % range) * speedStep;
+    obstacle->Initialize(sprite, sf::Vector2f(globalTileX, globalTileY), randomSpeed, minPosX, maxPosX);
     obstacles.push_back(std::move(obstacle));
 }
 

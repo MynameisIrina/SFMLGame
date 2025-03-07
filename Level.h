@@ -53,7 +53,9 @@ private:
     const int totalGridWidth = gridWidth + bufferColumns;
     int firstPlatformHeight = 5;
     int nextGridColumn = gridWidth + 1;
-    const int treeGenerationProbability = 9;
+    const int treeGenerationProbability = 6;
+    const int maxPlatformGap = 2;
+    int bottomBuffer = 3;
 
 
     std::shared_ptr<ObstacleManager> obstacleManager;

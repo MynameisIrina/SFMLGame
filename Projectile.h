@@ -18,8 +18,7 @@ public:
     sf::Vector2f position;
     float velocity;
     bool isActive = false;
-
-
+    const float scale = 0.02f;
 
 private:
     sf::Sprite sprite;

@@ -4,7 +4,7 @@
 Projectile::Projectile(const std::shared_ptr<TextureLoader>& txLoader)
 {
     sprite = txLoader->SetSprite(TextureLoader::Hairball);
-    sprite.setScale(sf::Vector2f(0.02, 0.02));
+    sprite.setScale(sf::Vector2f(scale, scale));
 
     boundingCircle = Utilities::CreateBoundingCircle(sprite, sf::Vector2f());
 }

@@ -1,12 +1,11 @@
 #include "Player.h"
-#include "Animation.h"  
+#include "Animation.h"
 #include "Math.h"
 #include "TextureLoader.h"
 #include "HealthBar.h"
-#include "Tile.h" 
-#include "RayCast.h"
+#include "Tile.h"
 #include "ProjectilePool.h"
-#include "AudioManager.h" 
+#include "AudioManager.h"
 #include "Camera.h"
 #include "Utilities.h"
 #include "RespawnManager.h"
@@ -44,19 +43,27 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
                     std::vector<sf::RectangleShape> &obstaclesShapes)
 {
 
-    InputToState(moveRight, moveLeft, shoot, respawn);
+    CalculateCurrentAnimation(dt);
 
-    if (IfStateActive(State::Moving) && !IsInRebirth())
+    if (IsInRebirth())
     {
-        HandleHorizontalMovement(camera, dt);
+        UpdateRebirthView();
+        return;
     }
+
+    InputToState(moveRight, moveLeft, shoot, respawn);
 
     if (IfStateActive(State::Respawning))
     {
         respawnManager->RespawnAllEntities();
     }
 
-    if (IfStateActive(State::Shooting) && !IsInRebirth())
+    if (IfStateActive(State::Moving))
+    {
+        HandleHorizontalMovement(camera, dt);
+    }
+
+    if (IfStateActive(State::Shooting))
     {
         HandleShooting(shoot, dt);
     }
@@ -68,20 +75,18 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
         isShooting = false;
     }
 
+    UpdateView(moveRight, moveLeft);
+
     if (!IsInRebirth())
     {
         HandleVerticalMovement(dt);
         CheckCollisionGround(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
-        // CheckCollisionSide(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
         HandleFalling();
         HandleBlinking();
         projectilePool->Update(camera, dt);
         HandleProjectileReset(dt);
         HandleCoinLifeExchange(exchangeCoins);
     }
-
-    CalculateCurrentAnimation(dt);
-    UpdateView(moveRight, moveLeft);
 }
 
 void Player::InputToState(bool moveRight, bool moveLeft, bool shoot, bool respawn)
@@ -134,7 +139,7 @@ void Player::HandleHorizontalMovement(const std::shared_ptr<Camera> &camera, flo
     }
     else if (direction == Direction::Left)
     {
-        if (position.x > leftCameraBound + 27.f)
+        if (position.x > leftCameraBound + leftBoundaryOffset)
         {
             position.x -= movementDelta;
         }
@@ -236,7 +241,7 @@ void Player::ResetAnimation(int animYIndex)
     sprite.setTextureRect(sf::IntRect(TextureLoader::playerX + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
 }
 
-void Player::HandleRebirthAnimation()
+void Player::HandleRebirthAnimation(const float dt)
 {
     if (rebornAnimationTimer >= rebirth_animation_interval)
     {
@@ -322,25 +327,25 @@ bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const st
         if (!collisionInfo.hasCollision)
             continue;
 
-        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
+        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= maxOverlap)
         {
             HandleGroundCollision(tileBounds, playerHalfHeight);
             return true;
         }
 
-        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= maxOverlap)
         {
             HandleTopCollision(tileBounds, playerHalfHeight);
             return true;
         }
 
-        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
+        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= maxOverlap)
         {
             HandleLeftCollision(tileBounds, playerHalfWidth);
             return true;
         }
 
-        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
+        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= maxOverlap)
         {
             HandleRightCollision(tileBounds, playerHalfWidth);
             return true;
@@ -360,28 +365,28 @@ bool Player::CheckEnemiesCollision(const sf::FloatRect &playerBounds, const std:
         if (!collisionInfo.hasCollision)
             continue;
 
-        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
+        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= maxOverlap)
         {
             HandleGroundCollision(enemyBounds, playerHalfHeight);
             HandleEnemyCollision();
             return true;
         }
 
-        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= maxOverlap)
         {
             HandleTopCollision(enemyBounds, playerHalfHeight);
             HandleEnemyCollision();
             return true;
         }
 
-        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
+        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= maxOverlap)
         {
             HandleLeftCollision(enemyBounds, playerHalfWidth);
             HandleEnemyCollision();
             return true;
         }
 
-        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
+        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= maxOverlap)
         {
             HandleRightCollision(enemyBounds, playerHalfWidth);
             HandleEnemyCollision();
@@ -405,25 +410,25 @@ bool Player::CheckFlyingEnemiesCollision(const sf::FloatRect &playerBounds, std:
         if (!collisionInfo.hasCollision)
             continue;
 
-        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
+        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= maxOverlap)
         {
             HandleFlyingEnemyCollision();
             return true;
         }
 
-        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
+        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= maxOverlap)
         {
             HandleFlyingEnemyCollision();
             return true;
         }
 
-        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
+        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= maxOverlap)
         {
             HandleFlyingEnemyCollision();
             return true;
         }
 
-        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= -4.f)
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= maxOverlap)
         {
             HandleFlyingEnemyCollision();
             return true;
@@ -443,7 +448,7 @@ bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const s
         if (!collisionInfo.hasCollision)
             continue;
 
-        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= -4.f)
+        if (collisionInfo.overlapBottom <= 0.f && collisionInfo.overlapBottom >= maxOverlap)
         {
             HandleGroundCollision(obstacleBounds, playerHalfHeight);
             if (!IsPlayerProtected())
@@ -452,7 +457,7 @@ bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const s
             }
             return true;
         }
-        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= -4.f)
+        if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= maxOverlap)
         {
 
             HandleLeftCollision(obstacleBounds, playerHalfWidth);
@@ -460,7 +465,7 @@ bool Player::CheckObstaclesCollisions(const sf::FloatRect &playerBounds, const s
             return true;
         }
 
-        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= -4.f)
+        if (collisionInfo.overlapRightSide <= 0.f && collisionInfo.overlapRightSide >= maxOverlap)
         {
 
             HandleRightCollision(obstacleBounds, playerHalfWidth);
@@ -510,7 +515,7 @@ void Player::CalculateCurrentAnimation(const float dt)
 
     if (IsInRebirth())
     {
-        HandleRebirthAnimation();
+        HandleRebirthAnimation(dt);
     }
     else
     {
@@ -520,41 +525,32 @@ void Player::CalculateCurrentAnimation(const float dt)
 
 void Player::HandleRespawn()
 {
+    if (position == respawnPos)
+        return;
 
-    if (position != respawnPos)
+    if (position.x > maxPosition.x)
     {
-        if (position.x > maxPosition.x)
-        {
-            maxPosition = position;
-        }
-
-        respawnTimer.restart();
-        isRespawnTimerRestarted = true;
-        position = respawnPos;
-
-        velocity.y = 0;
-        sprite.setScale(scale, scale);
-
-        ResetHealth();
-        ResetCoins();
-        ResetProjectiles();
-        ResetBlinking();
-        projectilePool->Clear();
-
-        state = 0;
+        maxPosition = position;
     }
+
+    respawnTimer.restart();
+    isRespawnTimerRestarted = true;
+    position = respawnPos;
+
+    velocity.y = 0;
+    sprite.setScale(scale, scale);
+
+    ResetHealth();
+    ResetCoins();
+    ResetProjectiles();
+    ResetBlinking();
+    projectilePool->Clear();
+
+    ClearState(State::Respawning);
 }
 
 void Player::UpdateView(bool moveRight, bool moveLeft)
 {
-    if (IsInRebirth())
-    {
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer), TextureLoader::rectWidthPlayer, 31));
-        sprite.setPosition(position - sf::Vector2f(0, 4 * rebirthVerticaloffset));
-        boundingBoxPlayer.setPosition(position.x, position.y + rebirthVerticaloffset);
-        return;
-    }
-
     if (moveRight)
     {
         sprite.setScale(scale, scale);
@@ -568,6 +564,13 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
 
     sprite.setPosition(position);
     boundingBoxPlayer.setPosition(position.x, position.y + boundingBoxOffsetY);
+}
+
+void Player::UpdateRebirthView()
+{
+    sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer), TextureLoader::rectWidthPlayer, 31));
+    sprite.setPosition(position - sf::Vector2f(0, 4 * rebirthVerticaloffset));
+    boundingBoxPlayer.setPosition(position.x, position.y + rebirthVerticaloffset);
 }
 
 void Player::Draw(const std::shared_ptr<sf::RenderTarget> &rt) const
@@ -684,6 +687,7 @@ void Player::ResetProjectiles()
 
 void Player::ResetBlinking()
 {
+    ClearState(State::Blinking);
     isVisible = true;
     sprite.setColor(Utilities::GetOpaqueColor(normalColor));
 }

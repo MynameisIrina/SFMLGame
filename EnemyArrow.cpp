@@ -167,9 +167,9 @@ void EnemyArrow::ShootArrow(const std::shared_ptr<Camera> &camera)
         const float xOffset = facingLeft ? -shootingOffset : shootingOffset;
         arrow->position = sf::Vector2f(position.x + xOffset, position.y);
         arrow->sprite.setScale(facingLeft ? -std::abs(arrow->sprite.getScale().x) : std::abs(arrow->sprite.getScale().x), arrow->sprite.getScale().y);
-        int randomVelocity = 180 + (std::rand() % (300 - 180 + 1));
+        int randomVelocity = minArrowSpeed + (std::rand() % (maxArrowSpeed - minArrowSpeed + 1));
         arrow->velocity = randomVelocity;
-        arrow->direction = facingLeft ? -1.0f : 1.0f;
+        arrow->direction = facingLeft ? Arrow::Direction::Left : Arrow::Direction::Right;
     }
 }
 
@@ -181,5 +181,4 @@ void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
         return;
 
     Enemy::Draw(window);
-    window->draw(boundingBox);
 }

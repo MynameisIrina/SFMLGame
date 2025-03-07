@@ -56,6 +56,9 @@ public:
     void HandleAudio(GameManager::PlayerInput input);
     bool ShouldEnterMenuState(GameManager::PlayerInput input);
     bool CheckWinCondition();
+    void InitializeWindow();
+    void InitializeAudio();
+    void Restart();
     GameManager::BoundingBoxes CollectBoundingBoxes();
 
 private:
@@ -92,7 +95,7 @@ private:
 
     // Player settings
     const float playerStartX = 30.f;
-    const float playerStartY = 236.f;
+    const float playerStartY = 230.f;
     const int playerLives = 6;
     const int playerProjectiles = 5;
     const float playerScale = 2.5f;

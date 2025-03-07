@@ -36,5 +36,8 @@ private:
     const float scale = 0.45f;
     bool isShooting = false;
 
+    int minArrowSpeed = 200;
+    int maxArrowSpeed = 350;
+
     int counter = 0;
 };

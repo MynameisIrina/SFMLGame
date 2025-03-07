@@ -18,10 +18,10 @@ void Obstacle::Initialize(const sf::Sprite& sprite, const sf::Vector2f& startPos
 
     boundingBox = Utilities::CreateBoundingBox(this->sprite, position);
 
-    boundingBox.setSize(sf::Vector2f(boundingBox.getSize().x * 0.7f, boundingBox.getSize().y * 0.7f));
+    boundingBox.setSize(sf::Vector2f(boundingBox.getSize().x * boundingBoxScaleFactor, boundingBox.getSize().y * boundingBoxScaleFactor));
 
     // Adjust vertical position to account for bounding box height
-    this->position.y += boundingBox.getGlobalBounds().height * 0.8f;
+    this->position.y += boundingBox.getGlobalBounds().height * verticalOffsetFactor;
 
     CreateVisualLine(minX, maxX, position.y , position.y);
     
@@ -45,7 +45,7 @@ void Obstacle::MoveObstacle(float dt)
 void Obstacle::UpdateTexture()
 {
     sprite.setPosition(position);
-    boundingBox.setPosition(position.x + boundingBox.getSize().x * 0.25f, position.y + boundingBox.getSize().y * 0.25f);
+    boundingBox.setPosition(position.x + boundingBox.getSize().x * boundingBoxOffsetFactor, position.y + boundingBox.getSize().y * boundingBoxOffsetFactor);
     sprite.setRotation(rotation);
 }
 
@@ -73,6 +73,5 @@ void Obstacle::CreateVisualLine(const float minX, const float maxX, const float 
 void Obstacle::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
 {
     window->draw(sprite);
-    //window->draw(boundingBox);
     window->draw(line, 2, sf::Lines);
 }

@@ -1,7 +1,6 @@
 #pragma once
-#include <SFML/Graphics.hpp> // Needed for sf::Sprite, Vector2f, etc. in the interface
-#include <memory>  // Needed for shared_ptr/unique_ptr in the interface
-#include "RayCast.h"
+#include <SFML/Graphics.hpp>
+#include <memory> 
 
 class Enemy;
 class RespawnManager;
@@ -31,7 +30,8 @@ public:
     enum class PlayerCondition
     {
         Normal,
-        Protected
+        Protected,
+        Dead
     };
 
     enum State
@@ -96,17 +96,16 @@ private:
     int projectilesCount = 0;
     int maxProjectileCount = 0;
     float projectileAccumulatedTime = 0.f;
-    float projectileResetDelay = 3.f;
-    const float projectileResetInterval = 3.0f;
+    const float projectileResetDelay = 2.f;
     const float projectileOffsetX = 20.f;
     const float projectileVelocity = 500.f;
 
     // Collision
-    RayCast::Ray ray{sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)};
     sf::RectangleShape boundingBoxPlayer;
     bool collisionGround = false;
     bool collisionSide = false;
     bool collisionTop = false;
+    const float maxOverlap = -4.f;
 
     // Health
     int health = 0;
@@ -127,6 +126,7 @@ private:
     const float loseLifeDelay = 2.0f;
     const int tileSize = 32;
     const sf::Color normalColor = sf::Color(255,255,255);
+    const float leftBoundaryOffset = 27.f;
 
 
 public:
@@ -140,6 +140,7 @@ public:
     // Update
     void Update(const std::shared_ptr<RespawnManager>& respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight,const bool moveLeft, const bool shoot, const bool respawn, const bool exchangeCoins, const float dt, const std::vector<sf::RectangleShape> &tilesShapes, std::vector<sf::RectangleShape>& enemiesShapes, std::vector<sf::RectangleShape>& flyingEnemiesShapes, std::vector<sf::RectangleShape>& obstaclesShapes);
     void UpdateView(const bool moveRight, const bool moveLeft);
+    void UpdateRebirthView();
 
     // Movement
     void HandleFalling();
@@ -171,7 +172,7 @@ public:
     void ResetAnimation(const int animYIndex);
     void HandleBlinking();
     void StartBlinking();
-    void HandleRebirthAnimation();
+    void HandleRebirthAnimation(const float dt);
     void HandleMovementAnimation();
     void HandleRespawn();
 
@@ -180,6 +181,7 @@ public:
     void DecreaseHealth(); 
     bool IsPlayerProtected();
     void LoseLife();
+    //void Die();
 
     //Getters
     sf::Vector2f GetPosition() const;

@@ -21,8 +21,8 @@ void CoinBar::Initialize(const std::shared_ptr<Player> &player, const std::share
     coinText.setFont(font);
     coinText.setCharacterSize(24);
     coinText.setFillColor(sf::Color::Black);
-    coinText.setString("0");
-    coinText.setPosition(position.x + 30, position.y);
+    coinText.setString(initialValue);
+    coinText.setPosition(position.x + textOffsetX, position.y);
 }
 
 void CoinBar::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera)
@@ -37,7 +37,7 @@ void CoinBar::Update(const std::shared_ptr<Player> &player, const std::shared_pt
 void CoinBar::UpdateView()
 {
     sprite.setPosition(position);
-    coinText.setPosition(position.x + 30, position.y);
+    coinText.setPosition(position.x + textOffsetX, position.y);
     coinText.setString(std::to_string(coins));
 }
 

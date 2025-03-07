@@ -8,6 +8,13 @@ class Arrow
 {
 
 public:
+
+    enum Direction
+    {
+        Left = -1,
+        Right = 1
+    };
+
     Arrow(const sf::Sprite& sprite);
     void Update(const std::shared_ptr<Player>& player,const std::shared_ptr<Camera>& camera, const float dt);
     sf::RectangleShape GetBoundingBox() const;
@@ -19,8 +26,8 @@ public:
     sf::Sprite sprite;
     bool isActive = false;
     sf::Vector2f position{0.f,0.f};
-    float velocity = 0;
-    float direction = 0;
+    int velocity = 0;
+    Direction direction = Direction::Left;
     bool recentlyDeactivated = false;
     sf::RectangleShape boundingBox;
 

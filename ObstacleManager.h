@@ -11,10 +11,11 @@ private:
     std::vector<std::unique_ptr<Obstacle>> obstacles;
     sf::Sprite sprite;
     std::shared_ptr<TextureLoader> txLoader;
-    const int minSpeed = 45;
-    const int maxSpeed = 60;
-    const int speed = 50;
-    const int obstacleProbability = 10;
+    const int minSpeed = 60;
+    const int maxSpeed = 80;
+    const int obstacleProbability = 6;
+    const int speedStep = 10;
+    const float offsetY = 30.f;
     std::vector<sf::CircleShape> circles;
 
 public:

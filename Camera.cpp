@@ -8,8 +8,8 @@ void Camera::Initialize()
     auto windowSize = window->getSize();
     view.setSize(windowSize.x, windowSize.y);
     view.setCenter(windowSize.x * 0.5f, windowSize.y * 0.5f);
-    topBound = 40.f;
-    bottomBound = windowSize.y - 40.f;
+    topBound = topBoundOffset;
+    bottomBound = windowSize.y - bottomBoundOffset;
 }
 
 void Camera::Update(const std::shared_ptr<Player> &player, const float dt)
@@ -26,7 +26,7 @@ void Camera::Update(const std::shared_ptr<Player> &player, const float dt)
 
     // Smooth interpolation
     float currentX = view.getCenter().x;
-    float newX = currentX + (targetX - currentX) * 5.0f * dt;
+    float newX = currentX + (targetX - currentX) * cameraSmoothingFactor * dt;
     view.setCenter(newX, view.getSize().y * 0.5f);
     window->setView(view);
 

@@ -29,8 +29,9 @@ private:
     const float offsetX = 210.f;
     const float offsetY = 25.f;
     const float scale = 2;
-    int currentHealth;
-
+    int currentHealth = 0;
+    int heartSpriteSize = 32;
+    const float pulseInterval = 0.5f;
     sf::Clock animationTimer;
     float pulseDuration = 3.f;
     bool pulsing = false;

@@ -29,7 +29,7 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
     if (y - 1 < 0 || y + 1 >= maxY || x + 1 >= maxX || x - 1 < 0 || x + 2 >= maxX || x - 2 < 0)
         return false;
     
-    if (rand() % 4 != 0)
+    if (rand() % spawnEnemyProbability == 0)
         return false;
 
     const auto &currentRow = grid[y];
@@ -52,13 +52,13 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
 void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int tileSize, const int x, const int y)
 {
     const float globalTileX = grid[y+1][x].GetGlobalPosition().x + (tileSize * 0.5f);
-    const float globalTileY = grid[y+1][x].GetGlobalPosition().y - 27.f;
+    const float globalTileY = grid[y+1][x].GetGlobalPosition().y - offsetY;
 
     grid[y][x] = Tile(Tile::Enemy, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
 
-    std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>(std::make_unique<ArrowPool>(txLoader, 10), audioManager);
+    std::unique_ptr<Enemy> enemyArrow = std::make_unique<EnemyArrow>(std::make_unique<ArrowPool>(txLoader, arrowEnemyArrowPool), audioManager);
     sf::Vector2f position{globalTileX, globalTileY};
-    enemyArrow->Initialize(enemySprite, position, 40, 10);
+    enemyArrow->Initialize(enemySprite, position, arrowEnemyHealth, arrowEnemyDamage);
     enemies.push_back(std::move(enemyArrow));
 }
 
@@ -210,7 +210,7 @@ void EnemyManager::SpawnFlyingEnemy(const std::shared_ptr<Player> &player, const
         sf::Vector2f spawnPosition{spawnX, spawnY};
 
         std::unique_ptr<Enemy> eagle = std::make_unique<Eagle>(audioManager);
-        eagle->Initialize(eagleSprite, spawnPosition, 10, 5);
+        eagle->Initialize(eagleSprite, spawnPosition, eagleEnemyHealth, eagleEnemyDamage);
 
         if (auto *eaglePtr = dynamic_cast<Eagle *>(eagle.get()))
         {

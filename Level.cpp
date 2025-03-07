@@ -16,7 +16,6 @@ void Level::Initialize(const int firstPlatformHeight)
 
     const int initialWidthPattern = GenerateDefaultTiles();
     GenerateLevel(initialWidthPattern);
-    ShowGrid();
 }
 
 int Level::GenerateDefaultTiles()
@@ -44,14 +43,11 @@ void Level::GenerateLevel(const int startX)
 {
     const int numPatterns = patterns.size();
     const int minPlatformHeight = LevelBounds::minY;
-    int maxPlatformHeight = gridHeight - 3;
-
+    int maxPlatformHeight = gridHeight - bottomBuffer;
     for (const auto &pattern : patterns)
     {
         maxPlatformHeight = std::min(maxPlatformHeight, static_cast<int>(gridHeight - pattern.size()));
     }
-
-    const int maxPlatformGap = 2;
 
     int currentY = prevYFromLevelGen;
     int previousY = prevYFromLevelGen;
@@ -60,25 +56,23 @@ void Level::GenerateLevel(const int startX)
 
     int renderOffset = furthestTileX_totalGrid + tileSize;
 
-    for (int x = startX; x < gridWidth + bufferColumns; x += patternWidth)
+    int currentX = startX;
+    while (currentX < gridWidth + bufferColumns)
     {
         const int patternIndex = rand() % numPatterns;
         patternWidth = patterns[patternIndex][0].size();
         patternHeight = patterns[patternIndex].size();
 
-        // // cut the width if it exceeds agrid bound
-        bool widthExceedsGridBounds = x + patternWidth > gridWidth + bufferColumns;
-        if (widthExceedsGridBounds) continue;
+        if (currentX + patternWidth > gridWidth + bufferColumns)
+            break;
 
         previousY = currentY;
-
-        // Generate a random platform height
         currentY = rand() % maxPlatformHeight;
-
-        // Prevent excessive height gaps between platforms
         currentY = AdjustPlatformHeight(previousY, currentY, maxPlatformGap, minPlatformHeight, maxPlatformHeight);
 
-        PlacePattern(patternIndex, patternHeight, patternWidth, x, currentY);
+        PlacePattern(patternIndex, patternHeight, patternWidth, currentX, currentY);
+
+        currentX += patternWidth;
     }
 
     prevYFromLevelGen = currentY;
@@ -156,7 +150,7 @@ void Level::UpdateLevel(const std::shared_ptr<Player> &player, const std::shared
     if (shouldGenerateNewTiles && playerHasReturned)
     {
         shiftCounter = 0;
-        GenerateLevel(nextGridColumn);
+        GenerateLevel(gridWidth);
     }
 
     obstacleManager->UpdateObstacles(dt);
@@ -250,7 +244,6 @@ void Level::ShiftGridLeft()
 
         shiftCounter++;
         hasShifted = true;
-        //ShowGrid();
     }
 }
 
@@ -280,6 +273,8 @@ std::vector<sf::RectangleShape> &Level::GetAllTiles()
 
     return allTiles;
 }
+
+
 
 void Level::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
 {

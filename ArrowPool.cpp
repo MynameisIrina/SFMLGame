@@ -62,6 +62,6 @@ void ArrowPool::ResetArrow(std::unique_ptr<Arrow> &arrow)
     arrow->recentlyDeactivated = false;
     arrow->sprite.setPosition(0, 0);
     arrow->boundingBox.setPosition(0, 0);
-    arrow->direction = 0;
+    arrow->direction = Arrow::Direction::Left;
     arrow->velocity = 0;
 }

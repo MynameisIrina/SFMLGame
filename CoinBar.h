@@ -24,4 +24,6 @@ private:
     sf::Font font;
     const float offsetX = 200.f;
     const float offsetY = 40.f;
+    const float textOffsetX = 30.f;
+    const std::string initialValue = "0";
 };

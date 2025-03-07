@@ -5,6 +5,7 @@
 int main()
 {
     GameManager gameManager;
+    gameManager.InitializeWindow();
     gameManager.InitializeGame();
     gameManager.Run();
     return 0;

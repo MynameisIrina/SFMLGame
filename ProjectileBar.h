@@ -41,7 +41,7 @@ private:
     const sf::Color blinkingColor = sf::Color(50,50,50, 255);
     int maxProjectiles;
     sf::Clock reloadTimer;
-    const float reloadTime = 3.f;
+    const float reloadTime = 2.f;
     float currentVisualAmount = 0.f;
     bool isResetting = true;
 };

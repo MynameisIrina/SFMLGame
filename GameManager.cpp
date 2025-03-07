@@ -1,12 +1,22 @@
 #include "GameManager.h"
 
+void GameManager::InitializeWindow()
+{
+    sf::ContextSettings settings;
+    settings.antialiasingLevel = 8;
+    window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "sf::Cat", sf::Style::Close, settings);
+}
+
+void GameManager::InitializeAudio()
+{
+    audioManager = std::make_shared<AudioManager>();
+    audioManager->LoadSound("coinCollected", "Assets/Audio/sounds/coin.wav");
+    audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
+    audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
+}
+
 void GameManager::InitializeGame()
 {
-     sf::ContextSettings settings;
-    settings.antialiasingLevel = 8;
-
-    window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "sf::Cat", sf::Style::Close, settings);
-
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     sf::Clock timer;
     deltaTime = 0.0f;
@@ -15,12 +25,8 @@ void GameManager::InitializeGame()
     txLoader = std::make_shared<TextureLoader>();
     txLoader->Initialize();
 
-    audioManager = std::make_shared<AudioManager>();
-    audioManager->LoadSound("coinCollected", "Assets/Audio/sounds/coin.wav");
-    audioManager->LoadSound("jump", "Assets/Audio/sounds/jump.wav");
-    audioManager->LoadSound("kill enemy", "Assets/Audio/sounds/explosion.wav");
-
-     audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
+    InitializeAudio();
+    audioManager->PlayMusic("Assets/Audio/sounds/time_for_adventure.mp3", 100);
 
     projectilePool = std::make_unique<ProjectilePool>(txLoader, 10);
 
@@ -61,7 +67,7 @@ void GameManager::Run()
     while (window->isOpen())
     {
         deltaTime = timer.restart().asSeconds();
-        
+
         if (state == GameState::MENU)
         {
             savedView = window->getView();
@@ -94,10 +100,9 @@ void GameManager::Run()
         Render();
     }
 }
-
 void GameManager::RestartGame()
 {
-   InitializeGame();
+    InitializeGame();
 }
 
 void GameManager::ProcessEvents()
@@ -117,9 +122,7 @@ void GameManager::Update(const float dt)
     if (ShouldEnterMenuState(input))
         return;
 
-
     auto boundingBoxes = CollectBoundingBoxes();
-    
 
     background->GenerateNewSprite(player);
 
@@ -159,14 +162,10 @@ void GameManager::Render()
     }
     else if (state == GameState::RUNNING)
     {
-
         window->clear();
-
         background->Draw(window);
-
         level->Draw(window);
         player->Draw(window);
-
         healthBar->Draw(window);
         coinBar->Draw(window);
         projectileBar->Draw(window);
@@ -190,7 +189,7 @@ bool GameManager::ShouldEnterMenuState(GameManager::PlayerInput input)
 {
     if (input.paused)
     {
-        state = GameState::WIN;
+        state = GameState::MENU;
         return true;
     }
 

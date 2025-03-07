@@ -30,4 +30,7 @@ private:
     float maxX;
     float minX;
     sf::Vertex line[2];
+    const float boundingBoxScaleFactor = 0.7f;
+    const float verticalOffsetFactor = 0.8f;
+    const float boundingBoxOffsetFactor = 0.25f;
 };

@@ -34,7 +34,8 @@ void HealthBar::Update(const std::shared_ptr<Player> &player, const std::shared_
     const int previousHealth = currentHealth;
     currentHealth = player->GetHealth();
 
-    bool healthIncreased = previousHealth < currentHealth;
+    //std::cout << player->IfStateActive(Player::State::Respawning) << std::endl;
+    bool healthIncreased = previousHealth < currentHealth && !player->IsInRebirth();
     if (healthIncreased)
     {
         hearts[currentHealth - 1].shouldPulse = true;
@@ -45,7 +46,7 @@ void HealthBar::Update(const std::shared_ptr<Player> &player, const std::shared_
     // update visibility of hearts
     for (int i = 0; i < hearts.size(); i++)
     {
-        const sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX + (i * 32), offsetY);
+        const sf::Vector2f position = sf::Vector2f(camera->GetView().getCenter().x + offsetX + (i * heartSpriteSize), offsetY);
         hearts[i].position = position;
 
         if (i < currentHealth)
@@ -75,7 +76,7 @@ void HealthBar::UpdateView()
 
 void HealthBar::HandlePulseAnimation(const std::shared_ptr<Player> &player)
 {
-    if (!animationActive || player->IfStateActive(Player::State::Respawning))
+    if (!animationActive)
         return;
 
     if (animationTimer.getElapsedTime().asSeconds() >= pulseDuration)
@@ -93,8 +94,7 @@ void HealthBar::HandlePulseAnimation(const std::shared_ptr<Player> &player)
         return;
     }
 
-    bool timeHasPassed = animationTimer.getElapsedTime().asSeconds() - lastPulseTime >= 0.5f;
-    if (timeHasPassed)
+    bool timeHasPassed = animationTimer.getElapsedTime().asSeconds() - lastPulseTime >= pulseInterval;
     {
         for (int i = 0; i < hearts.size(); i++)
         {

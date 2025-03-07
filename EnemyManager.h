@@ -2,6 +2,7 @@
 #include "Enemy.h"
 #include "EnemyArrow.h"
 #include "TextureLoader.h"
+#include "Tile.h"
 
 class EnemyManager {
 public:
@@ -27,8 +28,16 @@ private:
 
     sf::Sprite enemySprite;
     sf::Sprite eagleSprite;
-    const float offsetY = 12;
+    const float offsetY = 27.f;
     float flyingEnemySpawnTimer = 0.0f;
     float flyingEnemySpawnCooldown = 25.0f; 
+    const int spawnEnemyProbability = 4;
+
+    const int arrowEnemyHealth = 40;
+    const int arrowEnemyDamage = 10;
+    const int arrowEnemyArrowPool = 10;
+
+    const int eagleEnemyHealth = 10;
+    const int eagleEnemyDamage = 5;
 
 };

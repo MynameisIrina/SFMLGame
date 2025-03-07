@@ -11,7 +11,9 @@ private:
     std::shared_ptr<sf::RenderWindow> window;
     float topBound = 0;
     float bottomBound = 0;
-
+    const float topBoundOffset = 40.f;
+    const float bottomBoundOffset = 40.f;
+    const float cameraSmoothingFactor = 5.0f;
 
 public:
     Camera(const std::shared_ptr<sf::RenderWindow>& window);
