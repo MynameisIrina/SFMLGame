@@ -8,9 +8,9 @@
 #include "ArrowPool.h"
 #include "AudioManager.h"
 
-EnemyArrow::EnemyArrow(std::unique_ptr<ArrowPool> arrowPool, const std::shared_ptr<AudioManager>& audioManager) : arrowPool(std::move(arrowPool)), Enemy(audioManager){}
+EnemyArrow::EnemyArrow(std::unique_ptr<ArrowPool> arrowPool, const std::shared_ptr<AudioManager> &audioManager) : arrowPool(std::move(arrowPool)), Enemy(audioManager) {}
 
-void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f& position, const int health, const int damage)
+void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f &position, const int health, const int damage)
 {
     this->sprite = sprite;
     this->position = position;
@@ -26,7 +26,6 @@ void EnemyArrow::Initialize(const sf::Sprite &sprite, const sf::Vector2f& positi
 
     boundingBox = Utilities::CreateBoundingBox(this->sprite, this->position);
     initialBoundingBox = boundingBox;
-    
 }
 
 void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera, const float dt)
@@ -44,10 +43,11 @@ void EnemyArrow::Update(const std::shared_ptr<Player> &player, const std::shared
 
 void EnemyArrow::UpdateAnimation(const float dt)
 {
-    if (state == State::Dead) return;
+    if (state == State::Dead)
+        return;
 
     animationTimer += dt;
-    
+
     if (animationTimer >= animationInterval)
     {
         if (currentAnim >= maxFrames)
@@ -64,29 +64,33 @@ void EnemyArrow::UpdateAnimation(const float dt)
 
 void EnemyArrow::UpdateView()
 {
-    if (state == State::Dead) return;
+    if (state == State::Dead)
+        return;
 
-    sprite.setTextureRect(sf::IntRect(currentAnim * frameSize, 0, frameSize, frameSize));
+    sprite.setTextureRect(sf::IntRect(currentAnim * frameSize, 0, TextureLoader::rectWidthEnemy, TextureLoader::rectHeightEnemy));
     sprite.setPosition(position);
     boundingBox.setPosition(position);
 }
 
-void EnemyArrow::HandleShooting(const std::shared_ptr<Camera>& camera)
+void EnemyArrow::HandleShooting(const std::shared_ptr<Camera> &camera)
 {
-    if (state == State::Dead) return;
+    if (state == State::Dead)
+        return;
 
     const bool enemyWithinCamera = camera->CalculateRightBound() >= (position.x - boundingBox.getSize().x * 0.5f) && camera->CalculateLeftBound() <= (position.x + boundingBox.getSize().x * 0.5f);
 
     if (enemyWithinCamera && !isShooting && (currentAnim == shootingFrame))
     {
         isShooting = true;
+        counter++;
         ShootArrow(camera);
     }
 }
 
 void EnemyArrow::HandleRotation(const std::shared_ptr<Player> &player)
 {
-    if (state == State::Dead) return;
+    if (state == State::Dead)
+        return;
 
     if (player->GetPosition().x > position.x)
     {
@@ -100,7 +104,8 @@ void EnemyArrow::HandleRotation(const std::shared_ptr<Player> &player)
 
 void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
 {
-    if (state == State::Dead) return;
+    if (state == State::Dead)
+        return;
 
     const auto &activeProjectiles = player->GetActiveProjectiles();
     const auto &enemyBounds = boundingBox.getGlobalBounds();
@@ -121,21 +126,21 @@ void EnemyArrow::HandleCollision(const std::shared_ptr<Player> &player)
     }
 }
 
-void EnemyArrow::HandleDeath(const std::shared_ptr<CollectibleManager>& collectibleManager)
+void EnemyArrow::HandleDeath(const std::shared_ptr<CollectibleManager> &collectibleManager)
 {
-    if (state != State::Dead || handledDeath) {
+    if (state != State::Dead || handledDeath)
+    {
         return;
     }
 
     handledDeath = true;
     boundingBox = sf::RectangleShape();
-    
+
     auto collectible = collectibleManager->CreateCoin(position);
     collectibleManager->AddCollectible(std::move(collectible));
-    
+
     audioManager->PlaySound("kill enemy");
 }
-
 
 Enemy::State EnemyArrow::GetState()
 {
@@ -152,7 +157,7 @@ void EnemyArrow::HandleFlyingArrows(const std::shared_ptr<Player> &player, const
     arrowPool->Update(player, camera, dt);
 }
 
-void EnemyArrow::ShootArrow(const std::shared_ptr<Camera>& camera)
+void EnemyArrow::ShootArrow(const std::shared_ptr<Camera> &camera)
 {
     Arrow *arrow = arrowPool->GetArrow();
 
@@ -162,12 +167,13 @@ void EnemyArrow::ShootArrow(const std::shared_ptr<Camera>& camera)
         const float xOffset = facingLeft ? -shootingOffset : shootingOffset;
         arrow->position = sf::Vector2f(position.x + xOffset, position.y);
         arrow->sprite.setScale(facingLeft ? -std::abs(arrow->sprite.getScale().x) : std::abs(arrow->sprite.getScale().x), arrow->sprite.getScale().y);
-        int randomVelocity = 180 + (std::rand() % (300 - 180 + 1));        arrow->velocity = randomVelocity;
+        int randomVelocity = 180 + (std::rand() % (300 - 180 + 1));
+        arrow->velocity = randomVelocity;
         arrow->direction = facingLeft ? -1.0f : 1.0f;
     }
 }
 
-void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
+void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow> &window) const
 {
     arrowPool->Draw(window);
 
@@ -175,4 +181,5 @@ void EnemyArrow::Draw(const std::shared_ptr<sf::RenderWindow>& window) const
         return;
 
     Enemy::Draw(window);
+    window->draw(boundingBox);
 }

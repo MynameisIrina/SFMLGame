@@ -1,5 +1,6 @@
 #include "ArrowPool.h"
 #include "TextureLoader.h"
+#include <iostream>
 
 ArrowPool::ArrowPool(const std::shared_ptr<TextureLoader> &txLoader, int size)
 {
@@ -17,6 +18,7 @@ Arrow *ArrowPool::GetArrow()
     {
         if (!arrow->isActive && !arrow->recentlyDeactivated)
         {
+
             ResetArrow(arrow);
             arrow->isActive = true;
             return arrow.get();
@@ -59,6 +61,7 @@ void ArrowPool::ResetArrow(std::unique_ptr<Arrow> &arrow)
     arrow->isActive = false;
     arrow->recentlyDeactivated = false;
     arrow->sprite.setPosition(0, 0);
+    arrow->boundingBox.setPosition(0, 0);
     arrow->direction = 0;
     arrow->velocity = 0;
 }

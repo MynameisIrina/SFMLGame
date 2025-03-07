@@ -52,7 +52,7 @@ bool EnemyManager::CanPlaceEnemy(const std::vector<std::vector<Tile>> &grid, con
 void EnemyManager::PlaceEnemy(std::vector<std::vector<Tile>> &grid, const int tileSize, const int x, const int y)
 {
     const float globalTileX = grid[y+1][x].GetGlobalPosition().x + (tileSize * 0.5f);
-    const float globalTileY = grid[y+1][x].GetGlobalPosition().y - 30.f;
+    const float globalTileY = grid[y+1][x].GetGlobalPosition().y - 27.f;
 
     grid[y][x] = Tile(Tile::Enemy, sf::Vector2f(globalTileX, globalTileY), sf::RectangleShape());
 

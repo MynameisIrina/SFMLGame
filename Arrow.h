@@ -14,7 +14,7 @@ public:
     void HandleMovement(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera>& camera, const float dt);
     void UpdateView();
     bool IsArrowActive();
-    void Reset();
+    void HandleCollision(const std::shared_ptr<Player>& player, const std::shared_ptr<Camera> &camera);
     
     sf::Sprite sprite;
     bool isActive = false;
@@ -22,7 +22,6 @@ public:
     float velocity = 0;
     float direction = 0;
     bool recentlyDeactivated = false;
-
-private:
     sf::RectangleShape boundingBox;
+
 };

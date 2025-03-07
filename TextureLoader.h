@@ -67,7 +67,7 @@ public:
     static const int rectHeightPlayer = 16;
     static const int rectWidthHealthBar = 16;
     static const int rectHeightHealthBar = 16;
-    static const int rectWidthEnemy = 124;
+    static const int rectWidthEnemy = 125;
     static const int rectHeightEnemy = 128;
     static const int rectWidthArrow = 16;
     static const int rectHeightArrow = 10;

@@ -75,9 +75,13 @@ void HealthBar::UpdateView()
 
 void HealthBar::HandlePulseAnimation(const std::shared_ptr<Player> &player)
 {
-    if (!animationActive || animationTimer.getElapsedTime().asSeconds() >= pulseDuration || player->IfStateActive(Player::State::Blinking))
+    if (!animationActive || player->IfStateActive(Player::State::Respawning))
+        return;
+
+    if (animationTimer.getElapsedTime().asSeconds() >= pulseDuration)
     {
         animationActive = false;
+        lastPulseTime = 0.f;
         for (int i = 0; i < hearts.size(); i++)
         {
             if (hearts[i].shouldPulse)
@@ -89,7 +93,7 @@ void HealthBar::HandlePulseAnimation(const std::shared_ptr<Player> &player)
         return;
     }
 
-    bool timeHasPassed = animationTimer.getElapsedTime().asSeconds() - lastPulseTime > 0.5f;
+    bool timeHasPassed = animationTimer.getElapsedTime().asSeconds() - lastPulseTime >= 0.5f;
     if (timeHasPassed)
     {
         for (int i = 0; i < hearts.size(); i++)

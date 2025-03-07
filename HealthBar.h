@@ -32,7 +32,7 @@ private:
     int currentHealth;
 
     sf::Clock animationTimer;
-    float pulseDuration = 5.f;
+    float pulseDuration = 3.f;
     bool pulsing = false;
     bool animationActive = false;
     float lastPulseTime = 0.f;

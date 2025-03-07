@@ -35,4 +35,6 @@ private:
     float rotation = 0.f;
     const float scale = 0.45f;
     bool isShooting = false;
+
+    int counter = 0;
 };

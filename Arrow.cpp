@@ -17,25 +17,10 @@ void Arrow::Update(const std::shared_ptr<Player> &player, const std::shared_ptr<
     if (!IsArrowActive())
         return;
 
-
     position.x += velocity * direction * dt;
-
-    const bool outOfCameraBounds = position.x < camera->CalculateLeftBound() || position.x > camera->CalculateRightBound();
-    const bool collisionWithPlayer = Math::CheckRectCollision(player->GetBoundingBox().getGlobalBounds(), boundingBox.getGlobalBounds());
-
-    if (outOfCameraBounds || collisionWithPlayer)
-    {
-        isActive = false;
-        recentlyDeactivated = true;
-
-        if (collisionWithPlayer)
-        {
-            player->StartBlinking();
-            player->DecreaseHealth();
-        }
-    }
-
     UpdateView();
+
+    HandleCollision(player,camera);
 }
 
 sf::RectangleShape Arrow::GetBoundingBox() const
@@ -62,4 +47,23 @@ bool Arrow::IsArrowActive()
     }
 
     return true;
+}
+
+void Arrow::HandleCollision(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera)
+{
+
+    const bool outOfCameraBounds = position.x < camera->CalculateLeftBound() || position.x > camera->CalculateRightBound();
+    const bool collisionWithPlayer = Math::CheckRectCollision(player->GetBoundingBox().getGlobalBounds(), boundingBox.getGlobalBounds());
+
+    if (outOfCameraBounds || collisionWithPlayer)
+    {
+        isActive = false;
+        recentlyDeactivated = true;
+
+        if (collisionWithPlayer)
+        {
+            player->StartBlinking();
+            player->DecreaseHealth();
+        }
+    }
 }

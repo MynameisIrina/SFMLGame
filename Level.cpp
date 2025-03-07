@@ -250,7 +250,7 @@ void Level::ShiftGridLeft()
 
         shiftCounter++;
         hasShifted = true;
-        ShowGrid();
+        //ShowGrid();
     }
 }
 
