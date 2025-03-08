@@ -1,18 +1,27 @@
 # sf::Cat
-2D Platformer Game Developed in C++ using SFML
 
-## Current State of the Project
-This project is still in active development. Here's what has been implemented so far:
+## Overview
 
-Procedural Level Generation: Levels are generated randomly, providing a unique experience each time the game is played.
+**sf::Cat** is a 2D platformer developed in C++ using SFML. The game follows the journey of a stray cat trying to survive in a challenging world. Players navigate procedurally generated levels, avoid dangers such as dogs and traps, and collect food to sustain the cat. With simple yet engaging mechanics, the game highlights the struggles and resilience of a small cat in a big, unfriendly world.
 
-Player Movement: Basic platforming mechanics for running and jumping
+## Features
 
-Collision Detection: Part of collision detection is implemented, ensuring the cat interacts correctly with the environment. This includes platform collisions, as well as collisions with obstacles.
+Procedural Level Generation: Levels are dynamically generated to ensure a unique experience each playthrough.
+
+Player Movement Mechanics: Implemented smooth running and jumping mechanics.
+
+Obstacle and Enemy Placement: Randomized enemy and obstacle distribution for increased challenge.
+
+Collision Detection: Robust system handling player-environment and player-enemy interactions.
+
+Respawn System: Restart the player at a specific location after death.
+
+User Interface Elements: Health bars, score displays, and menus for better user interaction.
+
+Dynamic Audio: Integrated background music, sound effects, and character actions.
 
 ## How to Run the Game
 Prerequisites: C++ Compiler and SFML 2.6.1. Follow the SFML installation guide to set it up on your system. [Link to SFML Tutorials](https://www.sfml-dev.org/tutorials/2.6/)
-
 
 
 **Steps to Build and Run**
