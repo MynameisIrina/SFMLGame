@@ -34,8 +34,8 @@ void Player::Initialize(const sf::Vector2f &position, const int maxHealth, const
     sprite.setScale(scale, scale);
 
     boundingBoxPlayer = Utilities::CreateBoundingBox(sprite, position);
-    boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - boundingBoxOffsetX, sprite.getGlobalBounds().height));
-    boundingBoxPlayer.setOrigin(boundingBoxPlayer.getSize().x * 0.5f, boundingBoxPlayer.getSize().y * 0.5f);
+    boundingBoxPlayer.setSize(sf::Vector2f(sprite.getGlobalBounds().width - boundingBoxResizeX, sprite.getGlobalBounds().height - boundingBoxResizeY));
+    boundingBoxPlayer.setOrigin(boundingBoxPlayer.getSize().x * 0.5f, 0);
 }
 
 void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const std::shared_ptr<Camera> &camera, const bool moveRight, const bool moveLeft, const bool shoot, const bool respawn,
@@ -43,11 +43,13 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
                     std::vector<sf::RectangleShape> &obstaclesShapes)
 {
 
-    CalculateCurrentAnimation(dt);
+
+    UpdateAllTimers(dt);
 
     if (IsInRebirth())
     {
         UpdateRebirthView();
+        HandleRebirthAnimation();
         return;
     }
 
@@ -75,18 +77,14 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
         isShooting = false;
     }
 
+    HandleMovementAnimation();
+    HandleVerticalMovement(dt);
     UpdateView(moveRight, moveLeft);
-
-    if (!IsInRebirth())
-    {
-        HandleVerticalMovement(dt);
-        CheckCollisionGround(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
-        HandleFalling();
-        HandleBlinking();
-        projectilePool->Update(camera, dt);
-        HandleProjectileReset(dt);
-        HandleCoinLifeExchange(exchangeCoins);
-    }
+    CheckCollisionGround(tilesShapes, enemiesShapes, flyingEnemiesShapes, obstaclesShapes);
+    HandleBlinking();
+    projectilePool->Update(camera, dt);
+    HandleProjectileReset(dt);
+    HandleCoinLifeExchange(exchangeCoins);
 }
 
 void Player::InputToState(bool moveRight, bool moveLeft, bool shoot, bool respawn)
@@ -112,9 +110,6 @@ void Player::InputToState(bool moveRight, bool moveLeft, bool shoot, bool respaw
 
 void Player::HandleFalling()
 {
-    if (IsPlayerProtected() || position.y < positionThresholdY)
-        return;
-
     DecreaseHealth();
     SetState(State::Respawning);
     loseLifeCooldown.restart();
@@ -160,6 +155,11 @@ void Player::HandleVerticalMovement(float dt)
     }
 
     position.y += velocity.y * dt;
+
+    if (IsFalling())
+    {
+        HandleFalling();
+    }
 }
 
 void Player::HandleBlinking()
@@ -214,7 +214,10 @@ void Player::HandleShooting(const bool shoot, const float dt)
         if (projectile != nullptr)
         {
             const Direction direction = CalculateDirection();
-            projectile->position = (direction == Direction::Right) ? sf::Vector2f(position.x + projectileOffsetX, position.y) : sf::Vector2f(position.x - projectileOffsetX, position.y);
+            const sf::Vector2f boundingBoxPosition = boundingBoxPlayer.getPosition();
+            const sf::Vector2f boundingBoxHalfSize = boundingBoxPlayer.getSize() * 0.5f;
+
+            projectile->position = (direction == Direction::Right) ? sf::Vector2f(boundingBoxPosition.x + boundingBoxHalfSize.x, boundingBoxPosition.y + boundingBoxHalfSize.y) : sf::Vector2f(boundingBoxPosition.x - boundingBoxHalfSize.x, boundingBoxPosition.y + boundingBoxHalfSize.y);
             projectile->velocity = (direction == Direction::Right) ? projectileVelocity : -projectileVelocity;
             isShooting = true;
             projectilesCount--;
@@ -236,71 +239,79 @@ Player::Direction Player::CalculateDirection()
     return isMovingRight ? Direction::Right : Direction::Left;
 }
 
-void Player::ResetAnimation(int animYIndex)
+bool Player::IsFalling()
 {
-    sprite.setTextureRect(sf::IntRect(TextureLoader::playerX + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+    return position.y > positionThresholdY;
 }
 
-void Player::HandleRebirthAnimation(const float dt)
+void Player::ResetAnimation()
 {
-    if (rebornAnimationTimer >= rebirth_animation_interval)
+    sprite.setTextureRect(sf::IntRect(TextureLoader::playerX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+}
+
+void Player::HandleRebirthAnimation()
+{
+    if (rebirthAnimationTimer >= rebirthAnimationInterval)
     {
-        currentAnim++;
-        rebornAnimationTimer = 0.0f;
+        currentRebirthAnim++;
+        rebirthAnimationTimer = 0.0f;
     }
 
-    if (currentAnim >= maxFrames)
+    if (currentRebirthAnim >= maxFrames)
     {
-        currentAnim = 0;
+        currentRebirthAnim = 0;
         isRespawnTimerRestarted = false;
     }
 }
 
 void Player::HandleMovementAnimation()
 {
-    if (animationTimer >= animationInterval)
+    if (movementAnimationTimer >= animationInterval)
     {
-        currentAnim += 1;
+        currentAnim++;
 
         // if the player stopped moving, reset its animation
         bool stopped = !IfStateActive(State::Moving);
-        if ((currentAnim >= maxFrames || stopped) && !IfStateActive(State::Jumping))
+        if ((currentAnim >= maxFrames || stopped))
         {
             currentAnim = 0;
-            ResetAnimation(AnimationPlayer::STOP_MOVING);
+            ResetAnimation();
         }
-        // if the player is jumping, play only one animation unit
-        else if (currentAnim >= maxFrames && IfStateActive(State::Jumping))
-        {
-            currentAnim = 0;
-            ResetAnimation(AnimationPlayer::STOPP_JUMPING);
-        }
-        animationTimer = 0.f;
+
+        movementAnimationTimer = 0.f;
     }
 }
 
 void Player::HandleGroundCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight)
 {
-    position.y = otherBounds.top - playerHalfHeight - boundingBoxOffsetY;
+    const float offset = 1.f;
+    position.y = otherBounds.top - playerHalfHeight - boundingBoxOffsetY + offset;
     collisionGround = true;
     ClearState(Player::State::Jumping);
 }
 
 void Player::HandleTopCollision(const sf::FloatRect &otherBounds, const float playerHalfHeight)
 {
-    position.y = (otherBounds.top + otherBounds.height) + playerHalfHeight;
+    const float offset = 1.f;
+    position.y = (otherBounds.top + otherBounds.height) + playerHalfHeight - offset;
     collisionTop = true;
 }
 
 void Player::HandleLeftCollision(const sf::FloatRect &otherBounds, const float playerHalfWidth)
 {
-    position.x = (otherBounds.left + otherBounds.width) + playerHalfWidth + 1.f;
+    Direction dir = CalculateDirection();
+    float offset = (dir == Direction::Right) ? -boundingBoxOffsetX : boundingBoxOffsetX;
+
+    position.x = (otherBounds.left + otherBounds.width) + playerHalfWidth + offset;
     collisionSide = true;
 }
 
 void Player::HandleRightCollision(const sf::FloatRect &otherBounds, const float playerHalfWidth)
 {
-    position.x = otherBounds.left - playerHalfWidth - 1.f;
+    Direction dir = CalculateDirection();
+    float offset = (dir == Direction::Right) ? -boundingBoxOffsetX : boundingBoxOffsetX;
+
+    position.x = otherBounds.left - playerHalfWidth + offset;
     collisionSide = true;
 }
 
@@ -333,14 +344,9 @@ bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const st
             return true;
         }
 
-        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= maxOverlap)
-        {
-            HandleTopCollision(tileBounds, playerHalfHeight);
-            return true;
-        }
-
         if (collisionInfo.overlapLeftSide <= 0.f && collisionInfo.overlapLeftSide >= maxOverlap)
         {
+
             HandleLeftCollision(tileBounds, playerHalfWidth);
             return true;
         }
@@ -350,8 +356,14 @@ bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const st
             HandleRightCollision(tileBounds, playerHalfWidth);
             return true;
         }
-    }
 
+        if (collisionInfo.overlapTop <= 0.f && collisionInfo.overlapTop >= maxOverlap)
+        {
+            HandleTopCollision(tileBounds, playerHalfHeight);
+            return true;
+        }
+    }
+    
     return false;
 }
 
@@ -484,7 +496,7 @@ void Player::CheckCollisionGround(const std::vector<sf::RectangleShape> &tiles, 
 
     const sf::FloatRect &playerBounds = boundingBoxPlayer.getGlobalBounds();
     const float playerHeight = playerBounds.getSize().y;
-    const float playerHalfHeight = playerHeight * 0.5f;
+    const float playerHalfHeight = playerHeight;
     const float playerWidth = playerBounds.getSize().x;
     const float playerHalfWidth = playerBounds.getSize().x * 0.5f;
 
@@ -508,21 +520,6 @@ void Player::Jump(const bool jump, const float dt)
     }
 }
 
-void Player::CalculateCurrentAnimation(const float dt)
-{
-    animationTimer += dt;
-    rebornAnimationTimer += dt;
-
-    if (IsInRebirth())
-    {
-        HandleRebirthAnimation(dt);
-    }
-    else
-    {
-        HandleMovementAnimation();
-    }
-}
-
 void Player::HandleRespawn()
 {
     if (position == respawnPos)
@@ -539,14 +536,21 @@ void Player::HandleRespawn()
 
     velocity.y = 0;
     sprite.setScale(scale, scale);
+    sprite.setPosition(respawnPos);
 
     ResetHealth();
     ResetCoins();
-    ResetProjectiles();
+    ResetProjectilesCount();
     ResetBlinking();
     projectilePool->Clear();
 
     ClearState(State::Respawning);
+}
+
+void Player::UpdateAllTimers(const float dt)
+{
+    rebirthAnimationTimer += dt;
+    movementAnimationTimer += dt;
 }
 
 void Player::UpdateView(bool moveRight, bool moveLeft)
@@ -554,23 +558,27 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     if (moveRight)
     {
         sprite.setScale(scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationCoordinates::tileSize, AnimationCoordinates::movingY * AnimationCoordinates::tileSize, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
     }
     else if (moveLeft)
     {
         sprite.setScale(-scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, TextureLoader::playerY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationCoordinates::tileSize, AnimationCoordinates::movingY * AnimationCoordinates::tileSize, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
     }
 
+    const Direction dir = CalculateDirection();
+    const float offsetX = (dir == Direction::Right) ? boundingBoxOffsetX : -boundingBoxOffsetX;
+    const float offsetY = boundingBoxOffsetY;
+
     sprite.setPosition(position);
-    boundingBoxPlayer.setPosition(position.x, position.y + boundingBoxOffsetY);
+    boundingBoxPlayer.setPosition(position.x + offsetX, position.y + offsetY);
 }
 
 void Player::UpdateRebirthView()
 {
-    sprite.setTextureRect(sf::IntRect(currentAnim * tileSize + TextureLoader::playerOffsetX, (AnimationPlayer::REBORN_Y * TextureLoader::rectHeightPlayer) - (31 - TextureLoader::rectHeightPlayer), TextureLoader::rectWidthPlayer, 31));
-    sprite.setPosition(position - sf::Vector2f(0, 4 * rebirthVerticaloffset));
-    boundingBoxPlayer.setPosition(position.x, position.y + rebirthVerticaloffset);
+    sprite.setTextureRect(sf::IntRect(currentRebirthAnim * tileSize, AnimationCoordinates::rebornY * tileSize, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+    sprite.setPosition(position);
+    boundingBoxPlayer.setPosition(position.x, position.y);
 }
 
 void Player::Draw(const std::shared_ptr<sf::RenderTarget> &rt) const
@@ -667,7 +675,7 @@ int Player::GetCoins() const
 
 bool Player::IsInRebirth() const
 {
-    return isRespawnTimerRestarted && respawnTimer.getElapsedTime().asSeconds() <= rebirth_animation_duration;
+    return isRespawnTimerRestarted && respawnTimer.getElapsedTime().asSeconds() <= rebirthAnimationDuration;
 }
 
 void Player::ResetHealth()
@@ -680,7 +688,7 @@ void Player::ResetCoins()
     coinsCollected = 0;
 }
 
-void Player::ResetProjectiles()
+void Player::ResetProjectilesCount()
 {
     projectilesCount = maxProjectileCount;
 }

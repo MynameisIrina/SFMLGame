@@ -83,6 +83,7 @@ private:
     std::unique_ptr<WinScreen> winScreen;
 
 
+
     std::unique_ptr<ProjectilePool> projectilePool;
     std::unique_ptr<Background> background;
 
@@ -95,10 +96,10 @@ private:
 
     // Player settings
     const float playerStartX = 30.f;
-    const float playerStartY = 230.f;
+    const float playerStartY = 210.f;
     const int playerLives = 6;
     const int playerProjectiles = 5;
     const float playerScale = 2.5f;
     const int firstPlatformheight = 8;
-    const int coinWinCondition = 8;
+    const int coinWinCondition = 1;
 };

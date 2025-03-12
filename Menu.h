@@ -27,10 +27,10 @@ private:
     const int maxFrames = 3;
     const float animationInterval = 0.2f;
     int currentAnimationX = 0;
-    int currentAnimationY = 51;
-    const int minAnimationY = 51;
-    const int maxAnimationY = 61;
-    const int diffBetweenAnimation = 2;
+    int currentAnimationY = 810;
+    const int minAnimationY = 810;
+    const int maxAnimationY = 1000;
+    const int diffBetweenAnimation = 32;
     const int frameSize = 32;
 
 

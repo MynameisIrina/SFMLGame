@@ -29,7 +29,7 @@ public:
         grassX = 2,
         grassY = 8,
         playerX = 0,
-        playerY = 9,
+        playerY = 5,
         obstacleX = 27,
         obstacleY = 3,
         HealthBarX = 0,
@@ -63,8 +63,8 @@ public:
     static const int tileSizeHealthBar = 16;
     static const int playerOffsetX = 4;
     static const int playerHeightOffset = 3;
-    static const int rectWidthPlayer = 22;
-    static const int rectHeightPlayer = 16;
+    static const int rectWidthPlayer = 26;
+    static const int rectHeightPlayer = 32;
     static const int rectWidthHealthBar = 16;
     static const int rectHeightHealthBar = 16;
     static const int rectWidthEnemy = 125;

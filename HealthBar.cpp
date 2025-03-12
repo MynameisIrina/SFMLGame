@@ -8,7 +8,7 @@ HealthBar::HealthBar(const std::shared_ptr<TextureLoader> &txLoader) : txLoader(
 void HealthBar::Initialize(const std::shared_ptr<Player> &player, const std::shared_ptr<Camera> &camera)
 {
     sf::Sprite sprite = txLoader->SetSprite(TextureLoader::TextureType::HealthBar);
-    sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
+    sprite.setOrigin(sprite.getLocalBounds().width * 0.5f, sprite.getLocalBounds().height * 0.5f);
     currentHealth = player->GetHealth();
 
     hearts.reserve(player->GetMaxHealth());
@@ -34,7 +34,6 @@ void HealthBar::Update(const std::shared_ptr<Player> &player, const std::shared_
     const int previousHealth = currentHealth;
     currentHealth = player->GetHealth();
 
-    //std::cout << player->IfStateActive(Player::State::Respawning) << std::endl;
     bool healthIncreased = previousHealth < currentHealth && !player->IsInRebirth();
     if (healthIncreased)
     {
@@ -94,7 +93,9 @@ void HealthBar::HandlePulseAnimation(const std::shared_ptr<Player> &player)
         return;
     }
 
-    bool timeHasPassed = animationTimer.getElapsedTime().asSeconds() - lastPulseTime >= pulseInterval;
+    const bool timeHasPassed = animationTimer.getElapsedTime().asSeconds() - lastPulseTime >= pulseInterval;
+
+    if (timeHasPassed)
     {
         for (int i = 0; i < hearts.size(); i++)
         {

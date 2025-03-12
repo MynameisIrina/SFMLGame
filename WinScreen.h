@@ -24,6 +24,6 @@ private:
     const int maxFrames = 8;
     const float animationInterval = 0.2f;
     int currentAnimationX = 0;
-    int currentAnimationY = 1;
+    int currentAnimationY = 0;
     const int frameSize = 32;
 };

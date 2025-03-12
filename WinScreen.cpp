@@ -13,11 +13,11 @@ WinScreen::WinScreen(const std::shared_ptr<sf::RenderWindow> &window, const std:
     message.setString("You Won!");
     message.setCharacterSize(50);
     message.setFillColor(sf::Color::Black);
-    message.setPosition(300, 100);
+    message.setPosition(310, 100);
 
     cat = txLoader->SetSprite(TextureLoader::Player);
     cat.setScale(2, 2);
-    cat.setPosition(300, 198);
+    cat.setPosition(300, 166);
 }
 
 void WinScreen::Show(GameState &gameState, const float dt)
@@ -72,5 +72,5 @@ void WinScreen::UpdateCatAnimation(const float dt)
         animationTimer = 0.f;
     }
 
-    cat.setTextureRect(sf::IntRect(currentAnimationX * frameSize + TextureLoader::playerOffsetX, currentAnimationY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+    cat.setTextureRect(sf::IntRect(currentAnimationX * frameSize, currentAnimationY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
 }

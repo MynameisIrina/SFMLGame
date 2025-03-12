@@ -17,7 +17,7 @@ Menu::Menu(std::shared_ptr<sf::RenderWindow> &window, std::shared_ptr<TextureLoa
 
     cat = txLoader->SetSprite(TextureLoader::Player);
     cat.setScale(2,2);
-    cat.setPosition(300, 198);
+    cat.setPosition(290, 186);
 }
 
 void Menu::Show(GameState &gameState, const float dt)
@@ -79,5 +79,5 @@ void Menu::UpdateCatAnimation(const float dt)
             animationTimer = 0.f;
         }
 
-        cat.setTextureRect(sf::IntRect(currentAnimationX * frameSize + TextureLoader::playerOffsetX, currentAnimationY * TextureLoader::rectHeightPlayer, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        cat.setTextureRect(sf::IntRect(currentAnimationX * frameSize, currentAnimationY, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
 }

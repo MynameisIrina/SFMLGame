@@ -34,8 +34,7 @@ add_custom_command(TARGET cat POST_BUILD
 )
 
 
-else(APPLE)
-
+elseif(APPLE)
     message(STATUS "Apple detected")
 
     find_package(SFML 2.6 REQUIRED graphics window system audio)
@@ -46,5 +45,4 @@ else(APPLE)
 
     # Link SFML libraries
     target_link_libraries(cat sfml-graphics sfml-window sfml-system sfml-audio)
-
 endif()
