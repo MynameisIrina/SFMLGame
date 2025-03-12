@@ -26,7 +26,7 @@ void TextureLoader::Initialize()
         throw std::runtime_error("Failed to load player texture");
     }
     textures[Player] = std::move(playerTex);
-    textureCoordinates[Player] = sf::IntRect(playerX + playerOffsetX, playerY * rectHeightPlayer, rectWidthPlayer, rectHeightPlayer - playerHeightOffset);
+    textureCoordinates[Player] = sf::IntRect(playerX, playerY * rectHeightPlayer + playerOffsetY, rectWidthPlayer, rectHeightPlayer - playerOffsetY);
 
     sf::Texture backgroundTex;
     if (!backgroundTex.loadFromFile("Assets/Background/Background.png"))

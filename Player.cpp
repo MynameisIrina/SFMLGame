@@ -43,7 +43,6 @@ void Player::Update(const std::shared_ptr<RespawnManager> &respawnManager, const
                     std::vector<sf::RectangleShape> &obstaclesShapes)
 {
 
-
     UpdateAllTimers(dt);
 
     if (IsInRebirth())
@@ -363,7 +362,7 @@ bool Player::CheckPlatformsCollision(const sf::FloatRect &playerBounds, const st
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -558,12 +557,16 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
     if (moveRight)
     {
         sprite.setScale(scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationCoordinates::tileSize, AnimationCoordinates::movingY * AnimationCoordinates::tileSize, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationCoordinates::tileSize, AnimationCoordinates::movingY * AnimationCoordinates::tileSize + TextureLoader::playerOffsetY, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer - TextureLoader::playerOffsetY));
     }
     else if (moveLeft)
     {
         sprite.setScale(-scale, scale);
-        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationCoordinates::tileSize, AnimationCoordinates::movingY * AnimationCoordinates::tileSize, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+        sprite.setTextureRect(sf::IntRect(currentAnim * AnimationCoordinates::tileSize, AnimationCoordinates::movingY * AnimationCoordinates::tileSize + TextureLoader::playerOffsetY, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer - TextureLoader::playerOffsetY));
+    }
+    else
+    {
+        sprite.setTextureRect(sf::IntRect(0, AnimationCoordinates::movingY * AnimationCoordinates::tileSize + TextureLoader::playerOffsetY, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer - TextureLoader::playerOffsetY));
     }
 
     const Direction dir = CalculateDirection();
@@ -576,7 +579,7 @@ void Player::UpdateView(bool moveRight, bool moveLeft)
 
 void Player::UpdateRebirthView()
 {
-    sprite.setTextureRect(sf::IntRect(currentRebirthAnim * tileSize, AnimationCoordinates::rebornY * tileSize, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer));
+    sprite.setTextureRect(sf::IntRect(currentRebirthAnim * tileSize, AnimationCoordinates::rebornY * tileSize + TextureLoader::playerOffsetY, TextureLoader::rectWidthPlayer, TextureLoader::rectHeightPlayer  - TextureLoader::playerOffsetY));
     sprite.setPosition(position);
     boundingBoxPlayer.setPosition(position.x, position.y);
 }

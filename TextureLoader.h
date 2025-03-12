@@ -61,7 +61,7 @@ public:
     static const int rectWidthDefault = 32;
     static const int rectHeightDefault = 32;
     static const int tileSizeHealthBar = 16;
-    static const int playerOffsetX = 4;
+    static const int playerOffsetY = 2;
     static const int playerHeightOffset = 3;
     static const int rectWidthPlayer = 26;
     static const int rectHeightPlayer = 32;

@@ -30,7 +30,7 @@ private:
     sf::Sprite eagleSprite;
     const float offsetY = 27.f;
     float flyingEnemySpawnTimer = 0.0f;
-    float flyingEnemySpawnCooldown = 25.0f; 
+    float flyingEnemySpawnCooldown = 10.0f; 
     const int spawnEnemyProbability = 4;
 
     const int arrowEnemyHealth = 40;

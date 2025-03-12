@@ -83,7 +83,7 @@ private:
     const float boundingBoxResizeX = 32.f;
     const float boundingBoxResizeY = 45.f;
     const float boundingBoxOffsetX = 8.f;
-    const float boundingBoxOffsetY = 13.f;
+    const float boundingBoxOffsetY = 5.f;
     const float jumpVelocity = 280.f;
 
     // Animation

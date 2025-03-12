@@ -101,5 +101,5 @@ private:
     const int playerProjectiles = 5;
     const float playerScale = 2.5f;
     const int firstPlatformheight = 8;
-    const int coinWinCondition = 1;
+    const int coinWinCondition = 8;
 };
