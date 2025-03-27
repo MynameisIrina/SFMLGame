@@ -33,16 +33,19 @@ add_custom_command(TARGET cat POST_BUILD
     COMMENT "Copying assets to the build directory"
 )
 
-
 elseif(APPLE)
     message(STATUS "Apple detected")
 
     find_package(SFML 2.6 REQUIRED graphics window system audio)
 
-    # Add source files
-    file(GLOB SOURCES *.cpp)
+    file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+
+    list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/main.cpp)
+
+    include_directories(${CMAKE_SOURCE_DIR}/src)
+
     add_executable(cat ${SOURCES})
 
-    # Link SFML libraries
     target_link_libraries(cat sfml-graphics sfml-window sfml-system sfml-audio)
+
 endif()
