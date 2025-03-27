@@ -24,6 +24,11 @@ User Interface Elements: Health bars, score displays, and menus for better user 
 
 Dynamic Audio: Integrated background music, sound effects, and character actions.
 
+## How to run the game
+
+Download link coming soon
+
+
 
 
 
